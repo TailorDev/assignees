@@ -136,6 +136,7 @@ app.get('/auth/github/callback', passport.authenticate('github', { failureRedire
  * Real app routes
  */
 app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
+app.post('/repositories/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
 
 /**
  * Error Handler.

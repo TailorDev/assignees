@@ -1,22 +1,45 @@
 .organizations {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
+    @extend .list-group;
 
-  list-style-type: none;
+    a {
+        @extend .list-group-item;
 
-  li {
-    flex: 1;
-    position: relative;
-    width: 150px;
-    margin: 5px;
+        img {
+            @extend .img-circle;
 
-    img {
-      @extend .img-circle;
+            width: 50px;
+        }
 
-      width: 50px;
+        .name {
+            margin-left: 1rem;
+            font-weight: 500;
+        }
     }
-  }
+}
+
+.repositories {
+    @extend .list-group;
+
+    .repository {
+        @extend .row;
+        @extend .list-group-item;
+
+        font-weight: 500;
+
+        .name {
+            @extend .col-xs-10;
+        }
+
+        .actions {
+            @extend .col-xs-2;
+
+            text-align:right;
+        }
+
+        .name,
+        .actions {
+            height: 50px;
+            line-height: 50px;
+        }
+    }
 }

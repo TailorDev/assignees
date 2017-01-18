@@ -59,6 +59,27 @@ exports.listRepos = (req, res) => {
       title: 'Your repositories',
       organizations,
       repositories,
+      current_org: org,
     });
+  });
+};
+
+/**
+ * Enable
+ */
+exports.enable = (req, res) => {
+  const { org, repo } = req.params;
+  const userId = req.user.id;
+
+  Repository.findOne({
+    user_id: userId,
+    name: repo,
+    org
+  }, (err, repo) => {
+    repo
+      .set({ enabled: true })
+      .save();
+
+    return res.redirect(`/repositories/${org}`);
   });
 };

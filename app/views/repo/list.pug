@@ -4,17 +4,28 @@ block content
   h2 Your repositories
   hr
 
-  ul.organizations
-    for o in organizations
-      li
-        a(href='/repositories/' + o.name)
-          img(src=o.avatar_url)
-          span.name #{o.name}
+  div.row
+    div.col-md-3
+      div.organizations
+        for o in organizations
+          a(href='/repositories/' + o.name, class= o.name == current_org ? 'active' : '')
+            img(src=o.avatar_url)
+            span.name #{o.name}
 
-  if repositories
-    ul.repositories
-      for r in repositories
-        li
-          span.name #{r.name}
-          div.switch
-            input(type='checkbox')
+    if repositories
+      div.col-md-9
+        ul.repositories
+          for r in repositories
+            li.repository
+              div.name
+                | #{r.name}
+                if r.enabled
+                  | &nbsp;
+                  span.label.label-success ENABLED
+              div.actions
+                if !r.enabled
+                    form(action=`/repositories/${current_org}/${r.name}/enable`, method='POST')
+                      input(type='hidden', name='_csrf', value=_csrf)
+                      button.btn.btn-success
+                        i.fa.fa-play-circle-o
+                        | start
