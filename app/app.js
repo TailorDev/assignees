@@ -26,6 +26,7 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
  */
 const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
+const repoController = require('./controllers/repo');
 
 /**
  * API keys and Passport configuration.
@@ -130,6 +131,11 @@ app.get('/auth/github', passport.authenticate('github'));
 app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
   res.redirect(req.session.returnTo || '/');
 });
+
+/**
+ * Real app routes
+ */
+app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
 
 /**
  * Error Handler.

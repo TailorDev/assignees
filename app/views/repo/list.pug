@@ -1,0 +1,20 @@
+extends ../layout
+
+block content
+  h2 Your repositories
+  hr
+
+  ul.organizations
+    for o in organizations
+      li
+        a(href='/repositories/' + o.name)
+          img(src=o.avatar_url)
+          span.name #{o.name}
+
+  if repositories
+    ul.repositories
+      for r in repositories
+        li
+          span.name #{r.name}
+          div.switch
+            input(type='checkbox')
