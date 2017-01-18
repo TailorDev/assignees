@@ -15,7 +15,6 @@ const path = require('path');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const expressValidator = require('express-validator');
-const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 
@@ -54,7 +53,6 @@ mongoose.connection.on('error', () => {
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-app.use(expressStatusMonitor());
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),
@@ -97,8 +95,7 @@ app.use((req, res, next) => {
       !req.path.match(/^\/auth/) &&
       !req.path.match(/\./)) {
     req.session.returnTo = req.path;
-  } else if (req.user &&
-      req.path == '/account') {
+  } else if (req.user && req.path == '/account') {
     req.session.returnTo = req.path;
   }
   next();
@@ -109,27 +106,23 @@ app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }))
  * Primary app routes.
  */
 app.get('/', homeController.index);
-app.get('/login', userController.getLogin);
-app.post('/login', userController.postLogin);
 app.get('/logout', userController.logout);
-app.get('/forgot', userController.getForgot);
-app.post('/forgot', userController.postForgot);
-app.get('/reset/:token', userController.getReset);
-app.post('/reset/:token', userController.postReset);
-app.get('/signup', userController.getSignup);
-app.post('/signup', userController.postSignup);
 app.get('/account', passportConfig.isAuthenticated, userController.getAccount);
 app.post('/account/profile', passportConfig.isAuthenticated, userController.postUpdateProfile);
-app.post('/account/password', passportConfig.isAuthenticated, userController.postUpdatePassword);
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
-app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userController.getOauthUnlink);
 
 /**
  * OAuth authentication routes. (Sign in)
  */
 app.get('/auth/github', passport.authenticate('github'));
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-  res.redirect(req.session.returnTo || '/');
+app.get('/auth/github/callback', passport.authenticate('github', {
+    failureRedirect: '/',
+}), (req, res) => {
+  if (!req.session.returnTo || req.session.returnTo === '/') {
+    res.redirect('/repositories');
+  }
+
+  res.redirect(req.session.returnTo);
 });
 
 /**

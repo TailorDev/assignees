@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
 
   profile: {
     name: String,
-    gender: String,
     location: String,
     website: String,
     picture: String

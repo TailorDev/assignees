@@ -13,14 +13,16 @@
       ul.nav.navbar-nav
         li(class=(title == 'Home') ? 'active' : undefined)
           a(href='/') Home
-        li(class=(title == 'Your repositories') ? 'active' : undefined)
-          a(href='/repositories') Your repositories
-        li
-          a(href='/status') Status
+        if user
+          li(class=(title == 'Your repositories') ? 'active' : undefined)
+            a(href='/repositories') Your repositories
+
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title == 'Login') ? 'active' : undefined)
-            a(href='/login') Login
+            a(href='/auth/github')
+              i.fa.fa-github
+              | Login
         else
           li.dropdown(class=(title == 'Account Management') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
