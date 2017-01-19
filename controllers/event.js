@@ -43,7 +43,8 @@ exports.listen = (req, res) => {
     User.findOne({ _id: repository.user_id }, (err, user) => {
       const github = gh.auth(user);
 
-      github.repos
+      github
+        .repos
         .getCollaborators({
           owner: repository.org,
           repo: repository.name,
@@ -57,28 +58,27 @@ exports.listen = (req, res) => {
           ;
         })
         .then((reviewers) => {
-          console.log({ reviewers });
-
           if (reviewers.length === 0) {
             return res.send({ status: 'aborted', reason: 'No reviewers found' });
           }
 
-          github.pullRequests
+          return github
+            .pullRequests
             .createReviewRequest({
               owner: repository.org,
               repo: repository.name,
               number: pullNumber,
               reviewers,
             })
-            .then(() => {
-              res.send({ status: 'accepted' });
-            })
-            .catch((err) => {
-              console.log({err});
-
-              res.send({ status: 'errored' });
-            })
           ;
+        })
+        .then(() => {
+          res.send({ status: 'accepted' });
+        })
+        .catch((err) => {
+          console.log({err});
+
+          res.send({ status: 'errored' });
         })
       ;
     });
