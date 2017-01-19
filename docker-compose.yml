@@ -3,11 +3,11 @@ version: '2'
 services:
   app:
     build:
-      context: ./app
+      context: .
     ports:
       - 3000:3000
     volumes:
-      - ./app:/usr/src/app
+      - .:/usr/src/app
     environment:
       MONGODB_URI: mongodb://db:27017/assignees
       GITHUB_ID: 295a8ebdde4efebf8278

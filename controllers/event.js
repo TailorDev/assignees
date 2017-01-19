@@ -2,6 +2,10 @@
  * Listen to GitHub events
  */
 exports.listen = (req, res) => {
+  if (req.header('x-github-event') !== 'ping') {
+    return res.send('PONG');
+  }
+
   if (req.header('x-github-event') !== 'pull_request') {
     return res.send({ status: 'ignored', reason: 'I don\t listen to such events.' });
   }
