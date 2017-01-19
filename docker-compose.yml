@@ -10,10 +10,10 @@ services:
       - .:/usr/src/app
     environment:
       MONGODB_URI: mongodb://db:27017/assignees
-      GITHUB_ID: 295a8ebdde4efebf8278
-      GITHUB_SECRET: 2da83a71081c48324dbd74f747bd68e9b3b6120e
+      GITHUB_ID: 19383c627ba67c57fcb9
+      GITHUB_SECRET: 2ecf59c031dc6f9a0dad2ac739fcf0e136f20ef7
       SESSION_SECRET: s3cr3t
-      GITHUB_WEBHOOK_URL: http://assignees.dev/events
+      GITHUB_WEBHOOK_URL: http://assignees.dev:3000/events
       GITHUB_WEBHOOK_SECRET: Th4tIsS3cr3t
     networks:
       public:
