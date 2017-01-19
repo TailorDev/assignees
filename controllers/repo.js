@@ -27,7 +27,7 @@ exports.listRepos = (req, res) => {
         }
 
         res.render('repo/list', {
-          title: 'Your repositories',
+          title: 'Projects',
           organizations,
           repositories,
           current_org: org,
