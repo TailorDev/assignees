@@ -181,3 +181,46 @@ exports.syncRepos = (req, res) => {
       });
   });
 };
+
+exports.configureRepo = (req, res) => {
+  const { org, repo } = req.params;
+  const userId = req.user.id;
+
+  Repository.findOne({
+    user_id: userId,
+    name: repo,
+    org
+  }, (err, repository) => {
+    if (err) {
+      return res.status(404).end();
+    }
+
+    req.sanitizeBody('max').toInt();
+    req.sanitizeBody('skip').toBoolean();
+
+    req.assert('max', '%0 is not an integer').isInt();
+    req.assert('skip').optional().isBoolean();
+
+    req.getValidationResult().then((result) => {
+      if (!result.isEmpty()) {
+        result.array().forEach(error => {
+          req.flash('errors', { msg: error.msg });
+        });
+      } else {
+        const { max, skip } = req.body;
+
+        repository
+          .set({
+            skip_wip: !!skip || false,
+            max_reviewers: max,
+          })
+          .save()
+        ;
+
+        req.flash('success', { msg: 'Configuration successfully updated.' });
+      }
+
+      return res.redirect(`/repositories/${org}`);
+    });
+  });
+};

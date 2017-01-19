@@ -52,8 +52,12 @@ mongoose.connection.on('error', () => {
  * Express configuration.
  */
 app.set('port', process.env.PORT || 3000);
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+// pretty html == better bootstrap output (yes, I know...)
+app.locals.pretty = true;
+
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),
@@ -132,6 +136,8 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
 app.post('/repositories/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
 app.post('/repositories/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
+app.post('/repositories/:org/:repo/configure', passportConfig.isAuthenticated, repoController.configureRepo);
+
 app.post('/sync/organizations', passportConfig.isAuthenticated, repoController.syncOrgs);
 app.post('/sync/repositories/:org', passportConfig.isAuthenticated, repoController.syncRepos);
 

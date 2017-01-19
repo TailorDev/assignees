@@ -1,47 +1,67 @@
 @import "./home";
 
 .organizations {
-    @extend .list-group;
+  @extend .list-group;
 
-    a {
-        @extend .list-group-item;
+  a {
+    @extend .list-group-item;
 
-        img {
-            @extend .img-circle;
+    img {
+      @extend .img-circle;
 
-            width: 50px;
-        }
-
-        .name {
-            margin-left: 1rem;
-            font-weight: 500;
-        }
+      width: 50px;
     }
+
+    .name {
+      margin-left: 1rem;
+      font-weight: 500;
+    }
+  }
 }
 
 .repositories {
-    @extend .list-group;
+  @extend .list-group;
 
-    .repository {
-        @extend .row;
-        @extend .list-group-item;
+  .repository {
+    @extend .row;
+    @extend .list-group-item;
 
-        font-weight: 500;
+    font-weight: 500;
 
-        .name {
-            @extend .col-xs-10;
+    .name {
+      @extend .col-xs-9;
+
+      form {
+        > * {
+          padding-right: 1rem;
         }
 
-        .actions {
-            @extend .col-xs-2;
-
-            text-align:right;
+        label {
+          margin-bottom: 0;
+          font-weight: 400;
         }
 
-        .name,
-        .actions {
-            height: 50px;
-            line-height: 50px;
+        .max-reviewers-input {
+          width: 50px;
         }
+      }
     }
+
+    .actions {
+      @extend .col-xs-3;
+
+      text-align:right;
+
+      .action {
+        display: inline-block;
+        margin-left: 1rem;
+      }
+    }
+
+    .name,
+    .actions {
+      height: 50px;
+      line-height: 50px;
+    }
+  }
 }

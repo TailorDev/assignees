@@ -32,18 +32,55 @@ block content
           for r in repositories
             li.repository
               div.name
-                | #{r.name}
                 if r.enabled
-                  | &nbsp;
-                  span.label.label-success ENABLED
-                else if r.github_hook_id
-                  | &nbsp;
-                  span.label.label-default PAUSED
+                  .row
+                    .col-xs-4
+                      | #{r.name}
+                      | &nbsp;
+                      span.label.label-success ENABLED
+
+                    .col-xs-8
+                      form(
+                        action=`/repositories/${current_org}/${r.name}/configure`,
+                        method='POST',
+                        class='form-inline pull-right'
+                      )
+                        div.form-group.form-group-sm
+                          label(for='max-reviewers')
+                            | Max reviewers:
+                          input(
+                            name='max',
+                            value=r.max_reviewers,
+                            type='number',
+                            min=1,
+                            class='form-control max-reviewers-input',
+                            id='max-reviewers'
+                          )
+
+                        .checkbox
+                          label
+                            input(name='skip', type='checkbox', checked=r.skip_wip)
+                            |&nbsp;Skip&nbsp;
+                            abbr(title='Work In Progress')
+                              | WIP
+
+                        input(type='hidden', name='_csrf', value=_csrf)
+                        button(type='submit', class='btn btn-default btn-sm')
+                          i.fa.fa-wrench
+                          | save
+
+                else
+                  | #{r.name}
+
+                  if r.github_hook_id
+                    | &nbsp;
+                    span.label.label-default PAUSED
+
               div.actions
                 if r.enabled
-                  form(action=`/repositories/${current_org}/${r.name}/pause`, method='POST')
+                  form(action=`/repositories/${current_org}/${r.name}/pause`, method='POST', class='action')
                     input(type='hidden', name='_csrf', value=_csrf)
-                    button.btn
+                    button.btn.btn-warning
                       i.fa.fa-pause-circle-o
                       | pause
                 else
