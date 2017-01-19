@@ -13,7 +13,8 @@ services:
       GITHUB_ID: 295a8ebdde4efebf8278
       GITHUB_SECRET: 2da83a71081c48324dbd74f747bd68e9b3b6120e
       SESSION_SECRET: s3cr3t
-      GITHUB_WEBHOOK_URL: http://ed4f1a93.ngrok.io/events
+      GITHUB_WEBHOOK_URL: http://assignees.dev/events
+      GITHUB_WEBHOOK_SECRET: Th4tIsS3cr3t
     networks:
       public:
         aliases: ['assignees.dev']

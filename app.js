@@ -16,6 +16,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
+const gh = require('./helpers/github');
 
 /**
  * Controllers (route handlers).
@@ -61,7 +62,32 @@ app.use(sass({
   dest: path.join(__dirname, 'public')
 }));
 app.use(logger('dev'));
-app.use(bodyParser.json());
+
+app.use(bodyParser.json({
+  verify: (req, res, buffer) => {
+    if (req.path !== '/events') {
+      return;
+    }
+
+    [
+      'x-hub-signature',
+      'x-github-event',
+      'x-github-delivery',
+    ].forEach((header) => {
+      if (!req.headers[header]) {
+        throw new Error(`Header ${header} is missing.`);
+      }
+    });
+
+    const expected = req.headers['x-hub-signature'];
+    const computed = gh.computeSignature(buffer);
+
+    if (expected !== computed) {
+      throw new Error('Invalid signature');
+    }
+  },
+}));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
 app.use(session({
