@@ -22,7 +22,7 @@ passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_ID,
   clientSecret: process.env.GITHUB_SECRET,
   callbackURL: '/auth/github/callback',
-  scope: [ 'user:email', 'read:org' ],
+  scope: [ 'user:email', 'read:org', 'write:repo_hook' ],
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {

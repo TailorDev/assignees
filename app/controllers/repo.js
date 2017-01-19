@@ -65,7 +65,7 @@ exports.listRepos = (req, res) => {
 };
 
 /**
- * Enable
+ * Enable project and install webhook
  */
 exports.enable = (req, res) => {
   const { org, repo } = req.params;
@@ -75,11 +75,74 @@ exports.enable = (req, res) => {
     user_id: userId,
     name: repo,
     org
-  }, (err, repo) => {
-    repo
-      .set({ enabled: true })
-      .save();
+  }, (err, repository) => {
+    if (repository.enabled) {
+      req.flash('info', { msg: 'Repository already enabled' });
 
-    return res.redirect(`/repositories/${org}`);
-  });
+      return res.redirect(`/repositories/${org}`);
+    }
+
+    let githubTask;
+    if (repository.github_hook_id) {
+      githubTask = gh.auth(req.user).repos.editHook(
+        gh.getExistingWebhookConfig(repository.github_hook_id, org, repo, true)
+      );
+    } else {
+      githubTask = gh.auth(req.user).repos.createHook(
+        gh.getWebhookConfig(org, repo, true)
+      );
+    }
+
+    githubTask
+      .then((hook) => {
+        repository
+          .set({
+            enabled: true,
+            github_hook_id: hook.id,
+          })
+          .save();
+
+        req.flash('success', { msg: `Project "${repo}" is successfully configured.` });
+      })
+      .catch((err) => {
+        req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
+      })
+      .then(() => {
+        return res.redirect(`/repositories/${org}`);
+      })
+    ;
+  })
 };
+
+/**
+ * Pause project and disable webhook
+ */
+exports.pause = (req, res) => {
+  const { org, repo } = req.params;
+  const userId = req.user.id;
+
+  Repository.findOne({
+    user_id: userId,
+    name: repo,
+    org
+  }, (err, repository) => {
+    if (!repository.enabled) {
+      req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
+
+      return res.redirect(`/repositories/${org}`);
+    }
+
+    return gh.auth(req.user).repos.editHook(
+      gh.getExistingWebhookConfig(repository.github_hook_id, org, repo, false),
+      (err, hook) => {
+        repository
+          .set({ enabled: false })
+          .save();
+
+        req.flash('success', { msg: `Project "${repo}" has been paused.` });
+
+        return res.redirect(`/repositories/${org}`);
+      }
+    );
+  });
+}

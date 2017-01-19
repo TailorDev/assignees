@@ -130,6 +130,7 @@ app.get('/auth/github/callback', passport.authenticate('github', {
  */
 app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
 app.post('/repositories/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
+app.post('/repositories/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
 
 /**
  * Error Handler.

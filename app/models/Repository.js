@@ -7,6 +7,7 @@ const repositorySchema = new mongoose.Schema({
   github_id: Number,
   github_url: String,
   enabled: Boolean,
+  github_hook_id: Number,
 });
 
 const Repository = mongoose.model('Repository', repositorySchema);
