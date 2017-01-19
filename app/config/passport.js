@@ -22,7 +22,7 @@ passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_ID,
   clientSecret: process.env.GITHUB_SECRET,
   callbackURL: '/auth/github/callback',
-  scope: [ 'user:email', 'read:org', 'write:repo_hook' ],
+  scope: [ 'user:email', 'read:org', 'write:repo_hook', 'repo' ],
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {
@@ -34,6 +34,7 @@ passport.use(new GitHubStrategy({
         User.findById(req.user.id, (err, user) => {
           if (err) { return done(err); }
           user.github = profile.id;
+          user.github_login = user.github_login || profile._json.login,
           user.tokens.push({ kind: 'github', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
           user.profile.picture = user.profile.picture || profile._json.avatar_url;
@@ -61,6 +62,7 @@ passport.use(new GitHubStrategy({
           const user = new User();
           user.email = profile._json.email;
           user.github = profile.id;
+          user.github_login = profile._json.login,
           user.tokens.push({ kind: 'github', accessToken });
           user.profile.name = profile.displayName;
           user.profile.picture = profile._json.avatar_url;

@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema({
   github: String,
   tokens: Array,
 
+  github_login: String,
+
   profile: {
     name: String,
     location: String,

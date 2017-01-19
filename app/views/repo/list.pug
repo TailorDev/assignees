@@ -6,11 +6,25 @@ block content
 
   div.row
     div.col-md-3
-      div.organizations
-        for o in organizations
-          a(href='/repositories/' + o.name, class= o.name == current_org ? 'active' : '')
-            img(src=o.avatar_url)
-            span.name #{o.name}
+      .row
+        .col-md-12
+          div.organizations
+            a(href=`/repositories/${user.github_login}`, class= user.github_login == current_org ? 'active' : '')
+              img(src=user.profile.picture)
+              span.name #{user.github_login}
+
+            for o in organizations
+              a(href='/repositories/' + o.name, class= o.name == current_org ? 'active' : '')
+                img(src=o.avatar_url)
+                span.name #{o.name}
+
+      .row
+        .col-md-3
+          form(action='/sync/organizations', method='POST')
+            input(type='hidden', name='_csrf', value=_csrf)
+            button.btn.btn-link
+              i.fa.fa-refresh
+              | synchronize your organizations
 
     if repositories
       div.col-md-9
@@ -41,3 +55,9 @@ block content
                         | restart
                       else
                         | start
+
+        form(action=`/sync/repositories/${current_org}`, method='POST')
+          input(type='hidden', name='_csrf', value=_csrf)
+          button.btn.btn-link
+            i.fa.fa-refresh
+            | synchronize #{current_org}'s repositories

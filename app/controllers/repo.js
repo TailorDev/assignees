@@ -9,57 +9,20 @@ exports.listRepos = (req, res) => {
   const org = req.params.org;
   const userId = req.user.id;
 
-  let repositories;
-  let organizations;
+  Organization.find({ user_id: userId }, (err, organizations) => {
+    let findRepos = Promise.resolve(null);
 
-  if (org) {
-    Repository.find({ user_id: userId, org }, (err, docs) => {
-      if (docs.length === 0) {
-        gh.auth(req.user).repos.getForOrg({ org }, (err, repos) => {
-          repositories = repos.map(r => {
-            return {
-              user_id: userId,
-              name: r.name,
-              org,
-              github_id: r.id,
-              github_url: r.html_url,
-              enabled: false,
-            };
-          });
-
-          Repository.create(repositories);
-        });
-      } else {
-        repositories = docs;
-      }
-    });
-  }
-
-  Organization.find({ user_id: userId }, (err, docs) => {
-    if (docs.length === 0) {
-      gh.auth(req.user).users.getOrgs({}, function(err, orgs) {
-        organizations = orgs.map(o => {
-          return {
-            user_id: userId,
-            name: o.login,
-            description: o.description,
-            github_id: o.id,
-            github_url: o.url,
-            avatar_url: o.avatar_url,
-          };
-        });
-
-        Organization.create(organizations);
-      });
-    } else {
-      organizations = docs;
+    if (org) {
+      findRepos = Repository.find({ user_id: userId, org });
     }
 
-    res.render('repo/list', {
-      title: 'Your repositories',
-      organizations,
-      repositories,
-      current_org: org,
+    findRepos.then((repositories) => {
+      res.render('repo/list', {
+        title: 'Your repositories',
+        organizations,
+        repositories,
+        current_org: org,
+      });
     });
   });
 };
@@ -82,18 +45,18 @@ exports.enable = (req, res) => {
       return res.redirect(`/repositories/${org}`);
     }
 
-    let githubTask;
+    let createOrEditHook;
     if (repository.github_hook_id) {
-      githubTask = gh.auth(req.user).repos.editHook(
+      createOrEditHook = gh.auth(req.user).repos.editHook(
         gh.getExistingWebhookConfig(repository.github_hook_id, org, repo, true)
       );
     } else {
-      githubTask = gh.auth(req.user).repos.createHook(
+      createOrEditHook = gh.auth(req.user).repos.createHook(
         gh.getWebhookConfig(org, repo, true)
       );
     }
 
-    githubTask
+    createOrEditHook
       .then((hook) => {
         repository
           .set({
@@ -145,4 +108,76 @@ exports.pause = (req, res) => {
       }
     );
   });
-}
+};
+
+/**
+ * Sync organizations
+ */
+exports.syncOrgs = (req, res) => {
+  const userId = req.user.id;
+
+  // 1. remove all orgs
+  Organization.remove({ user_id: userId }, (err) => {
+    // 2. fetch current orgs
+    gh.auth(req.user).users.getOrgs({}, (err, orgs) => {
+      organizations = orgs.map(o => {
+        return {
+          user_id: userId,
+          name: o.login,
+          description: o.description,
+          github_id: o.id,
+          github_url: o.url,
+          avatar_url: o.avatar_url,
+        };
+      });
+
+      // 3. persist
+      Organization.create(organizations, () => {
+        req.flash('success', { msg: 'Organizations successfully synchronized.' });
+
+        return res.redirect('/repositories');
+      });
+    });
+  });
+};
+
+/**
+ * Sync repositories
+ */
+exports.syncRepos = (req, res) => {
+  const userId = req.user.id;
+  const org = req.params.org;
+
+  Repository.find({ user_id: userId, org }, (err, existingRepos) => {
+    let fetchRepositories;
+
+    if (org === req.user.github_login) {
+      fetchRepositories = gh.auth(req.user).repos.getForUser({ username: org, per_pqge: 50 });
+    } else {
+      fetchRepositories = gh.auth(req.user).repos.getForOrg({ org, per_page: 50 });
+    }
+
+    fetchRepositories
+      .then((repos) => {
+        const repositories = repos
+          .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
+          .map(r => {
+            return {
+              user_id: userId,
+              org,
+              name: r.name,
+              github_id: r.id,
+              github_url: r.html_url,
+              enabled: false,
+            };
+          })
+        ;
+
+        Repository.create(repositories, (err) => {
+          req.flash('success', { msg: `"${org}" repositories successfully synchronized.` });
+
+          return res.redirect(`/repositories/${org}`);
+        });
+      });
+  });
+};
