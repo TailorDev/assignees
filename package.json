@@ -82,5 +82,8 @@
       "no-console": 0,
       "no-plusplus": 0
     }
+  },
+  "engines": {
+    "yarn": "0.16.1"
   }
 }
