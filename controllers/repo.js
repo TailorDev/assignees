@@ -66,6 +66,17 @@ exports.enable = (req, res) => {
     }
 
     createOrEditHook
+      .catch((err) => {
+        if (err.code === 404) {
+          // the hook does not exist. Are we screwed?
+          // Nope! Let's create a new one
+          return gh.auth(req.user).repos.createHook(
+            gh.getWebhookConfig(org, repo, true)
+          );
+        }
+
+        throw err;
+      })
       .then((hook) => {
         repository
           .set({
@@ -77,6 +88,8 @@ exports.enable = (req, res) => {
         req.flash('success', { msg: `Project "${repo}" is successfully configured.` });
       })
       .catch((err) => {
+        console.log({ method: 'enable-hook', err });
+
         req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
       })
       .then(() => {
