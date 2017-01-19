@@ -10,20 +10,29 @@ exports.listRepos = (req, res) => {
   const userId = req.user.id;
 
   Organization.find({ user_id: userId }, (err, organizations) => {
+    if (organizations.length === 0) {
+      return module.exports.syncOrgs(req, res);
+    }
+
     let findRepos = Promise.resolve(null);
 
     if (org) {
       findRepos = Repository.find({ user_id: userId, org });
     }
 
-    findRepos.then((repositories) => {
-      res.render('repo/list', {
-        title: 'Your repositories',
-        organizations,
-        repositories,
-        current_org: org,
+    findRepos
+      .then((repositories) => {
+        if (repositories !== null && repositories.length === 0) {
+          return module.exports.syncRepos(req, res);
+        }
+
+        res.render('repo/list', {
+          title: 'Your repositories',
+          organizations,
+          repositories,
+          current_org: org,
+        });
       });
-    });
   });
 };
 
@@ -182,6 +191,9 @@ exports.syncRepos = (req, res) => {
   });
 };
 
+/**
+ * Configure a repository.
+ */
 exports.configureRepo = (req, res) => {
   const { org, repo } = req.params;
   const userId = req.user.id;
