@@ -223,8 +223,10 @@ exports.configureRepo = (req, res) => {
     req.sanitizeBody('max').toInt();
     req.sanitizeBody('skip').toBoolean();
 
-    req.assert('max', '%0 is not an integer').isInt();
-    req.assert('skip').optional().isBoolean();
+    req.checkBody('max', 'The number of reviewers should be an integer')
+      .isInt('The minimum number of reviewers should be 1', { min: 1 })
+    ;
+    req.checkBody('skip').optional().isBoolean();
 
     req.getValidationResult().then((result) => {
       if (!result.isEmpty()) {
