@@ -51,6 +51,9 @@ mongoose.connection.on('error', () => {
  */
 app.set('port', process.env.PORT || 3000);
 
+app.enable('trust proxy');
+app.disable('x-powered-by')
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // pretty html == better bootstrap output (yes, I know...)
@@ -94,6 +97,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   secret: process.env.SESSION_SECRET,
+  name: 'assignees',
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
     autoReconnect: true
