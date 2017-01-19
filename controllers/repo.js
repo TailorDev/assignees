@@ -1,5 +1,4 @@
 const gh = require('../helpers/github');
-const Organization = require('../models/Organization');
 const Repository = require('../models/Repository');
 
 /**
@@ -7,33 +6,33 @@ const Repository = require('../models/Repository');
  */
 exports.listRepos = (req, res) => {
   const org = req.params.org;
-  const userId = req.user.id;
+  const user = req.user;
 
-  Organization.find({ user_id: userId }, (err, organizations) => {
-    if (organizations.length === 0) {
-      return module.exports.syncOrgs(req, res);
-    }
+  const organizations = user.organizations || [];
+  if (organizations.length === 0 && !user.last_synchronized_at) {
+    return module.exports.syncOrgs(req, res);
+  }
 
-    let findRepos = Promise.resolve(null);
+  let findRepos = Promise.resolve(null);
 
-    if (org) {
-      findRepos = Repository.find({ user_id: userId, org });
-    }
+  if (org) {
+    findRepos = Repository.find({ user_id: user.id, org });
+  }
 
-    findRepos
-      .then((repositories) => {
-        if (repositories !== null && repositories.length === 0) {
-          return module.exports.syncRepos(req, res);
-        }
+  findRepos
+    .then((repositories) => {
+      if (repositories !== null && repositories.length === 0) {
+        return module.exports.syncRepos(req, res);
+      }
 
-        res.render('repo/list', {
-          title: 'Projects',
-          organizations,
-          repositories,
-          current_org: org,
-        });
+      res.render('repo/list', {
+        title: 'Projects',
+        organizations,
+        repositories,
+        current_org: org,
       });
-  });
+    })
+  ;
 };
 
 /**
@@ -136,29 +135,30 @@ exports.pause = (req, res) => {
  * Sync organizations
  */
 exports.syncOrgs = (req, res) => {
-  const userId = req.user.id;
+  const user = req.user;
 
-  // 1. remove all orgs
-  Organization.remove({ user_id: userId }, (err) => {
-    // 2. fetch current orgs
-    gh.auth(req.user).users.getOrgs({}, (err, orgs) => {
-      organizations = orgs.map(o => {
-        return {
-          user_id: userId,
-          name: o.login,
-          description: o.description,
-          github_id: o.id,
-          github_url: o.url,
-          avatar_url: o.avatar_url,
-        };
-      });
+  // 1. fetch current orgs
+  gh.auth(user).users.getOrgs({}, (err, orgs) => {
+    const organizations = orgs.map(o => {
+      return {
+        name: o.login,
+        description: o.description,
+        github_id: o.id,
+        github_url: o.url,
+        avatar_url: o.avatar_url,
+      };
+    });
 
-      // 3. persist
-      Organization.create(organizations, () => {
-        req.flash('success', { msg: 'Organizations successfully synchronized.' });
+    // 2. persist
+    user.set({
+      organizations: organizations,
+      last_synchronized_at: Date.now(),
+    });
 
-        return res.redirect('/repositories');
-      });
+    user.save(() => {
+      req.flash('success', { msg: 'Organizations successfully synchronized.' });
+
+      return res.redirect('/repositories');
     });
   });
 };

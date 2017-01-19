@@ -1,6 +1,14 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
+const organizationSchema = new mongoose.Schema({
+  name: String,
+  description: String,
+  github_id: Number,
+  github_url: String,
+  avatar_url: String,
+});
+
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
 
@@ -8,6 +16,9 @@ const userSchema = new mongoose.Schema({
   tokens: Array,
 
   github_login: String,
+
+  organizations: [organizationSchema],
+  last_synchronized_at: Date,
 
   profile: {
     name: String,
