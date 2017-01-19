@@ -18,7 +18,7 @@ exports.getWebhookConfig = (owner, repo, active) => {
     repo,
     name: 'web',
     config: {
-      url: 'http://ed4f1a93.ngrok.io/events',
+      url: process.env.GITHUB_WEBHOOK_URL,
       content_type: 'json'
     },
     events: ['pull_request'],
