@@ -26,6 +26,7 @@ const upload = multer({ dest: path.join(__dirname, 'uploads') });
 const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const repoController = require('./controllers/repo');
+const eventController = require('./controllers/event');
 
 /**
  * API keys and Passport configuration.
@@ -75,7 +76,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
+  if (req.path === '/events') {
     next();
   } else {
     lusca.csrf()(req, res, next);
@@ -131,6 +132,8 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
 app.post('/repositories/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
 app.post('/repositories/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
+
+app.post('/events', eventController.listen);
 
 /**
  * Error Handler.

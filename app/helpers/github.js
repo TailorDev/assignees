@@ -18,7 +18,7 @@ exports.getWebhookConfig = (owner, repo, active) => {
     repo,
     name: 'web',
     config: {
-      url: 'http://assignees.tailordev.fr/events',
+      url: 'http://ed4f1a93.ngrok.io/events',
       content_type: 'json'
     },
     events: ['pull_request'],
