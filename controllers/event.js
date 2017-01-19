@@ -23,6 +23,7 @@ exports.listen = (req, res) => {
   const repoId = req.body.repository.id;
   const pullTitle = req.body.pull_request.title;
   const pullNumber = req.body.pull_request.number;
+  const pullAuthor = req.body.pull_request.user.login;
 
   Repository.findOne({ github_id: repoId }, (err, repository) => {
     if (!repository) {
@@ -37,24 +38,47 @@ exports.listen = (req, res) => {
       return res.send({ status: 'ignored', reason: 'WIP.' });
     }
 
-    // TODO: find collaborators, also check `max_reviewers`
     // TODO: move this logic to a worker
 
     User.findOne({ _id: repository.user_id }, (err, user) => {
-      gh.auth(user).pullRequests
-        .createReviewRequest({
+      const github = gh.auth(user);
+
+      github.repos
+        .getCollaborators({
           owner: repository.org,
           repo: repository.name,
-          number: pullNumber,
-          reviewers: ['jmaupetit'],
         })
-        .then(() => {
-          res.send({ status: 'accepted' });
+        .then((collaborators) => {
+          return collaborators
+            .map(c => c.login)
+            .filter(login => login !== pullAuthor)
+            .sort(() => .5 - Math.random())
+            .slice(0, repository.max_reviewers)
+          ;
         })
-        .catch((err) => {
-          console.log({err});
+        .then((reviewers) => {
+          console.log({ reviewers });
 
-          res.send({ status: 'errored' });
+          if (reviewers.length === 0) {
+            return res.send({ status: 'aborted', reason: 'No reviewers found' });
+          }
+
+          github.pullRequests
+            .createReviewRequest({
+              owner: repository.org,
+              repo: repository.name,
+              number: pullNumber,
+              reviewers,
+            })
+            .then(() => {
+              res.send({ status: 'accepted' });
+            })
+            .catch((err) => {
+              console.log({err});
+
+              res.send({ status: 'errored' });
+            })
+          ;
         })
       ;
     });
