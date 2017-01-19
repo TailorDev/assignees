@@ -151,7 +151,7 @@ app.get('/auth/github/callback', passport.authenticate('github', {
     failureRedirect: '/',
 }), (req, res) => {
   if (!req.session.returnTo || req.session.returnTo === '/') {
-    res.redirect('/repositories');
+    return res.redirect('/repositories');
   }
 
   res.redirect(req.session.returnTo);
