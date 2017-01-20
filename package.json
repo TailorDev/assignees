@@ -12,6 +12,7 @@
     "async": "^2.1.2",
     "bcrypt-nodejs": "^0.0.3",
     "body-parser": "^1.15.2",
+    "cache-busted": "~1.2.0",
     "chalk": "^1.1.3",
     "cheerio": "^0.22.0",
     "clockwork": "^0.1.4",

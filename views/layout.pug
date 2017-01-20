@@ -10,7 +10,7 @@ html
     meta(name='csrf-token', content=_csrf)
     title #{title} - Assignees
     link(rel='shortcut icon', href='/favicon.png')
-    link(rel='stylesheet', href='/css/main.css')
+    != cacheBust('/css/main.css')
 
   body
     include partials/header

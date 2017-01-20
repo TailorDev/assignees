@@ -16,6 +16,7 @@ const passport = require('passport');
 const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
 const moment = require('moment');
+const cacheBust = require('cache-busted');
 
 const gh = require('./helpers/github');
 
@@ -135,6 +136,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
+cacheBust.handler(app);
 
 /**
  * Primary app routes.
