@@ -9,37 +9,14 @@ describe('GET /', () => {
   });
 });
 
-describe('GET /login', () => {
-  it('should return 200 OK', (done) => {
+describe('GET /projects', () => {
+  it('should redirect to home if not authenticated', (done) => {
     request(app)
-      .get('/login')
-      .expect(200, done);
+      .get('/projects')
+      .expect(302, done);
   });
 });
 
-describe('GET /signup', () => {
-  it('should return 200 OK', (done) => {
-    request(app)
-      .get('/signup')
-      .expect(200, done);
-  });
-});
-
-describe('GET /api', () => {
-  it('should return 200 OK', (done) => {
-    request(app)
-      .get('/api')
-      .expect(200, done);
-  });
-});
-
-describe('GET /contact', () => {
-  it('should return 200 OK', (done) => {
-    request(app)
-      .get('/contact')
-      .expect(200, done);
-  });
-});
 
 describe('GET /random-url', () => {
   it('should return 404', (done) => {

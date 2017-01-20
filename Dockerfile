@@ -11,6 +11,7 @@ WORKDIR /usr/src
 RUN yarn install
 
 ENV NODE_PATH=/usr/src/node_modules
+ENV PATH="$PATH:/usr/src/node_modules/.bin"
 WORKDIR $APP_DIR
 
 CMD [ "nodemon", "app.js" ]
