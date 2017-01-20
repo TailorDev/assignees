@@ -28,9 +28,9 @@ exports.listRepos = (req, res) => {
   const user = req.user;
 
   const organizations = user.organizations;
-  const current_org = organizations.find(o => o.name === owner);
+  const currentOrg = organizations.find(o => o.name === owner);
 
-  if (!current_org) {
+  if (!currentOrg) {
     return res.status(404).send('Not Found');
   }
 
@@ -39,7 +39,7 @@ exports.listRepos = (req, res) => {
   })
   .then((repositories) => {
     // first time, let's sync them
-    if (repositories.length === 0 && !current_org.last_synchronized_at) {
+    if (repositories.length === 0 && !currentOrg.last_synchronized_at) {
       return module.exports.syncRepos(req, res);
     }
 
@@ -47,13 +47,13 @@ exports.listRepos = (req, res) => {
     repositories = repositories.filter(r => user.repositories.includes(r.github_id));
 
     // enabled projects first
-    repositories.sort(a => a.enabled ? -1 : 1);
+    repositories.sort(a => (a.enabled ? -1 : 1));
 
     res.render('project/list', {
       title: 'Projects',
       organizations,
       repositories,
-      current_org,
+      current_org: currentOrg,
     });
   });
 };
@@ -153,7 +153,7 @@ exports.pause = (req, res) => {
 
     return gh.auth(req.user).repos.editHook(
       gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, false),
-      (err, hook) => {
+      () => {
         repository
           .set({ enabled: false })
           .save();
@@ -250,7 +250,7 @@ exports.syncRepos = (req, res) => {
           }))
         ;
 
-        Repository.create(repositories, (err) => {
+        Repository.create(repositories, () => {
           user.organizations = user.organizations.map((organization) => {
             if (organization.name === owner) {
               organization.last_synchronized_at = Date.now();

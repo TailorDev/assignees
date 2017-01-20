@@ -1,6 +1,4 @@
-const _ = require('lodash');
 const passport = require('passport');
-const request = require('request');
 const GitHubStrategy = require('passport-github').Strategy;
 
 const User = require('../models/User');
@@ -36,7 +34,7 @@ passport.use(new GitHubStrategy({
         User.findById(req.user.id, (err, user) => {
           if (err) { return done(err); }
           user.github = profile.id;
-          user.github_login = user.github_login || profile._json.login,
+          user.github_login = user.github_login || profile._json.login;
           user.tokens.push({ kind: 'github', accessToken });
           user.profile.name = user.profile.name || profile.displayName;
           user.profile.picture = user.profile.picture || profile._json.avatar_url;
@@ -62,7 +60,7 @@ passport.use(new GitHubStrategy({
       const user = new User();
       user.email = profile._json.email;
       user.github = profile.id;
-      user.github_login = profile._json.login,
+      user.github_login = profile._json.login;
       user.tokens.push({ kind: 'github', accessToken });
       user.profile.name = profile.displayName;
       user.profile.picture = profile._json.avatar_url;

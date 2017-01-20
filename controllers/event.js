@@ -72,7 +72,7 @@ exports.listen = (req, res) => {
         .then(() => {
           res.send({ status: 'ok' });
         })
-        .catch((err) => {
+        .catch(() => {
           res.send({ status: 'errored' });
         })
       ;

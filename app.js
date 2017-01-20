@@ -134,7 +134,7 @@ app.use((req, res, next) => {
       !req.path.match(/^\/auth/) &&
       !req.path.match(/\./)) {
     req.session.returnTo = req.path;
-  } else if (req.user && req.path == '/account') {
+  } else if (req.user && req.path === '/account') {
     req.session.returnTo = req.path;
   }
   next();
@@ -186,7 +186,7 @@ app.get('/dashboard', passportConfig.isAdmin, adminController.index);
  * Error Handler.
  */
 if (process.env.NODE_ENV === 'development') {
-  app.use(require('errorhandler')());
+  app.use(require('errorhandler')()); // eslint-disable-line global-require
 }
 
 /**
