@@ -26,12 +26,11 @@ exports.getWebhookConfig = (owner, repo, active) => ({
   active,
 });
 
-exports.getExistingWebhookConfig = (id, owner, repo, active) => Object.assign({},
-    module.exports.getWebhookConfig(owner, repo, active),
-    { id }
-  );
+exports.getExistingWebhookConfig = (id, owner, repo, active) => Object.assign(
+  {},
+  module.exports.getWebhookConfig(owner, repo, active),
+  { id }
+);
 
-exports.computeSignature = blob => `sha1=${crypto
-    .createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET)
-    .update(blob)
-    .digest('hex')}`;
+exports.computeSignature = blob =>
+  `sha1=${crypto.createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET).update(blob).digest('hex')}`;

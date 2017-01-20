@@ -180,7 +180,7 @@ exports.syncOrgs = (req, res) => {
         description: 'Your personal account',
         github_id: user.github,
         avatar_url: user.profile.picture,
-      }
+      },
     ].concat(orgs.map(o => ({
       name: o.login,
       description: o.description,

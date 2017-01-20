@@ -23,7 +23,7 @@ passport.use(new GitHubStrategy({
   // `write:repo_hook` for installing a hook
   // `repo` for reading private repos :x
   scope: ['user:email', 'read:org', 'write:repo_hook', 'repo'],
-  passReqToCallback: true
+  passReqToCallback: true,
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {
     User.findOne({ github: profile.id }, (err, existingUser) => {

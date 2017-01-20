@@ -69,7 +69,7 @@ app.locals.github_app_id = process.env.GITHUB_APP_ID;
 app.use(compression());
 app.use(sass({
   src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public')
+  dest: path.join(__dirname, 'public'),
 }));
 app.use(logger('dev'));
 
@@ -107,8 +107,8 @@ app.use(session({
   name: 'assignees',
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
-    autoReconnect: true
-  })
+    autoReconnect: true,
+  }),
 }));
 app.use(passport.initialize());
 app.use(passport.session());

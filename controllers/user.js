@@ -15,7 +15,7 @@ exports.logout = (req, res) => {
  */
 exports.getAccount = (req, res) => {
   res.render('account/profile', {
-    title: 'Account Management'
+    title: 'Account Management',
   });
 };
 
