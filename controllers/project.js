@@ -224,6 +224,26 @@ exports.syncRepos = (req, res) => {
 
     fetchRepositories
       .then((repos) => {
+        // update existing repos
+        repos
+          .filter(r => existingRepos.find(e => e.github_id === r.id) !== undefined)
+          .map(r => {
+            return {
+              gh: r,
+              db: existingRepos.find(e => e.github_id === r.id),
+            };
+          })
+          .forEach(repos => {
+            repos.db
+              .set({
+                name: repos.gh.name,
+                private: repos.gh.private,
+              })
+              .save()
+            ;
+          })
+        ;
+
         const repositories = repos
           .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
           .map(r => {
@@ -231,6 +251,7 @@ exports.syncRepos = (req, res) => {
               owner,
               name: r.name,
               github_id: r.id,
+              private: r.private,
             };
           })
         ;

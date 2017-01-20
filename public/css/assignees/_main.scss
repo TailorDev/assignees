@@ -30,8 +30,12 @@
 
     font-weight: 500;
 
+    &.is-private {
+      background-color: #fff9ea;
+    }
+
     .name {
-      @extend .col-xs-9;
+      @extend .col-sm-9;
 
       form {
         > * {
@@ -50,7 +54,7 @@
     }
 
     .actions {
-      @extend .col-xs-3;
+      @extend .col-sm-3;
 
       text-align:right;
 

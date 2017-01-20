@@ -6,7 +6,7 @@ const repositorySchema = new mongoose.Schema({
 
   // github
   github_id: Number,
-  github_url: String,
+  private: Boolean,
   github_hook_id: Number,
 
   // assignees config

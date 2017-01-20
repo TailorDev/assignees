@@ -2,6 +2,7 @@
 
 @import "lib/bootstrap/bootstrap";
 @import "lib/font-awesome/font-awesome";
+@import "lib/octicons/octicons";
 
 @import "themes/modern/modern";
 
@@ -67,6 +68,13 @@ textarea {
 
 .fa {
   margin-right: 6px;
+}
+
+// Octicons
+// -------------------------
+
+.octicon {
+  vertical-align: middle;
 }
 
 // Custom
