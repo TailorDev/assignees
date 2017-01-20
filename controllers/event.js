@@ -40,7 +40,7 @@ exports.listen = (req, res) => {
 
     // TODO: move this logic to a worker
 
-    User.findOne({ _id: repository.user_id }, (err, user) => {
+    User.findOne({ _id: repository.enabled_by.user_id }, (err, user) => {
       const github = gh.auth(user);
 
       github

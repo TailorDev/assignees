@@ -28,12 +28,14 @@ block content
               div.name
                 if r.enabled
                   .row
-                    .col-xs-4
+                    .col-xs-5
                       | #{r.name}
                       | &nbsp;
-                      span.label.label-success ENABLED
+                      span.label.label-success
+                        | enabled by&nbsp;
+                        | #{r.enabled_by.login === user.github_login ? 'you' : r.enabled_by.login}
 
-                    .col-xs-8
+                    .col-xs-7
                       form(
                         action=`/projects/${current_org.name}/${r.name}/configure`,
                         method='POST',

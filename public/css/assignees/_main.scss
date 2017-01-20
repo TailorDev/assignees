@@ -73,6 +73,16 @@
 
     list-style-type: none;
   }
+
+  .label {
+    display: inline-block;
+    max-width: 80%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    vertical-align: text-bottom;
+  }
 }
 
 .last-sync {

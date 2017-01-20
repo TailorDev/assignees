@@ -35,7 +35,6 @@ exports.listRepos = (req, res) => {
   }
 
   Repository.find({
-    user_id: user.id,
     owner,
   })
   .then((repositories) => {
@@ -58,10 +57,11 @@ exports.listRepos = (req, res) => {
  */
 exports.enable = (req, res) => {
   const { owner, repo } = req.params;
-  const userId = req.user.id;
+  const user = req.user;
+
+  // TODO: ensure user can do that
 
   Repository.findOne({
-    user_id: userId,
     name: repo,
     owner,
   }, (err, repository) => {
@@ -73,11 +73,11 @@ exports.enable = (req, res) => {
 
     let createOrEditHook;
     if (repository.github_hook_id) {
-      createOrEditHook = gh.auth(req.user).repos.editHook(
+      createOrEditHook = gh.auth(user).repos.editHook(
         gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, true)
       );
     } else {
-      createOrEditHook = gh.auth(req.user).repos.createHook(
+      createOrEditHook = gh.auth(user).repos.createHook(
         gh.getWebhookConfig(owner, repo, true)
       );
     }
@@ -87,7 +87,7 @@ exports.enable = (req, res) => {
         if (err.code === 404) {
           // the hook does not exist. Are we screwed?
           // Nope! Let's create a new one
-          return gh.auth(req.user).repos.createHook(
+          return gh.auth(user).repos.createHook(
             gh.getWebhookConfig(owner, repo, true)
           );
         }
@@ -98,6 +98,10 @@ exports.enable = (req, res) => {
         repository
           .set({
             enabled: true,
+            enabled_by: {
+              user_id: user.id,
+              login: user.github_login,
+            },
             github_hook_id: hook.id,
           })
           .save();
@@ -121,10 +125,10 @@ exports.enable = (req, res) => {
  */
 exports.pause = (req, res) => {
   const { owner, repo } = req.params;
-  const userId = req.user.id;
+
+  // TODO: ensure user can do that
 
   Repository.findOne({
-    user_id: userId,
     name: repo,
     owner,
   }, (err, repository) => {
@@ -194,7 +198,7 @@ exports.syncRepos = (req, res) => {
   const owner = req.params.owner;
   const user = req.user;
 
-  Repository.find({ user_id: user.id, owner }, (err, existingRepos) => {
+  Repository.find({ owner }, (err, existingRepos) => {
     let fetchRepositories;
 
     if (owner === user.github_login) {
@@ -209,7 +213,6 @@ exports.syncRepos = (req, res) => {
           .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
           .map(r => {
             return {
-              user_id: user.id,
               owner,
               name: r.name,
               github_id: r.id,
@@ -241,10 +244,10 @@ exports.syncRepos = (req, res) => {
  */
 exports.configureRepo = (req, res) => {
   const { owner, repo } = req.params;
-  const userId = req.user.id;
+
+  // TODO: ensure user can do that
 
   Repository.findOne({
-    user_id: userId,
     name: repo,
     owner,
   }, (err, repository) => {
