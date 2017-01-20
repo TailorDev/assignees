@@ -7,7 +7,6 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
-const errorHandler = require('errorhandler');
 const lusca = require('lusca');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
@@ -177,7 +176,9 @@ app.post('/events', eventController.listen);
 /**
  * Error Handler.
  */
-app.use(errorHandler());
+if (process.env.NODE_ENV === 'development') {
+  app.use(require('errorhandler')());
+}
 
 /**
  * Start Express server.
