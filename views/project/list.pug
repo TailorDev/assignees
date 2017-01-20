@@ -13,14 +13,20 @@ block content
             for o in organizations
               a(
                 href='/projects/' + o.name,
-                class= (current_org && o.name == current_org.name) ? 'active' : ''
+                class= (current_org && o.name == current_org.name) ? 'active' : 'hidden-xs hidden-sm'
               )
                 img(src=o.avatar_url)
                 span.name #{o.name}
+            a(
+              href='/projects',
+              class='hidden-md hidden-lg'
+            )
+              i.fa.fa-chevron-left
+              span.name Select another organization
 
       +last-sync('/sync/organizations', 'synchronize your organizations', user.last_synchronized_at)
       if github_app_id
-        .application-link
+        .application-link.hidden-xs.hidden-sm
           | Is an organization missing?
           a(href=`https://github.com/settings/connections/applications/${github_app_id}`)
             | &nbsp;Review and add
