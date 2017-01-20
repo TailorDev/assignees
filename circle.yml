@@ -1,0 +1,27 @@
+machine:
+  node:
+    version: 6.9
+  environment:
+    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+    MONGODB_URI: mongodb://db:27017/assignees
+    GITHUB_ID: 123
+    GITHUB_SECRET: 123
+    SESSION_SECRET: s3cr3t
+    GITHUB_WEBHOOK_URL: http://assignees.dev:3000/events
+    GITHUB_WEBHOOK_SECRET: s3cr3t
+
+dependencies:
+  override:
+    - yarn
+  cache_directories:
+    - ~/.cache/yarn
+
+test:
+  override:
+    - yarn test
+
+deployment:
+  production:
+    branch: master
+    heroku:
+      appname: assignees
