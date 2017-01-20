@@ -10,11 +10,11 @@ const organizationSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, unique: true },
+  email: String,
 
   tokens: Array,
 
-  github: String,
+  github: { type: String, unique: true },
   github_login: String,
 
   repositories: Array,

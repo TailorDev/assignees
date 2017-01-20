@@ -7,7 +7,7 @@ const User = require('../models/User');
 
 describe('User Model', () => {
   it('should create a new user', (done) => {
-    const UserMock = sinon.mock(new User({ email: 'test@gmail.com', password: 'root' }));
+    const UserMock = sinon.mock(new User({ github: 'github-id' }));
     const user = UserMock.object;
 
     UserMock
@@ -23,7 +23,7 @@ describe('User Model', () => {
   });
 
   it('should return error if user is not created', (done) => {
-    const UserMock = sinon.mock(new User({ email: 'test@gmail.com', password: 'root' }));
+    const UserMock = sinon.mock(new User({ github: 'github-id' }));
     const user = UserMock.object;
     const expectedError = {
       name: 'ValidationError'
@@ -42,8 +42,8 @@ describe('User Model', () => {
     });
   });
 
-  it('should not create a user with the unique email', (done) => {
-    const UserMock = sinon.mock(User({ email: 'test@gmail.com', password: 'root' }));
+  it('should not create a user if github id already exists', (done) => {
+    const UserMock = sinon.mock(new User({ github: 'github-id' }));
     const user = UserMock.object;
     const expectedError = {
       name: 'MongoError',
@@ -62,45 +62,5 @@ describe('User Model', () => {
       expect(result).to.be.undefined;
       done();
     });
-  });
-
-  it('should find user by email', (done) => {
-    const userMock = sinon.mock(User);
-    const expectedUser = {
-      _id: '5700a128bd97c1341d8fb365',
-      email: 'test@gmail.com'
-    };
-
-    userMock
-      .expects('findOne')
-      .withArgs({ email: 'test@gmail.com' })
-      .yields(null, expectedUser);
-
-    User.findOne({ email: 'test@gmail.com' }, (err, result) => {
-      userMock.verify();
-      userMock.restore();
-      expect(result.email).to.equal('test@gmail.com');
-      done();
-    })
-  });
-
-  it('should remove user by email', (done) => {
-    const userMock = sinon.mock(User);
-    const expectedResult = {
-      nRemoved: 1
-    };
-
-    userMock
-      .expects('remove')
-      .withArgs({ email: 'test@gmail.com' })
-      .yields(null, expectedResult);
-
-    User.remove({ email: 'test@gmail.com' }, (err, result) => {
-      userMock.verify();
-      userMock.restore();
-      expect(err).to.be.null;
-      expect(result.nRemoved).to.equal(1);
-      done();
-    })
   });
 });
