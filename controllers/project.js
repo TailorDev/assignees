@@ -14,7 +14,7 @@ exports.listOrgs = (req, res) => {
     return module.exports.syncOrgs(req, res);
   }
 
-  res.render('repo/list', {
+  res.render('project/list', {
     title: 'Projects',
     organizations,
   });
@@ -24,11 +24,11 @@ exports.listOrgs = (req, res) => {
  * List all repositories that can be sync'ed
  */
 exports.listRepos = (req, res) => {
-  const org = req.params.org;
+  const owner = req.params.owner;
   const user = req.user;
 
   const organizations = user.organizations;
-  const current_org = organizations.find(o => o.name === org);
+  const current_org = organizations.find(o => o.name === owner);
 
   if (!current_org) {
     return res.status(404).send('Not Found');
@@ -36,7 +36,7 @@ exports.listRepos = (req, res) => {
 
   Repository.find({
     user_id: user.id,
-    org,
+    owner,
   })
   .then((repositories) => {
     // first time, let's sync them
@@ -44,7 +44,7 @@ exports.listRepos = (req, res) => {
       return module.exports.syncRepos(req, res);
     }
 
-    res.render('repo/list', {
+    res.render('project/list', {
       title: 'Projects',
       organizations,
       repositories,
@@ -57,28 +57,28 @@ exports.listRepos = (req, res) => {
  * Enable project and install webhook
  */
 exports.enable = (req, res) => {
-  const { org, repo } = req.params;
+  const { owner, repo } = req.params;
   const userId = req.user.id;
 
   Repository.findOne({
     user_id: userId,
     name: repo,
-    org
+    owner,
   }, (err, repository) => {
     if (repository.enabled) {
       req.flash('info', { msg: 'Repository already enabled' });
 
-      return res.redirect(`/projects/${org}`);
+      return res.redirect(`/projects/${owner}`);
     }
 
     let createOrEditHook;
     if (repository.github_hook_id) {
       createOrEditHook = gh.auth(req.user).repos.editHook(
-        gh.getExistingWebhookConfig(repository.github_hook_id, org, repo, true)
+        gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, true)
       );
     } else {
       createOrEditHook = gh.auth(req.user).repos.createHook(
-        gh.getWebhookConfig(org, repo, true)
+        gh.getWebhookConfig(owner, repo, true)
       );
     }
 
@@ -88,7 +88,7 @@ exports.enable = (req, res) => {
           // the hook does not exist. Are we screwed?
           // Nope! Let's create a new one
           return gh.auth(req.user).repos.createHook(
-            gh.getWebhookConfig(org, repo, true)
+            gh.getWebhookConfig(owner, repo, true)
           );
         }
 
@@ -110,7 +110,7 @@ exports.enable = (req, res) => {
         req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
       })
       .then(() => {
-        return res.redirect(`/projects/${org}`);
+        return res.redirect(`/projects/${owner}`);
       })
     ;
   })
@@ -120,22 +120,22 @@ exports.enable = (req, res) => {
  * Pause project and disable webhook
  */
 exports.pause = (req, res) => {
-  const { org, repo } = req.params;
+  const { owner, repo } = req.params;
   const userId = req.user.id;
 
   Repository.findOne({
     user_id: userId,
     name: repo,
-    org
+    owner,
   }, (err, repository) => {
     if (!repository.enabled) {
       req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
 
-      return res.redirect(`/projects/${org}`);
+      return res.redirect(`/projects/${owner}`);
     }
 
     return gh.auth(req.user).repos.editHook(
-      gh.getExistingWebhookConfig(repository.github_hook_id, org, repo, false),
+      gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, false),
       (err, hook) => {
         repository
           .set({ enabled: false })
@@ -143,7 +143,7 @@ exports.pause = (req, res) => {
 
         req.flash('success', { msg: `Project "${repo}" has been paused.` });
 
-        return res.redirect(`/projects/${org}`);
+        return res.redirect(`/projects/${owner}`);
       }
     );
   });
@@ -191,16 +191,16 @@ exports.syncOrgs = (req, res) => {
  * Sync repositories
  */
 exports.syncRepos = (req, res) => {
-  const org = req.params.org;
+  const owner = req.params.owner;
   const user = req.user;
 
-  Repository.find({ user_id: user.id, org }, (err, existingRepos) => {
+  Repository.find({ user_id: user.id, owner }, (err, existingRepos) => {
     let fetchRepositories;
 
-    if (org === user.github_login) {
-      fetchRepositories = gh.auth(user).repos.getForUser({ username: org, per_page: 50 });
+    if (owner === user.github_login) {
+      fetchRepositories = gh.auth(user).repos.getForUser({ username: owner, per_page: 50 });
     } else {
-      fetchRepositories = gh.auth(user).repos.getForOrg({ org, per_page: 50 });
+      fetchRepositories = gh.auth(user).repos.getForOrg({ org: owner, per_page: 50 });
     }
 
     fetchRepositories
@@ -210,7 +210,7 @@ exports.syncRepos = (req, res) => {
           .map(r => {
             return {
               user_id: user.id,
-              org,
+              owner,
               name: r.name,
               github_id: r.id,
             };
@@ -219,8 +219,7 @@ exports.syncRepos = (req, res) => {
 
         Repository.create(repositories, (err) => {
           user.organizations = user.organizations.map(organization => {
-            if (organization.name === org) {
-              console.log({organization})
+            if (organization.name === owner) {
               organization.last_synchronized_at = Date.now();
             }
 
@@ -228,9 +227,9 @@ exports.syncRepos = (req, res) => {
           });
 
           user.save(() => {
-            req.flash('success', { msg: `"${org}" repositories successfully synchronized.` });
+            req.flash('success', { msg: `"${owner}" repositories successfully synchronized.` });
 
-            return res.redirect(`/projects/${org}`);
+            return res.redirect(`/projects/${owner}`);
           });
         });
       });
@@ -241,13 +240,13 @@ exports.syncRepos = (req, res) => {
  * Configure a repository.
  */
 exports.configureRepo = (req, res) => {
-  const { org, repo } = req.params;
+  const { owner, repo } = req.params;
   const userId = req.user.id;
 
   Repository.findOne({
     user_id: userId,
     name: repo,
-    org
+    owner,
   }, (err, repository) => {
     if (err) {
       return res.status(404).end();
@@ -280,7 +279,7 @@ exports.configureRepo = (req, res) => {
         req.flash('success', { msg: 'Configuration successfully updated.' });
       }
 
-      return res.redirect(`/projects/${org}`);
+      return res.redirect(`/projects/${owner}`);
     });
   });
 };

@@ -27,15 +27,15 @@ exports.listen = (req, res) => {
 
   Repository.findOne({ github_id: repoId }, (err, repository) => {
     if (!repository) {
-      return res.send({ status: 'ignored', reason: 'Unknown repository.' });
+      return res.send({ status: 'ignored', reason: 'unknown repository' });
     }
 
     if (!repository.enabled) {
-      return res.send({ status: 'ignored', reason: 'Repository is paused.' });
+      return res.send({ status: 'ignored', reason: 'repository is paused' });
     }
 
     if (repository.skip_wip && /wip/i.test(pullTitle)) {
-      return res.send({ status: 'ignored', reason: 'WIP.' });
+      return res.send({ status: 'ignored', reason: 'skip wip' });
     }
 
     // TODO: move this logic to a worker
@@ -46,7 +46,7 @@ exports.listen = (req, res) => {
       github
         .repos
         .getCollaborators({
-          owner: repository.org,
+          owner: repository.owner,
           repo: repository.name,
         })
         .then((collaborators) => {
@@ -59,13 +59,13 @@ exports.listen = (req, res) => {
         })
         .then((reviewers) => {
           if (reviewers.length === 0) {
-            return res.send({ status: 'aborted', reason: 'No reviewers found' });
+            return res.send({ status: 'aborted', reason: 'no reviewers found' });
           }
 
           return github
             .pullRequests
             .createReviewRequest({
-              owner: repository.org,
+              owner: repository.owner,
               repo: repository.name,
               number: pullNumber,
               reviewers,
@@ -73,11 +73,9 @@ exports.listen = (req, res) => {
           ;
         })
         .then(() => {
-          res.send({ status: 'accepted' });
+          res.send({ status: 'ok' });
         })
         .catch((err) => {
-          console.log({err});
-
           res.send({ status: 'errored' });
         })
       ;

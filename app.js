@@ -25,7 +25,7 @@ const gh = require('./helpers/github');
  */
 const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
-const repoController = require('./controllers/repo');
+const projectController = require('./controllers/project');
 const eventController = require('./controllers/event');
 
 /**
@@ -163,14 +163,14 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 /**
  * Real app routes
  */
-app.get('/projects', passportConfig.isAuthenticated, repoController.listOrgs);
-app.get('/projects/:org', passportConfig.isAuthenticated, repoController.listRepos);
-app.post('/projects/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
-app.post('/projects/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
-app.post('/projects/:org/:repo/configure', passportConfig.isAuthenticated, repoController.configureRepo);
+app.get('/projects', passportConfig.isAuthenticated, projectController.listOrgs);
+app.get('/projects/:owner', passportConfig.isAuthenticated, projectController.listRepos);
+app.post('/projects/:owner/:repo/enable', passportConfig.isAuthenticated, projectController.enable);
+app.post('/projects/:owner/:repo/pause', passportConfig.isAuthenticated, projectController.pause);
+app.post('/projects/:owner/:repo/configure', passportConfig.isAuthenticated, projectController.configureRepo);
 
-app.post('/sync/organizations', passportConfig.isAuthenticated, repoController.syncOrgs);
-app.post('/sync/projects/:org', passportConfig.isAuthenticated, repoController.syncRepos);
+app.post('/sync/organizations', passportConfig.isAuthenticated, projectController.syncOrgs);
+app.post('/sync/projects/:owner', passportConfig.isAuthenticated, projectController.syncRepos);
 
 app.post('/events', eventController.listen);
 

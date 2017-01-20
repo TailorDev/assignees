@@ -1,0 +1,19 @@
+mixin no-repository
+  li.no-repository
+    .panel-heading
+      | No repositories
+    .panel-body
+      | It appears that you don't have any repositories in this organization yet,
+      | or you may not have sufficient permissions. Contact us if you think it is
+      | an error.
+
+mixin last-sync(url, text, last_synchronized_at)
+  .last-sync
+    form(action=url, method='POST')
+      input(type='hidden', name='_csrf', value=_csrf)
+      button.btn.btn-link
+        i.fa.fa-refresh
+        | #{text}
+
+      if last_synchronized_at
+        span (last synced about #{moment(last_synchronized_at).fromNow()})

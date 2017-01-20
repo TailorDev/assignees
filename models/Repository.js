@@ -5,7 +5,7 @@ const repositorySchema = new mongoose.Schema({
   user_id: mongoose.Schema.Types.ObjectId,
 
   name: String,
-  org: String,
+  owner: String,
   enabled: { type: Boolean, default: false },
 
   // github

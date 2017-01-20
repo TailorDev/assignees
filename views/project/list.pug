@@ -1,4 +1,5 @@
 extends ../layout
+include ./mixins
 
 block content
   h2 #{title}
@@ -17,15 +18,7 @@ block content
                 img(src=o.avatar_url)
                 span.name #{o.name}
 
-      .last-sync
-        form(action='/sync/organizations', method='POST')
-          input(type='hidden', name='_csrf', value=_csrf)
-          button.btn.btn-link
-            i.fa.fa-refresh
-            | synchronize your organizations
-
-          if user.last_synchronized_at
-            span (last synced about #{moment(user.last_synchronized_at).fromNow()})
+      +last-sync('/sync/organizations', 'synchronize your organizations', user.last_synchronized_at)
 
     if current_org
       div.col-md-9
@@ -79,7 +72,11 @@ block content
 
               div.actions
                 if r.enabled
-                  form(action=`/projects/${current_org.name}/${r.name}/pause`, method='POST', class='action')
+                  form(
+                    action=`/projects/${current_org.name}/${r.name}/pause`,
+                    method='POST',
+                    class='action'
+                  )
                     input(type='hidden', name='_csrf', value=_csrf)
                     button.btn.btn-warning
                       i.fa.fa-pause-circle-o
@@ -94,20 +91,10 @@ block content
                       else
                         | start
           else
-            li.no-repository
-              .panel-heading
-                | No repositories
-              .panel-body
-                | It appears that you don't have any repositories in this organization yet,
-                | or you may not have sufficient permissions. Contact us if you think it is
-                | an error.
+            + no-repository
 
-        .last-sync
-          form(action=`/sync/projects/${current_org.name}`, method='POST')
-            input(type='hidden', name='_csrf', value=_csrf)
-            button.btn.btn-link
-              i.fa.fa-refresh
-              | synchronize #{current_org.name}'s repositories
-
-            if current_org.last_synchronized_at
-              span (last synced about #{moment(current_org.last_synchronized_at).fromNow()})
+        +last-sync(
+          `/sync/projects/${current_org.name}`,
+          `synchronize ${current_org.name}'s repositories`,
+          current_org.last_synchronized_at
+        )
