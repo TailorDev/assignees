@@ -49,14 +49,11 @@ exports.listen = (req, res) => {
           owner: repository.owner,
           repo: repository.name,
         })
-        .then((collaborators) => {
-          return collaborators
+        .then(collaborators => collaborators
             .map(c => c.login)
             .filter(login => login !== pullAuthor)
-            .sort(() => .5 - Math.random())
-            .slice(0, repository.max_reviewers)
-          ;
-        })
+            .sort(() => 0.5 - Math.random())
+            .slice(0, repository.max_reviewers))
         .then((reviewers) => {
           if (reviewers.length === 0) {
             return res.send({ status: 'aborted', reason: 'no reviewers found' });

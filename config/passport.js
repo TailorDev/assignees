@@ -24,7 +24,7 @@ passport.use(new GitHubStrategy({
   callbackURL: '/auth/github/callback',
   // `write:repo_hook` for installing a hook
   // `repo` for reading private repos :x
-  scope: [ 'user:email', 'read:org', 'write:repo_hook', 'repo' ],
+  scope: ['user:email', 'read:org', 'write:repo_hook', 'repo'],
   passReqToCallback: true
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {expect} = require('chai');
+const { expect } = require('chai');
 const sinon = require('sinon');
 require('sinon-mongoose');
 
@@ -14,7 +14,7 @@ describe('User Model', () => {
       .expects('save')
       .yields(null);
 
-    user.save(function (err, result) {
+    user.save((err, result) => {
       UserMock.verify();
       UserMock.restore();
       expect(err).to.be.null;

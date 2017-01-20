@@ -56,7 +56,7 @@ mongoose.connection.on('error', () => {
 app.set('port', process.env.PORT || 3000);
 
 app.enable('trust proxy');
-app.disable('x-powered-by')
+app.disable('x-powered-by');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -156,7 +156,7 @@ app.post('/account/delete', passportConfig.isAuthenticated, userController.postD
  */
 app.get('/auth/github', passport.authenticate('github'));
 app.get('/auth/github/callback', passport.authenticate('github', {
-    failureRedirect: '/',
+  failureRedirect: '/',
 }), (req, res) => {
   if (!req.session.returnTo || req.session.returnTo === '/') {
     return res.redirect('/projects');
@@ -193,7 +193,8 @@ if (process.env.NODE_ENV === 'development') {
  * Start Express server.
  */
 app.listen(app.get('port'), () => {
-  console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env')); 
+  console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
+
   console.log('  Press CTRL-C to stop\n');
 });
 

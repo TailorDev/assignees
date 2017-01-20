@@ -1,7 +1,7 @@
 {
   "name": "assignees",
   "version": "1.0.1",
-  "description": "",
+  "description": "Code reviews for everyone.",
   "private": true,
   "license": "MIT",
   "scripts": {

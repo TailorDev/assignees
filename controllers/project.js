@@ -123,11 +123,9 @@ exports.enable = (req, res) => {
 
         req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
       })
-      .then(() => {
-        return res.redirect(`/projects/${owner}`);
-      })
+      .then(() => res.redirect(`/projects/${owner}`))
     ;
-  })
+  });
 };
 
 /**
@@ -183,18 +181,16 @@ exports.syncOrgs = (req, res) => {
         github_id: user.github,
         avatar_url: user.profile.picture,
       }
-    ].concat(orgs.map(o => {
-      return {
-        name: o.login,
-        description: o.description,
-        github_id: o.id,
-        avatar_url: o.avatar_url,
-      };
-    }));
+    ].concat(orgs.map(o => ({
+      name: o.login,
+      description: o.description,
+      github_id: o.id,
+      avatar_url: o.avatar_url,
+    })));
 
     // 2. persist
     user.set({
-      organizations: organizations,
+      organizations,
       last_synchronized_at: Date.now(),
     });
 
@@ -227,13 +223,11 @@ exports.syncRepos = (req, res) => {
         // update existing repos
         repos
           .filter(r => existingRepos.find(e => e.github_id === r.id) !== undefined)
-          .map(r => {
-            return {
-              gh: r,
-              db: existingRepos.find(e => e.github_id === r.id),
-            };
-          })
-          .forEach(repos => {
+          .map(r => ({
+            gh: r,
+            db: existingRepos.find(e => e.github_id === r.id),
+          }))
+          .forEach((repos) => {
             repos.db
               .set({
                 name: repos.gh.name,
@@ -247,19 +241,17 @@ exports.syncRepos = (req, res) => {
 
         const repositories = repos
           .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
-          .map(r => {
-            return {
-              owner,
-              name: r.name,
-              github_id: r.id,
-              private: r.private,
-              fork: r.fork,
-            };
-          })
+          .map(r => ({
+            owner,
+            name: r.name,
+            github_id: r.id,
+            private: r.private,
+            fork: r.fork,
+          }))
         ;
 
         Repository.create(repositories, (err) => {
-         user.organizations = user.organizations.map(organization => {
+          user.organizations = user.organizations.map((organization) => {
             if (organization.name === owner) {
               organization.last_synchronized_at = Date.now();
             }
@@ -309,7 +301,7 @@ exports.configureRepo = (req, res) => {
 
     req.getValidationResult().then((result) => {
       if (!result.isEmpty()) {
-        result.array().forEach(error => {
+        result.array().forEach((error) => {
           req.flash('errors', { msg: error.msg });
         });
       } else {
