@@ -17,7 +17,6 @@ const passport = require('passport');
 const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
 const moment = require('moment');
-const octicons = require('octicons');
 
 const gh = require('./helpers/github');
 
@@ -62,7 +61,6 @@ app.set('view engine', 'pug');
 // pretty html == better bootstrap output (yes, I know...)
 app.locals.pretty = true;
 app.locals.moment = moment;
-app.locals.octicons = octicons;
 
 app.use(compression());
 app.use(sass({

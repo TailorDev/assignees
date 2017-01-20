@@ -29,7 +29,7 @@ block content
                 if r.enabled
                   .row
                     .col-sm-5
-                      | !{r.private ? octicons.lock.toSVG() : octicons.repo.toSVG()}
+                      | !{r.getIconSVG()}
                       | &nbsp;
                       | #{r.name}
                       | &nbsp;
@@ -68,7 +68,7 @@ block content
                           | save
 
                 else
-                  | !{r.private ? octicons.lock.toSVG() : octicons.repo.toSVG()}
+                  | !{r.getIconSVG()}
                   | &nbsp;
                   | #{r.name}
 

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const octicons = require('octicons');
 
 const repositorySchema = new mongoose.Schema({
   name: String,
@@ -7,6 +8,7 @@ const repositorySchema = new mongoose.Schema({
   // github
   github_id: Number,
   private: Boolean,
+  fork: Boolean,
   github_hook_id: Number,
 
   // assignees config
@@ -18,6 +20,19 @@ const repositorySchema = new mongoose.Schema({
   max_reviewers: { type: Number, default: 1 },
   skip_wip: { type: Boolean, default: false },
 });
+
+repositorySchema.methods.getIconSVG = function getIconSVG() {
+  let icon = 'repo';
+  if (this.fork === true) {
+    icon = 'repo-forked';
+  }
+
+  if (this.private === true) {
+    icon = 'lock';
+  }
+
+  return octicons[icon].toSVG();
+};
 
 const Repository = mongoose.model('Repository', repositorySchema);
 

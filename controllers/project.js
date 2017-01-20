@@ -238,6 +238,7 @@ exports.syncRepos = (req, res) => {
               .set({
                 name: repos.gh.name,
                 private: repos.gh.private,
+                fork: repos.gh.fork,
               })
               .save()
             ;
@@ -252,6 +253,7 @@ exports.syncRepos = (req, res) => {
               name: r.name,
               github_id: r.id,
               private: r.private,
+              fork: r.fork,
             };
           })
         ;
