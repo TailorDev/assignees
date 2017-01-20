@@ -17,3 +17,13 @@ mixin last-sync(url, text, last_synchronized_at)
 
       if last_synchronized_at
         span (last synced about #{moment(last_synchronized_at).fromNow()})
+
+mixin no-org-chosen
+  .panel.panel-default
+    .panel-heading
+      .fa.fa-hand-o-left.hidden-sm
+      .fa.fa-hand-o-up.visible-sm-inline
+      | Select an organization
+    .panel-body
+      p We have synchronized your GitHub organizations automatically.
+      p Now, it is up to you to pick one in order to enable any of your projects you have (admin) access to.

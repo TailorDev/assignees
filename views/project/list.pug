@@ -91,10 +91,15 @@ block content
                       else
                         | start
           else
-            + no-repository
+            +no-repository
 
         +last-sync(
           `/sync/projects/${current_org.name}`,
           `synchronize ${current_org.name}'s repositories`,
           current_org.last_synchronized_at
         )
+
+    else
+      div.col-md-9
+        +no-org-chosen
+
