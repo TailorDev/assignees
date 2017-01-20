@@ -23,6 +23,11 @@
         if user
           li(class=(title == 'Projects') ? 'active' : undefined)
             a(href='/projects') Projects
+          if user.isAdmin()
+            li(class=(title == 'Dashboard') ? 'active' : undefined)
+              a(href='/dashboard')
+                i.fa.fa-lock
+                | Dashboard
 
       ul.nav.navbar-nav.navbar-right
         if !user

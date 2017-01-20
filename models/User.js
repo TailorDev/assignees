@@ -46,6 +46,12 @@ userSchema.methods.gravatar = function gravatar(size) {
   return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;
 };
 
+userSchema.methods.isAdmin = function isAdmin() {
+  const admins = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',') : [];
+
+  return this.github && admins.includes(this.github);
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

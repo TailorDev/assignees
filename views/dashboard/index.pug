@@ -1,0 +1,21 @@
+extends ../layout
+
+mixin card(value, text, icon)
+  .col-lg-3.col-md-6
+    .panel.panel-default
+      .panel-heading
+        .row
+          .col-xs-3
+            i(class=`fa fa-${icon} fa-5x`)
+          .col-xs-9.text-right
+            h2 #{d3Format.format('.0s')(value)}
+            div #{text}
+
+block content
+  h2 #{title}
+  hr
+
+  .row
+    +card(nbRepositories, 'repositories', 'code-fork')
+    +card(nbUsers, 'users', 'users')
+

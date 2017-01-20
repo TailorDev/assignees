@@ -17,6 +17,7 @@ const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
 const moment = require('moment');
 const cacheBust = require('cache-busted');
+const d3Format = require('d3-format');
 
 const gh = require('./helpers/github');
 
@@ -27,6 +28,7 @@ const homeController = require('./controllers/home');
 const userController = require('./controllers/user');
 const projectController = require('./controllers/project');
 const eventController = require('./controllers/event');
+const adminController = require('./controllers/admin');
 
 /**
  * API keys and Passport configuration.
@@ -61,6 +63,7 @@ app.set('view engine', 'pug');
 // pretty html == better bootstrap output (yes, I know...)
 app.locals.pretty = true;
 app.locals.moment = moment;
+app.locals.d3Format = d3Format;
 
 app.use(compression());
 app.use(sass({
@@ -174,6 +177,9 @@ app.post('/sync/organizations', passportConfig.isAuthenticated, projectControlle
 app.post('/sync/projects/:owner', passportConfig.isAuthenticated, projectController.syncRepos);
 
 app.post('/events', eventController.listen);
+
+// Admin corner
+app.get('/dashboard', passportConfig.isAdmin, adminController.index);
 
 /**
  * Error Handler.
