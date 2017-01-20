@@ -43,6 +43,9 @@ exports.listRepos = (req, res) => {
       return module.exports.syncRepos(req, res);
     }
 
+    // enabled projects first
+    repositories.sort(a => a.enabled ? -1 : 1);
+
     res.render('project/list', {
       title: 'Projects',
       organizations,
