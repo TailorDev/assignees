@@ -19,6 +19,11 @@ block content
                 span.name #{o.name}
 
       +last-sync('/sync/organizations', 'synchronize your organizations', user.last_synchronized_at)
+      .application-link
+        | Is an organization missing?
+        a(href=`https://github.com/settings/connections/applications/295a8ebdde4efebf8278`)
+          | &nbsp;Review and add
+        | &nbsp;your authorized organizations.
 
     if current_org
       div.col-md-9

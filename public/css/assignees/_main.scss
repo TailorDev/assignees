@@ -130,14 +130,18 @@
   @extend .row;
   @extend .hidden-xs;
 
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 
   & > form {
     @extend .col-md-12;
   }
 
   .btn-link {
-    padding-left: 0;
-    padding-right: 5px;
+    padding: 0 5px 0 0;
+    vertical-align: initial;
   }
+}
+
+.application-link {
+  margin-bottom: 2rem;
 }
