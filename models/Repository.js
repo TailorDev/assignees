@@ -34,6 +34,10 @@ repositorySchema.methods.getIconSVG = function getIconSVG() {
   return octicons[icon].toSVG();
 };
 
+repositorySchema.methods.getURL = function getURL() {
+  return `https://github.com/${this.owner}/${this.name}`;
+};
+
 const Repository = mongoose.model('Repository', repositorySchema);
 
 module.exports = Repository;
