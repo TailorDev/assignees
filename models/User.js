@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   github: String,
   github_login: String,
 
+  repositories: Array,
   organizations: [organizationSchema],
   last_synchronized_at: Date,
 

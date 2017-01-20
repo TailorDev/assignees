@@ -43,6 +43,9 @@ exports.listRepos = (req, res) => {
       return module.exports.syncRepos(req, res);
     }
 
+    // filter repos for user
+    repositories = repositories.filter(r => user.repositories.includes(r.github_id));
+
     // enabled projects first
     repositories.sort(a => a.enabled ? -1 : 1);
 
@@ -68,6 +71,10 @@ exports.enable = (req, res) => {
     name: repo,
     owner,
   }, (err, repository) => {
+    if (!user.repositories.includes(repository.github_id)) {
+      return res.status(404).send('Not Found');
+    }
+
     if (repository.enabled) {
       req.flash('info', { msg: 'Repository already enabled' });
 
@@ -128,6 +135,7 @@ exports.enable = (req, res) => {
  */
 exports.pause = (req, res) => {
   const { owner, repo } = req.params;
+  const user = req.user;
 
   // TODO: ensure user can do that
 
@@ -135,6 +143,10 @@ exports.pause = (req, res) => {
     name: repo,
     owner,
   }, (err, repository) => {
+    if (!user.repositories.includes(repository.github_id)) {
+      return res.status(404).send('Not Found');
+    }
+
     if (!repository.enabled) {
       req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
 
@@ -224,13 +236,18 @@ exports.syncRepos = (req, res) => {
         ;
 
         Repository.create(repositories, (err) => {
-          user.organizations = user.organizations.map(organization => {
+         user.organizations = user.organizations.map(organization => {
             if (organization.name === owner) {
               organization.last_synchronized_at = Date.now();
             }
 
             return organization;
           });
+
+          // lis of repo ids the user is allowed to see
+          user.repositories = [...new Set(
+            user.repositories.concat(repos.map(r => r.id))
+          )];
 
           user.save(() => {
             req.flash('success', { msg: `"${owner}" repositories successfully synchronized.` });
@@ -247,6 +264,7 @@ exports.syncRepos = (req, res) => {
  */
 exports.configureRepo = (req, res) => {
   const { owner, repo } = req.params;
+  const user = req.user;
 
   // TODO: ensure user can do that
 
@@ -254,8 +272,8 @@ exports.configureRepo = (req, res) => {
     name: repo,
     owner,
   }, (err, repository) => {
-    if (err) {
-      return res.status(404).end();
+    if (!user.repositories.includes(repository.github_id)) {
+      return res.status(404).send('Not Found');
     }
 
     req.sanitizeBody('max').toInt();
