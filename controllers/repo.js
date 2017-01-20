@@ -8,7 +8,7 @@ exports.listRepos = (req, res) => {
   const org = req.params.org;
   const user = req.user;
 
-  const organizations = user.organizations || [];
+  const organizations = user.organizations;
   if (organizations.length === 0 && !user.last_synchronized_at) {
     return module.exports.syncOrgs(req, res);
   }
@@ -17,19 +17,23 @@ exports.listRepos = (req, res) => {
 
   if (org) {
     findRepos = Repository.find({ user_id: user.id, org });
+    current = organizations.find(o => o.name === org);
   }
 
   findRepos
     .then((repositories) => {
-      if (repositories !== null && repositories.length === 0) {
-        return module.exports.syncRepos(req, res);
+      if (repositories !== null && current !== null) {
+        if (repositories.length === 0 && !current.last_synchronized_at) {
+          return module.exports.syncRepos(req, res);
+        }
       }
 
       res.render('repo/list', {
         title: 'Projects',
         organizations,
         repositories,
-        current_org: org,
+        current_org_name: current ? current.name : null,
+        current_org: current,
       });
     })
   ;
@@ -167,16 +171,16 @@ exports.syncOrgs = (req, res) => {
  * Sync repositories
  */
 exports.syncRepos = (req, res) => {
-  const userId = req.user.id;
   const org = req.params.org;
+  const user = req.user;
 
-  Repository.find({ user_id: userId, org }, (err, existingRepos) => {
+  Repository.find({ user_id: user.id, org }, (err, existingRepos) => {
     let fetchRepositories;
 
-    if (org === req.user.github_login) {
-      fetchRepositories = gh.auth(req.user).repos.getForUser({ username: org, per_pqge: 50 });
+    if (org === user.github_login) {
+      fetchRepositories = gh.auth(user).repos.getForUser({ username: org, per_page: 50 });
     } else {
-      fetchRepositories = gh.auth(req.user).repos.getForOrg({ org, per_page: 50 });
+      fetchRepositories = gh.auth(user).repos.getForOrg({ org, per_page: 50 });
     }
 
     fetchRepositories
@@ -185,7 +189,7 @@ exports.syncRepos = (req, res) => {
           .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
           .map(r => {
             return {
-              user_id: userId,
+              user_id: user.id,
               org,
               name: r.name,
               github_id: r.id,
@@ -196,9 +200,19 @@ exports.syncRepos = (req, res) => {
         ;
 
         Repository.create(repositories, (err) => {
-          req.flash('success', { msg: `"${org}" repositories successfully synchronized.` });
+          user.organizations = user.organizations.map(organization => {
+            if (organization.name === org) {
+              organization.last_synchronized_at = Date.now();
+            }
 
-          return res.redirect(`/repositories/${org}`);
+            return organization;
+          });
+
+          user.save(() => {
+            req.flash('success', { msg: `"${org}" repositories successfully synchronized.` });
+
+            return res.redirect(`/repositories/${org}`);
+          });
         });
       });
   });

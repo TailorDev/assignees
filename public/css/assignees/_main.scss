@@ -26,6 +26,8 @@
     @extend .row;
     @extend .list-group-item;
 
+    margin: 0;
+
     font-weight: 500;
 
     .name {
@@ -63,5 +65,28 @@
       height: 50px;
       line-height: 50px;
     }
+  }
+
+  .no-repository {
+    @extend .panel;
+    @extend .panel-default;
+
+    list-style-type: none;
+  }
+}
+
+.last-sync {
+  @extend .row;
+  @extend .hidden-xs;
+
+  margin-bottom: 2rem;
+
+  & > form {
+    @extend .col-md-12;
+  }
+
+  .btn-link {
+    padding-left: 0;
+    padding-right: 5px;
   }
 }

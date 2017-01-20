@@ -7,6 +7,7 @@ const organizationSchema = new mongoose.Schema({
   github_id: Number,
   github_url: String,
   avatar_url: String,
+  last_synchronized_at: Date,
 });
 
 const userSchema = new mongoose.Schema({
