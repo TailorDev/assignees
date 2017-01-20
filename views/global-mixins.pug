@@ -1,4 +1,5 @@
-mixin contact-us
+mixin contact-us(withIcon)
   a(mailto='support@tailordev.fr', class='btn btn-link contact-us')
-    i.fa.fa-life-ring
+    if withIcon !== false
+      i.fa.fa-life-ring
     | contact us

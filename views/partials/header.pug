@@ -1,4 +1,11 @@
-.navbar.navbar-default.navbar-fixed-top
+.notifications
+  .alert.alert-info
+    i.fa.fa-bullhorn
+    | This application is in <strong>alpha</strong> state. You can
+    +contact-us(false)
+    | if something does not work as expected.
+
+.navbar.navbar-default
   .container
     .navbar-header
       button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
