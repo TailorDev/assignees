@@ -19,10 +19,6 @@ const repositorySchema = new mongoose.Schema({
   skip_wip: { type: Boolean, default: false },
 });
 
-repositorySchema.methods.canBeEditedBy = (userId) => {
-  return this.enabled_by && this.enabled_by.user_id === userId;
-};
-
 const Repository = mongoose.model('Repository', repositorySchema);
 
 module.exports = Repository;
