@@ -9,17 +9,10 @@ block content
       .row
         .col-md-12
           div.organizations
-            a(
-              href=`/repositories/${user.github_login}`,
-              class= user.github_login == current_org_name ? 'active' : ''
-            )
-              img(src=user.profile.picture)
-              span.name #{user.github_login}
-
             for o in organizations
               a(
-                href='/repositories/' + o.name,
-                _lass= o.name == current_org_name ? 'active' : ''
+                href='/projects/' + o.name,
+                class= (current_org && o.name == current_org.name) ? 'active' : ''
               )
                 img(src=o.avatar_url)
                 span.name #{o.name}
@@ -49,7 +42,7 @@ block content
 
                     .col-xs-8
                       form(
-                        action=`/repositories/${current_org.name}/${r.name}/configure`,
+                        action=`/projects/${current_org.name}/${r.name}/configure`,
                         method='POST',
                         class='form-inline pull-right'
                       )
@@ -86,13 +79,13 @@ block content
 
               div.actions
                 if r.enabled
-                  form(action=`/repositories/${current_org.name}/${r.name}/pause`, method='POST', class='action')
+                  form(action=`/projects/${current_org.name}/${r.name}/pause`, method='POST', class='action')
                     input(type='hidden', name='_csrf', value=_csrf)
                     button.btn.btn-warning
                       i.fa.fa-pause-circle-o
                       | pause
                 else
-                  form(action=`/repositories/${current_org.name}/${r.name}/enable`, method='POST')
+                  form(action=`/projects/${current_org.name}/${r.name}/enable`, method='POST')
                     input(type='hidden', name='_csrf', value=_csrf)
                     button.btn.btn-success
                       i.fa.fa-play-circle-o
@@ -110,7 +103,7 @@ block content
                 | an error.
 
         .last-sync
-          form(action=`/sync/repositories/${current_org.name}`, method='POST')
+          form(action=`/sync/projects/${current_org.name}`, method='POST')
             input(type='hidden', name='_csrf', value=_csrf)
             button.btn.btn-link
               i.fa.fa-refresh

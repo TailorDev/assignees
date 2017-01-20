@@ -5,7 +5,6 @@ const organizationSchema = new mongoose.Schema({
   name: String,
   description: String,
   github_id: Number,
-  github_url: String,
   avatar_url: String,
   last_synchronized_at: Date,
 });
@@ -13,9 +12,9 @@ const organizationSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
 
-  github: String,
   tokens: Array,
 
+  github: String,
   github_login: String,
 
   organizations: [organizationSchema],

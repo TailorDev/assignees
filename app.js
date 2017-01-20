@@ -154,7 +154,7 @@ app.get('/auth/github/callback', passport.authenticate('github', {
     failureRedirect: '/',
 }), (req, res) => {
   if (!req.session.returnTo || req.session.returnTo === '/') {
-    return res.redirect('/repositories');
+    return res.redirect('/projects');
   }
 
   res.redirect(req.session.returnTo);
@@ -163,13 +163,14 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 /**
  * Real app routes
  */
-app.get('/repositories/:org?', passportConfig.isAuthenticated, repoController.listRepos);
-app.post('/repositories/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
-app.post('/repositories/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
-app.post('/repositories/:org/:repo/configure', passportConfig.isAuthenticated, repoController.configureRepo);
+app.get('/projects', passportConfig.isAuthenticated, repoController.listOrgs);
+app.get('/projects/:org', passportConfig.isAuthenticated, repoController.listRepos);
+app.post('/projects/:org/:repo/enable', passportConfig.isAuthenticated, repoController.enable);
+app.post('/projects/:org/:repo/pause', passportConfig.isAuthenticated, repoController.pause);
+app.post('/projects/:org/:repo/configure', passportConfig.isAuthenticated, repoController.configureRepo);
 
 app.post('/sync/organizations', passportConfig.isAuthenticated, repoController.syncOrgs);
-app.post('/sync/repositories/:org', passportConfig.isAuthenticated, repoController.syncRepos);
+app.post('/sync/projects/:org', passportConfig.isAuthenticated, repoController.syncRepos);
 
 app.post('/events', eventController.listen);
 

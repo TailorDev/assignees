@@ -2,6 +2,25 @@ const gh = require('../helpers/github');
 const Repository = require('../models/Repository');
 
 /**
+ * List all organizations that have been sync'ed
+ */
+exports.listOrgs = (req, res) => {
+  const user = req.user;
+
+  const organizations = user.organizations;
+
+  // first time, let's sync them
+  if (organizations.length === 0 && !user.last_synchronized_at) {
+    return module.exports.syncOrgs(req, res);
+  }
+
+  res.render('repo/list', {
+    title: 'Projects',
+    organizations,
+  });
+};
+
+/**
  * List all repositories that can be sync'ed
  */
 exports.listRepos = (req, res) => {
@@ -9,34 +28,29 @@ exports.listRepos = (req, res) => {
   const user = req.user;
 
   const organizations = user.organizations;
-  if (organizations.length === 0 && !user.last_synchronized_at) {
-    return module.exports.syncOrgs(req, res);
+  const current_org = organizations.find(o => o.name === org);
+
+  if (!current_org) {
+    return res.status(404).send('Not Found');
   }
 
-  let findRepos = Promise.resolve(null);
+  Repository.find({
+    user_id: user.id,
+    org,
+  })
+  .then((repositories) => {
+    // first time, let's sync them
+    if (repositories.length === 0 && !current_org.last_synchronized_at) {
+      return module.exports.syncRepos(req, res);
+    }
 
-  if (org) {
-    findRepos = Repository.find({ user_id: user.id, org });
-    current = organizations.find(o => o.name === org);
-  }
-
-  findRepos
-    .then((repositories) => {
-      if (repositories !== null && current !== null) {
-        if (repositories.length === 0 && !current.last_synchronized_at) {
-          return module.exports.syncRepos(req, res);
-        }
-      }
-
-      res.render('repo/list', {
-        title: 'Projects',
-        organizations,
-        repositories,
-        current_org_name: current ? current.name : null,
-        current_org: current,
-      });
-    })
-  ;
+    res.render('repo/list', {
+      title: 'Projects',
+      organizations,
+      repositories,
+      current_org,
+    });
+  });
 };
 
 /**
@@ -54,7 +68,7 @@ exports.enable = (req, res) => {
     if (repository.enabled) {
       req.flash('info', { msg: 'Repository already enabled' });
 
-      return res.redirect(`/repositories/${org}`);
+      return res.redirect(`/projects/${org}`);
     }
 
     let createOrEditHook;
@@ -96,7 +110,7 @@ exports.enable = (req, res) => {
         req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
       })
       .then(() => {
-        return res.redirect(`/repositories/${org}`);
+        return res.redirect(`/projects/${org}`);
       })
     ;
   })
@@ -117,7 +131,7 @@ exports.pause = (req, res) => {
     if (!repository.enabled) {
       req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
 
-      return res.redirect(`/repositories/${org}`);
+      return res.redirect(`/projects/${org}`);
     }
 
     return gh.auth(req.user).repos.editHook(
@@ -129,7 +143,7 @@ exports.pause = (req, res) => {
 
         req.flash('success', { msg: `Project "${repo}" has been paused.` });
 
-        return res.redirect(`/repositories/${org}`);
+        return res.redirect(`/projects/${org}`);
       }
     );
   });
@@ -143,15 +157,21 @@ exports.syncOrgs = (req, res) => {
 
   // 1. fetch current orgs
   gh.auth(user).users.getOrgs({}, (err, orgs) => {
-    const organizations = orgs.map(o => {
+    const organizations = [
+      {
+        name: user.github_login,
+        description: 'Your personal account',
+        github_id: user.github,
+        avatar_url: user.profile.picture,
+      }
+    ].concat(orgs.map(o => {
       return {
         name: o.login,
         description: o.description,
         github_id: o.id,
-        github_url: o.url,
         avatar_url: o.avatar_url,
       };
-    });
+    }));
 
     // 2. persist
     user.set({
@@ -162,7 +182,7 @@ exports.syncOrgs = (req, res) => {
     user.save(() => {
       req.flash('success', { msg: 'Organizations successfully synchronized.' });
 
-      return res.redirect('/repositories');
+      return res.redirect('/projects');
     });
   });
 };
@@ -193,8 +213,6 @@ exports.syncRepos = (req, res) => {
               org,
               name: r.name,
               github_id: r.id,
-              github_url: r.html_url,
-              enabled: false,
             };
           })
         ;
@@ -202,6 +220,7 @@ exports.syncRepos = (req, res) => {
         Repository.create(repositories, (err) => {
           user.organizations = user.organizations.map(organization => {
             if (organization.name === org) {
+              console.log({organization})
               organization.last_synchronized_at = Date.now();
             }
 
@@ -211,7 +230,7 @@ exports.syncRepos = (req, res) => {
           user.save(() => {
             req.flash('success', { msg: `"${org}" repositories successfully synchronized.` });
 
-            return res.redirect(`/repositories/${org}`);
+            return res.redirect(`/projects/${org}`);
           });
         });
       });
@@ -261,7 +280,7 @@ exports.configureRepo = (req, res) => {
         req.flash('success', { msg: 'Configuration successfully updated.' });
       }
 
-      return res.redirect(`/repositories/${org}`);
+      return res.redirect(`/projects/${org}`);
     });
   });
 };
