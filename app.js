@@ -64,6 +64,7 @@ app.set('view engine', 'pug');
 app.locals.pretty = true;
 app.locals.moment = moment;
 app.locals.d3Format = d3Format;
+app.locals.github_app_id = process.env.GITHUB_APP_ID;
 
 app.use(compression());
 app.use(sass({

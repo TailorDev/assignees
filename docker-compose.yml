@@ -16,6 +16,7 @@ services:
       GITHUB_WEBHOOK_URL: http://assignees.dev:3000/events
       GITHUB_WEBHOOK_SECRET: Th4tIsS3cr3t
       ADMIN_IDS: 217628
+      GITHUB_APP_ID: 19383c627ba67c57fcb9
     networks:
       public:
         aliases: ['assignees.dev']
