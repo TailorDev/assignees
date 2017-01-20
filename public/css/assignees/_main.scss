@@ -1,5 +1,9 @@
 @import "./home";
 
+.contact-us {
+  padding: 0 4px 0 4px;
+}
+
 .organizations {
   @extend .list-group;
 

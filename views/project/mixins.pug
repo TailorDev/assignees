@@ -3,9 +3,10 @@ mixin no-repository
     .panel-heading
       | No repositories
     .panel-body
-      | It appears that you don't have any repositories in this organization yet,
-      | or you may not have sufficient permissions. Contact us if you think it is
-      | an error.
+      p It appears that you don't have any repositories in this organization yet, or you may not have sufficient permissions.
+      p You can also try to synchronize this organization again. Of course, you can
+        +contact-us
+        | whenever you want.
 
 mixin last-sync(url, text, last_synchronized_at)
   .last-sync
