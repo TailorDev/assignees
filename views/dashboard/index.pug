@@ -8,7 +8,11 @@ mixin card(value, text, icon)
           .col-xs-3
             i(class=`fa fa-${icon} fa-5x`)
           .col-xs-9.text-right
-            h2 #{d3Format.format('.0s')(value)}
+            h2
+              if isNaN(value)
+                | #{value || 'n/a'}
+              else
+                | #{value < 1e5 ? value : d3Format.format('.5s')(value)}
             div #{text}
 
 block content
@@ -17,5 +21,6 @@ block content
 
   .row
     +card(nbRepositories, 'repositories', 'code-fork')
+    +card(nbEnabledRepos, 'enabled repos', 'check-circle-o')
     +card(nbUsers, 'users', 'users')
-
+    +card(nbPrivateUsers, 'users with private repos', 'lock')
