@@ -59,7 +59,7 @@ app.enable('trust proxy');
 app.disable('x-powered-by');
 
 if (app.get('env') === 'production') {
-  app.use(require('express-sslify')({ trustProtoHeader: true })); // eslint-disable-line global-require
+  app.use(require('express-sslify').HTTPS({ trustProtoHeader: true })); // eslint-disable-line global-require
 }
 
 app.set('views', path.join(__dirname, 'views'));
