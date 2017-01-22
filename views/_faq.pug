@@ -34,7 +34,18 @@ div(
 )
   +faq-entry('how', 'How does that work?', true)
     p.text-justify
-      | +[+project-name]
+      | #[+project-name] registers a #[a(href='https://developer.github.com/webhooks/') webhook]
+      | on each project you decide to enable in your personal interface. This hook allows
+      | #[+project-name] to be notified when a new Pull Request is opened. Then,
+      | #[+project-name] selects and assign the reviewers for this Pull Request,
+      | among a list of potential reviewers. You can configure the upper limit of
+      | reviewers to assign, and #[+project-name] will do her best to assign them.
+    p.text-justify
+      | Currently, #[+project-name] randomly picks the reviewers among all the collaborators
+      | of the project (excluding the author of the Pull Request).
+      | In the near future, the selection will be refined to select the best reviewers,
+      | #[em i.e.] the people who contributed to similar parts of the patch proposed
+      | within the Pull Request.
 
   +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify

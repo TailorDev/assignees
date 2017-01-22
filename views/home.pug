@@ -29,6 +29,7 @@ block content
         | #[+project-name] integrates seamlessly with GitHub, using their built-in
         | review request system. #[strong Enable your project] and reviewers will be
         | assigned.
+
     +feature('Automatic', 'refresh')
       p.text-justify
         | #[+project-name] listens to GitHub events. When a Pull Request is opened,
@@ -42,5 +43,13 @@ block content
 
   hr
   .row
-    .col-md-12
+    .col-md-8
       include _faq
+
+    .col-md-4
+      h3.text-center This is how it looks!
+      br
+      p
+        img(src='/images/projects.png', class='img-responsive')
+
+
