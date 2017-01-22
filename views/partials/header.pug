@@ -15,7 +15,7 @@
         span.icon-bar
       a.navbar-brand(href='/')
         i.fa.fa-check-square-o
-        | Assignees
+        +project-name(false)
     .collapse.navbar-collapse
       ul.nav.navbar-nav
         li(class=(title == 'Home') ? 'active' : undefined)

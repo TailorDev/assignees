@@ -1,42 +1,44 @@
 extends layout
 
+mixin feature(title, icon)
+  .col-sm-4.feature
+    h2
+      i(class=`fa fa-${icon}`)
+      | #{title}
+    block
+
 block content
   h1 #[+project-name(false)]
   p.lead Code reviews for everyone.
-  hr
+
   .row
-    .col-sm-6
-      h2
-        .fa.fa-refresh
-        | Automatic
-      p
-        | Enable #[+project-name] on a repository and your collaborators will receive
-        | code review requests as soon as a Pull Request is open.
-    .col-sm-6
-      h2
-        .fa.fa-random
-        | Smart
-      p
-        | Reviewers are assigned because they were involved in the code that has changed.
-  .row
-    .col-sm-6
-      h2
-        .fa.fa-bolt
-        | Seamless integration
-      p
-        | #[+project-name] integrates seamlessly with GitHub, using built-in existing
-        | eview request system.
-    .col-sm-6
-      h2
-        .fa.fa-gears
-        | Configurable
-      p
-        | You can configure how many collaborators should review a Pull Request.
+    .col-md-12
+      h3.text-center
+        | Involve your collaborators with automatic code review requests.
 
   if !user
     .row
       .col-md-4.col-md-offset-4
         +sign-in
+
+  hr
+
+  .row
+    +feature('Seamless integration', 'magic')
+      p.text-justify
+        | #[+project-name] integrates seamlessly with GitHub, using their built-in
+        | review request system. #[strong Enable your project] and reviewers will be
+        | assigned.
+    +feature('Automatic', 'refresh')
+      p.text-justify
+        | #[+project-name] listens to GitHub events. When a Pull Request is opened,
+        | #[+project-name] #[strong automatically select the right reviewers] and request
+        | #[a(href='https://help.github.com/articles/requesting-a-pull-request-review/') pull request reviews].
+    +feature('Smart', 'random')
+      p.text-justify
+        | #[+project-name] chooses the best reviewers for the Pull Request that you
+        | have just received. #[strong Do not worry] about bothering the wrong people.
+        | #[span.label.label-default coming soon]
 
   hr
   .row

@@ -44,7 +44,7 @@ block content
                     .col-md-6
                       | !{r.getIconSVG()}
                       | &nbsp;
-                      | #{r.name}
+                      | #[a(href=r.getURL(), title='Browse this project on GitHub') #{r.name}]
                       | &nbsp;
                       span.label.label-success
                         | enabled by&nbsp;
@@ -76,7 +76,7 @@ block content
                 else
                   | !{r.getIconSVG()}
                   | &nbsp;
-                  | #{r.name}
+                  | #[a(href=r.getURL(), title='Browse this project on GitHub') #{r.name}]
 
                   if r.github_hook_id
                     | &nbsp;
@@ -99,9 +99,9 @@ block content
                     button.btn.btn-success
                       i.fa.fa-play-circle-o
                       if r.github_hook_id
-                        | restart
+                        | reactivate
                       else
-                        | start
+                        | enable
           else
             +no-repository
 

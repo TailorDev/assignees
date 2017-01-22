@@ -35,6 +35,15 @@
     .name {
       @extend .col-md-9;
 
+      a {
+        color: $gray-darker;
+      }
+
+      a:focus,
+      a:hover {
+        color: $brand-primary;
+      }
+
       form {
         > * {
           padding-right: 1rem;
@@ -84,6 +93,8 @@
     text-overflow: ellipsis;
     text-transform: uppercase;
     vertical-align: text-bottom;
+
+    background-color: $gray-darker;
   }
 }
 

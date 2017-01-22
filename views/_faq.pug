@@ -24,14 +24,19 @@ mixin faq-entry(id, title, enabled)
         block
 
 
-h3 Frequently Asked Questions
+h3.text-center Frequently Asked Questions
+br
 div(
   id='faq'
   class='panel-group',
   role='tablist',
   aria-multiselectable='true'
 )
-  +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?', true)
+  +faq-entry('how', 'How does that work?', true)
+    p.text-justify
+      | +[+project-name]
+
+  +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify
       | When you sign in to #[+project-name], we ask for permissions to access some of your data on GitHub.
       | We need such permissions to provide you the list of your organizations and repositories so
