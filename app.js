@@ -76,6 +76,7 @@ if (app.get('env') === 'development') {
   app.use(require('morgan')('dev')); // eslint-disable-line global-require
 }
 
+// middleware to verify GitHub webhooks
 app.use(bodyParser.json({
   verify: (req, res, buffer) => {
     if (req.path !== '/events') {
