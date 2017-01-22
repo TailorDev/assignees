@@ -58,6 +58,10 @@ app.set('port', process.env.PORT || 3000);
 app.enable('trust proxy');
 app.disable('x-powered-by');
 
+if (app.get('env') === 'production') {
+  app.use(require('express-sslify')({ trustProtoHeader: true })); // eslint-disable-line global-require
+}
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 // pretty html == better bootstrap output (yes, I know...)
