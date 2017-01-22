@@ -35,6 +35,8 @@
 
 .contact-us {
   padding: 0 4px 0 4px;
+  vertical-align: inherit;
+  font-size: inherit;
 }
 
 .organizations {
@@ -72,7 +74,7 @@
     }
 
     .name {
-      @extend .col-sm-9;
+      @extend .col-md-9;
 
       form {
         > * {
@@ -91,7 +93,7 @@
     }
 
     .actions {
-      @extend .col-sm-3;
+      @extend .col-md-3;
 
       text-align:right;
 

@@ -1,11 +1,11 @@
 /**
  * Module dependencies.
  */
+const util = require('util');
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const logger = require('morgan');
 const chalk = require('chalk');
 const lusca = require('lusca');
 const MongoStore = require('connect-mongo')(session);
@@ -71,7 +71,10 @@ app.use(sass({
   src: path.join(__dirname, 'public'),
   dest: path.join(__dirname, 'public'),
 }));
-app.use(logger('dev'));
+
+if (app.get('env') === 'development') {
+  app.use(require('morgan')('dev')); // eslint-disable-line global-require
+}
 
 app.use(bodyParser.json({
   verify: (req, res, buffer) => {
@@ -185,9 +188,26 @@ app.get('/dashboard', passportConfig.isAdmin, adminController.index);
 /**
  * Error Handler.
  */
-if (process.env.NODE_ENV === 'development') {
+if (app.get('env') === 'development') {
   app.use(require('errorhandler')()); // eslint-disable-line global-require
 }
+
+// handle 404
+app.use((req, res, next) => res.status(404).render('error/404', {
+  title: 'Page Not Found',
+}));
+
+app.use((err, req, res, next) => {
+  console.log(
+    '[error]',
+    Object.getOwnPropertyNames(err).map(k => `${k}=${util.inspect(err[k])}`)
+    .join(' ')
+  );
+
+  return res.status(500).render('error/500', {
+    title: 'Server Error',
+  });
+});
 
 /**
  * Start Express server.

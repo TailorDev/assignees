@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+  .jumbotron
+    h1 #{title}
+    p This is not the web page you are looking for.
+    p
+      if user
+        a(href='/projects').btn.btn-primary.btn-lg
+          | Go to your projects
+      else
+        a(href='/auth/github').btn.btn-primary.btn-lg
+          i.fa.fa-github
+          | Sign in with GitHub

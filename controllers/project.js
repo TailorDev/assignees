@@ -23,7 +23,7 @@ exports.listOrgs = (req, res) => {
 /**
  * List all repositories that can be sync'ed
  */
-exports.listRepos = (req, res) => {
+exports.listRepos = (req, res, next) => {
   const owner = req.params.owner;
   const user = req.user;
 
@@ -31,10 +31,10 @@ exports.listRepos = (req, res) => {
   const currentOrg = organizations.find(o => o.name === owner);
 
   if (!currentOrg) {
-    return res.status(404).send('Not Found');
+    return next(); // 404
   }
 
-  Repository.find({
+  return Repository.find({
     owner,
   })
   .then((repositories) => {
@@ -55,267 +55,281 @@ exports.listRepos = (req, res) => {
       repositories,
       current_org: currentOrg,
     });
-  });
+  })
+  .catch(err => next(err));
 };
 
 /**
  * Enable project and install webhook
  */
-exports.enable = (req, res) => {
+exports.enable = async (req, res, next) => {
   const { owner, repo } = req.params;
   const user = req.user;
 
-  // TODO: ensure user can do that
-
-  Repository.findOne({
+  const repository = await Repository.findOne({
     name: repo,
     owner,
-  }, (err, repository) => {
-    if (!user.repositories.includes(repository.github_id)) {
-      return res.status(404).send('Not Found');
-    }
+  })
+  .catch(() => null);
 
-    if (repository.enabled) {
-      req.flash('info', { msg: 'Repository already enabled' });
+  if (repository === null || !user.canSee(repository)) {
+    return next(); // 404
+  }
 
-      return res.redirect(`/projects/${owner}`);
-    }
+  if (repository.enabled) {
+    req.flash('info', { msg: 'Repository already enabled' });
 
-    let createOrEditHook;
-    if (repository.github_hook_id) {
-      createOrEditHook = gh.auth(user).repos.editHook(
-        gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, true)
-      );
-    } else {
-      createOrEditHook = gh.auth(user).repos.createHook(
-        gh.getWebhookConfig(owner, repo, true)
-      );
-    }
+    return res.redirect(`/projects/${owner}`);
+  }
 
-    createOrEditHook
-      .catch((err) => {
-        if (err.code === 404) {
-          // the hook does not exist. Are we screwed?
-          // Nope! Let's create a new one
-          return gh.auth(user).repos.createHook(
-            gh.getWebhookConfig(owner, repo, true)
-          );
-        }
+  let createOrEditHook;
+  if (repository.github_hook_id) {
+    createOrEditHook = gh.auth(user).repos.editHook(
+      gh.getExistingWebhookConfig(repository.github_hook_id, owner, 'repo', true)
+    );
+  } else {
+    createOrEditHook = gh.auth(user).repos.createHook(
+      gh.getWebhookConfig(owner, repo, true)
+    );
+  }
 
-        throw err;
-      })
-      .then((hook) => {
-        repository
-          .set({
-            enabled: true,
-            enabled_by: {
-              user_id: user.id,
-              login: user.github_login,
-            },
-            github_hook_id: hook.id,
-          })
-          .save();
+  return createOrEditHook
+    .catch((err) => {
+      if (err.code === 404) {
+        // the hook does not exist. Are we screwed?
+        // Nope! Let's create a new one
+        return gh.auth(user).repos.createHook(
+          gh.getWebhookConfig(owner, repo, true)
+        );
+      }
 
-        req.flash('success', { msg: `Project "${repo}" is successfully configured.` });
-      })
-      .catch((err) => {
-        console.log({ method: 'enable-hook', err });
-
-        req.flash('errors', { msg: 'An error has occured... Please contact the support.' });
-      })
-      .then(() => res.redirect(`/projects/${owner}`))
-    ;
-  });
+      throw err;
+    })
+    .then(hook => {
+      return repository
+        .set({
+          enabled: true,
+          enabled_by: {
+            user_id: user.id,
+            login: user.github_login,
+          },
+          github_hook_id: hook.id,
+        })
+        .save()
+      ;
+    })
+    .then(() => {
+      req.flash('success', { msg: `Project "${repo}" is successfully configured.` });
+      res.redirect(`/projects/${owner}`);
+    })
+    .catch(err => next(err))
+  ;
 };
 
 /**
  * Pause project and disable webhook
  */
-exports.pause = (req, res) => {
+exports.pause = async (req, res, next) => {
   const { owner, repo } = req.params;
   const user = req.user;
 
-  // TODO: ensure user can do that
-
-  Repository.findOne({
+  const repository = await Repository.findOne({
     name: repo,
     owner,
-  }, (err, repository) => {
-    if (!user.repositories.includes(repository.github_id)) {
-      return res.status(404).send('Not Found');
-    }
+  })
+  .catch(() => null);
 
-    if (!repository.enabled) {
-      req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
+  if (repository === null || !user.canSee(repository)) {
+    return next(); // 404
+  }
 
-      return res.redirect(`/projects/${owner}`);
-    }
+  if (!repository.enabled) {
+    req.flash('errors', { msg: 'You must enable the project first if you want to disable it.' });
 
-    return gh.auth(req.user).repos.editHook(
-      gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, false),
-      () => {
-        repository
-          .set({ enabled: false })
-          .save();
+    return res.redirect(`/projects/${owner}`);
+  }
 
-        req.flash('success', { msg: `Project "${repo}" has been paused.` });
-
-        return res.redirect(`/projects/${owner}`);
-      }
-    );
-  });
+  return gh.auth(req.user).repos
+    .editHook(gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, false))
+    .then(() => {
+      return repository
+        .set({ enabled: false })
+        .save()
+      ;
+    })
+    .then(() => {
+      req.flash('success', { msg: `Project "${repo}" has been paused.` });
+      res.redirect(`/projects/${owner}`);
+    })
+    .catch(err => next(err))
+  ;
 };
 
 /**
  * Sync organizations
  */
-exports.syncOrgs = (req, res) => {
+exports.syncOrgs = (req, res, next) => {
   const user = req.user;
 
-  // 1. fetch current orgs
-  gh.auth(user).users.getOrgs({}, (err, orgs) => {
-    const organizations = [
-      {
-        name: user.github_login,
-        description: 'Your personal account',
-        github_id: user.github,
-        avatar_url: user.profile.picture,
-      },
-    ].concat(orgs.map(o => ({
-      name: o.login,
-      description: o.description,
-      github_id: o.id,
-      avatar_url: o.avatar_url,
-    })));
-
-    // 2. persist
-    user.set({
-      organizations,
-      last_synchronized_at: Date.now(),
-    });
-
-    user.save(() => {
+  return gh.auth(user).users
+    .getOrgs({})
+    .then(organizations => {
+      return [
+        {
+          name: user.github_login,
+          description: 'Your personal account',
+          github_id: user.github,
+          avatar_url: user.profile.picture,
+        },
+      ].concat(organizations.map(o => ({
+        name: o.login,
+        description: o.description,
+        github_id: o.id,
+        avatar_url: o.avatar_url,
+      })));
+    })
+    .then(organizations => {
+      return user
+        .set({
+          organizations,
+          last_synchronized_at: Date.now(),
+        })
+        .save()
+      ;
+    })
+    .then(() => {
       req.flash('success', { msg: 'Organizations successfully synchronized.' });
-
-      return res.redirect('/projects');
-    });
-  });
+      res.redirect('/projects');
+    })
+    .catch(err => next(err))
+  ;
 };
 
 /**
  * Sync repositories
  */
-exports.syncRepos = (req, res) => {
+exports.syncRepos = (req, res, next) => {
   const owner = req.params.owner;
   const user = req.user;
 
-  Repository.find({ owner }, (err, existingRepos) => {
-    let fetchRepositories;
+  return Repository
+    .find({ owner })
+    .then((existingRepos) => {
+      let fetchRepositories;
 
-    if (owner === user.github_login) {
-      fetchRepositories = gh.auth(user).repos.getForUser({ username: owner, per_page: 50 });
-    } else {
-      fetchRepositories = gh.auth(user).repos.getForOrg({ org: owner, per_page: 50 });
-    }
+      if (owner === user.github_login) {
+        fetchRepositories = gh.auth(user).repos.getForUser({ username: owner, per_page: 50 });
+      } else {
+        fetchRepositories = gh.auth(user).repos.getForOrg({ org: owner, per_page: 50 });
+      }
 
-    fetchRepositories
-      .then((repos) => {
-        // update existing repos
-        repos
-          .filter(r => existingRepos.find(e => e.github_id === r.id) !== undefined)
-          .map(r => ({
-            gh: r,
-            db: existingRepos.find(e => e.github_id === r.id),
-          }))
-          .forEach((repos) => {
-            repos.db
-              .set({
-                name: repos.gh.name,
-                private: repos.gh.private,
-                fork: repos.gh.fork,
-              })
-              .save()
-            ;
-          })
-        ;
+      return fetchRepositories
+        .then((repos) => {
+          // update existing repos
+          repos
+            .filter(r => existingRepos.find(e => e.github_id === r.id) !== undefined)
+            .map(r => ({
+              gh: r,
+              db: existingRepos.find(e => e.github_id === r.id),
+            }))
+            .forEach((repos) => {
+              repos.db
+                .set({
+                  name: repos.gh.name,
+                  private: repos.gh.private,
+                  fork: repos.gh.fork,
+                })
+                .save((err) => {
+                  if (err) {
+                    throw err;
+                  }
+                })
+              ;
+            })
+          ;
 
-        const repositories = repos
-          .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
-          .map(r => ({
-            owner,
-            name: r.name,
-            github_id: r.id,
-            private: r.private,
-            fork: r.fork,
-          }))
-        ;
+          // create new ones
+          const repositories = repos
+            .filter(r => existingRepos.find(e => e.github_id === r.id) === undefined)
+            .map(r => ({
+              owner,
+              name: r.name,
+              github_id: r.id,
+              private: r.private,
+              fork: r.fork,
+            }))
+          ;
 
-        Repository.create(repositories, () => {
-          user.organizations = user.organizations.map((organization) => {
-            if (organization.name === owner) {
-              organization.last_synchronized_at = Date.now();
-            }
+          return Repository.create(repositories)
+            .then(() => {
+              user.organizations = user.organizations.map((organization) => {
+                if (organization.name === owner) {
+                  organization.last_synchronized_at = Date.now();
+                }
 
-            return organization;
-          });
+                return organization;
+              });
 
-          // lis of repo ids the user is allowed to see
-          user.repositories = [...new Set(
-            user.repositories.concat(repos.map(r => r.id))
-          )];
+              // list of repo ids the user is allowed to see
+              user.repositories = [...new Set(
+                user.repositories.concat(repos.map(r => r.id))
+              )];
 
-          user.save(() => {
-            req.flash('success', { msg: `"${owner}" repositories successfully synchronized.` });
-
-            return res.redirect(`/projects/${owner}`);
-          });
-        });
-      });
-  });
+              return user.save();
+            })
+          ;
+        })
+      ;
+    })
+    .then(() => {
+      req.flash('success', { msg: `"${owner}" repositories successfully synchronized.` });
+      res.redirect(`/projects/${owner}`);
+    })
+    .catch(err => next(err))
+  ;
 };
 
 /**
  * Configure a repository.
  */
-exports.configureRepo = (req, res) => {
+exports.configureRepo = async (req, res, next) => {
   const { owner, repo } = req.params;
   const user = req.user;
 
-  // TODO: ensure user can do that
-
-  Repository.findOne({
+  const repository = await Repository.findOne({
     name: repo,
     owner,
-  }, (err, repository) => {
-    if (!user.repositories.includes(repository.github_id)) {
-      return res.status(404).send('Not Found');
-    }
+  })
+  .catch(() => null);
 
-    req.sanitizeBody('max').toInt();
+  if (repository === null || !user.canSee(repository)) {
+    return next(); // 404
+  }
 
-    req.checkBody('max', 'The number of reviewers should be an integer')
-      .isInt('The minimum number of reviewers should be 1', { min: 1 })
-    ;
+  req.sanitizeBody('max').toInt();
+  req.checkBody('max',
+    'We expect the number of reviewers to be a strictly positive integer.'
+  ).isInt({ min: 1 });
 
-    req.getValidationResult().then((result) => {
-      if (!result.isEmpty()) {
-        result.array().forEach((error) => {
-          req.flash('errors', { msg: error.msg });
-        });
-      } else {
-        const { max } = req.body;
+  const errors = await req.getValidationResult();
 
-        repository
-          .set({
-            max_reviewers: max,
-          })
-          .save()
-        ;
-
-        req.flash('success', { msg: 'Configuration successfully updated.' });
-      }
-
-      return res.redirect(`/projects/${owner}`);
+  if (!errors.isEmpty()) {
+    errors.array().forEach((error) => {
+      req.flash('errors', { msg: error.msg });
     });
-  });
+
+    return res.redirect(`/projects/${owner}`);
+  }
+
+  const { max } = req.body;
+
+  return repository
+    .set({ max_reviewers: max })
+    .save()
+    .then(() => {
+      req.flash('success', { msg: 'Configuration successfully updated.' });
+      res.redirect(`/projects/${owner}`);
+    })
+    .catch(err => next(err))
+  ;
 };

@@ -52,6 +52,10 @@ userSchema.methods.isAdmin = function isAdmin() {
   return this.github && admins.includes(this.github);
 };
 
+userSchema.methods.canSee = function (repository) {
+  return this.repositories.includes(repository.github_id);
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

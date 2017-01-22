@@ -1,5 +1,11 @@
-.sign-in {
+.call-for-action {
   margin-top: 20%;
 
   text-align: center;
+
+  > a {
+    @extend .btn;
+    @extend .btn-primary;
+    @extend .btn-lg;
+  }
 }
