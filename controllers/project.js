@@ -34,16 +34,16 @@ exports.listRepos = (req, res, next) => {
     return Promise.resolve().then(next); // 404
   }
 
+  // first time, let's sync them
+  if (!currentOrg.last_synchronized_at) {
+    return module.exports.syncRepos(req, res, next);
+  }
+
   return Repository.find({
     owner,
   })
   .then((repositories) => {
-    // first time, let's sync them
-    if (repositories.length === 0 && !currentOrg.last_synchronized_at) {
-      return module.exports.syncRepos(req, res);
-    }
-
-    // filter repos for user
+     // filter repos for user
     repositories = repositories.filter(r => user.repositories.includes(r.github_id));
 
     // enabled projects first

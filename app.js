@@ -156,9 +156,22 @@ app.post('/account/profile', passportConfig.isAuthenticated, userController.post
 app.post('/account/delete', passportConfig.isAuthenticated, userController.postDeleteAccount);
 
 /**
- * OAuth authentication routes. (Sign in)
+ * OAuth / GitHub
  */
-app.get('/auth/github', passport.authenticate('github'));
+app.get('/auth/github', (req, res, next) => {
+  // `write:repo_hook` for installing a hook
+  const scopes = ['user:email', 'read:org', 'write:repo_hook'];
+
+  // `repo` for reading private repos :x
+  if (!!req.query.private) {
+    scopes.push('repo');
+  }
+
+  req.session.scopes = scopes;
+
+  return passport.authenticate('github', { scope: scopes })(req, res, next);
+});
+
 app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/',
 }), (req, res) => {
@@ -203,17 +216,18 @@ app.use((req, res, next) => res.status(404).render('error/404', {
 app.use((err, req, res, next) => {
   console.log(
     '[error]',
-    Object.getOwnPropertyNames(err).map(k => `${k}=${util.inspect(err[k])}`)
-    .join(' ')
+    `req_method=${req.method}`,
+    `req_headers=${util.inspect(req.headers)}`,
+    Object.getOwnPropertyNames(err).map(k => `${k}=${util.inspect(err[k])}`).join(' ')
   );
 
   return res.format({
-    'application/json': () => {
+    json: () => {
       res.status(err.statusCode || 500).send({
         message: 'Server Error',
       });
     },
-    default: () => {
+    html: () => {
       res.status(500).render('error/500', {
         title: 'Server Error',
       });

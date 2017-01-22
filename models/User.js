@@ -56,6 +56,20 @@ userSchema.methods.canSee = function canSee(repository) {
   return this.repositories.includes(repository.github_id);
 };
 
+userSchema.methods.getGitHubToken = function getGitHubToken() {
+  return this.tokens.find(t => t.kind === 'github').accessToken || null;
+};
+
+userSchema.methods.hasGitHubScopes = function hasGitHubScopes(scopes) {
+  const userScopes = this.tokens.find(t => t.kind === 'github').scopes || [];
+
+  if (userScopes.length < scopes.length) {
+    return false;
+  }
+
+  return userScopes.filter(s => scopes.includes(s) !== true).length === 0;
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

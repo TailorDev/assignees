@@ -3,3 +3,13 @@ mixin contact-us(withIcon)
     if withIcon !== false
       i.fa.fa-life-ring
     | contact us
+
+mixin sign-in
+  form(action='/auth/github', method='GET').call-for-action
+    button(type='submit')
+      i.fa.fa-github
+      | Sign in with GitHub
+    .checkbox
+      label
+        input(type='checkbox', name='private', checked=true)
+        | Include private repositories

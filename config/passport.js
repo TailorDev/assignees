@@ -20,33 +20,10 @@ passport.use(new GitHubStrategy({
   clientID: process.env.GITHUB_ID,
   clientSecret: process.env.GITHUB_SECRET,
   callbackURL: '/auth/github/callback',
-  // `write:repo_hook` for installing a hook
-  // `repo` for reading private repos :x
-  scope: ['user:email', 'read:org', 'write:repo_hook', 'repo'],
   passReqToCallback: true,
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {
-    User.findOne({ github: profile.id }, (err, existingUser) => {
-      if (existingUser) {
-        req.flash('errors', { msg: 'There is already a GitHub account that belongs to you. Sign in with that account or delete it, then link it with your current account.' });
-        done(err);
-      } else {
-        User.findById(req.user.id, (err, user) => {
-          if (err) { return done(err); }
-          user.github = profile.id;
-          user.github_login = user.github_login || profile._json.login;
-          user.tokens.push({ kind: 'github', accessToken });
-          user.profile.name = user.profile.name || profile.displayName;
-          user.profile.picture = user.profile.picture || profile._json.avatar_url;
-          user.profile.location = user.profile.location || profile._json.location;
-          user.profile.website = user.profile.website || profile._json.blog;
-          user.save((err) => {
-            req.flash('info', { msg: 'GitHub account has been linked.' });
-            done(err, user);
-          });
-        });
-      }
-    });
+    done(null, req.user);
   } else {
     User.findOne({ github: profile.id }, (err, existingUser) => {
       if (err) {
@@ -54,14 +31,35 @@ passport.use(new GitHubStrategy({
       }
 
       if (existingUser) {
-        return done(null, existingUser);
+        if (existingUser.hasGitHubScopes(req.session.scopes)) {
+          return done(null, existingUser);
+        }
+
+        existingUser.tokens = [{
+          kind: 'github',
+          accessToken,
+          scopes: req.session.scopes,
+        }];
+        existingUser.repositories = [];
+        existingUser.organizations = [];
+        existingUser.last_synchronized_at = null;
+
+        return existingUser.save((err) => {
+          req.flash('info', { msg: 'We have updated your information to reflect new GitHub permissions.' });
+          done(err, existingUser);
+        });
       }
 
       const user = new User();
-      user.email = profile._json.email;
+
       user.github = profile.id;
       user.github_login = profile._json.login;
-      user.tokens.push({ kind: 'github', accessToken });
+      user.email = profile._json.email;
+      user.tokens = [{
+        kind: 'github',
+        accessToken,
+        scopes: req.session.scopes,
+      }];
       user.profile.name = profile.displayName;
       user.profile.picture = profile._json.avatar_url;
       user.profile.location = profile._json.location;
@@ -91,5 +89,6 @@ exports.isAdmin = (req, res, next) => {
   if (req.isAuthenticated() && req.user.isAdmin()) {
     return next();
   }
-  res.status(404).send(`Cannot GET ${req.path}`);
+
+  res.redirect('/404');
 };
