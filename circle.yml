@@ -1,6 +1,6 @@
 machine:
   node:
-    version: 6.9
+    version: 7.4
   environment:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
     MONGODB_URI: mongodb://db:27017/assignees
