@@ -29,14 +29,9 @@
                 i.fa.fa-lock
                 | Dashboard
 
-      ul.nav.navbar-nav.navbar-right
-        if !user
-          li(class=(title == 'Login') ? 'active' : undefined)
-            a(href='/auth/github')
-              i.fa.fa-github
-              | Login
-        else
-          li.dropdown(class=(title == 'Account Management') ? 'active' : undefined)
+      if user
+        ul.nav.navbar-nav.navbar-right
+         li.dropdown(class=(title == 'Account Management') ? 'active' : undefined)
             a.dropdown-toggle(href='#', data-toggle='dropdown')
               if user.profile.picture
                 img(

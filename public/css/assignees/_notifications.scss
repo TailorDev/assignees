@@ -1,0 +1,32 @@
+.notifications {
+  display: block;
+  width: 100%;
+
+  text-align: center;
+
+  .alert {
+    margin: 0;
+    padding: 8px 13px;
+
+    border: 0;
+    border-radius: 0;
+
+    font-size: 12px;
+  }
+
+  .alert-info {
+    .btn {
+      font-size: inherit!important;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
+
+    a:hover,
+    a:focus {
+      color: #000;
+    }
+  }
+}
