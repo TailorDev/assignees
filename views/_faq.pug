@@ -1,0 +1,63 @@
+mixin faq-entry(id, title, enabled)
+  .panel.panel-default
+    div(
+      id=`heading-${id}`,
+      class='panel-heading',
+      role='tab'
+    )
+      h4.panel-title
+        a(
+          data-toggle='collapse',
+          data-parent='#faq',
+          href=`#${id}`,
+          role='button',
+          aria-expanded='true',
+          aria-controls=id
+        ) #{title}
+    div(
+      id=id,
+      class=`panel-collapse collapse${!!enabled ? ' in' : ''}`,
+      role='tabpanel',
+      aria-labelledby=`heading-${id}`
+    )
+      .panel-body
+        block
+
+
+h3 Frequently Asked Questions
+div(
+  id='faq'
+  class='panel-group',
+  role='tablist',
+  aria-multiselectable='true'
+)
+  +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?', true)
+    p.text-justify
+      | When you sign in to #[+project-name], we ask for permissions to access some of your data on GitHub.
+      | We need such permissions to provide you the list of your organizations and repositories so
+      | that you can enable #[+project-name] on any of your repositories in a simple manner.
+      | We automatically setup #[+project-name] on your repositories as soon as you "start" using #[+project-name]
+      | on them. Reviewers get assigned on your behalf. Let's review the different "scopes" (the
+      | term used by GitHub to sort the different permissions you can grant to applications like
+      | #[+project-name]):
+    p.text-justify
+      ul
+        li
+          | We ask for the #[code user:email] scope to retrieve your email address and create
+          | #[a(href='/account') your account] on #[+project-name]. You can update your information whenever
+          | you want, and all the information we read from your GitHub profile are displayed;
+        li
+          | To show you all of your repositories, including the ones from any organization you’re part of,
+          | we need the #[code read:org]. The GitHub API hides any organizations
+          | you’re a private member of without this scope. So to make sure we show
+          | you all of your repositories, we require this scope. We cannot read the data or code of your
+          | repositories with this scope;
+        li
+          | Getting reviewers on your projects with #[+project-name] is as simple as enabling it and
+          | waiting for a new Pull Request. We take care of the rest. The #[code write:repo_hook]
+          | scope allows us to create and update a webhook so that #[+project-name] is notified from GitHub
+          | on new Pull Requests;
+        li
+          | #[strong If you include private repositories], then we need the #[code repo] scope.
+          | We need this level of access because GitHub does not provide the equivalent of
+          | #[code read:org] scope for private repositories.

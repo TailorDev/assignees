@@ -1,3 +1,9 @@
+mixin project-name(emphasis)
+  if emphasis == false
+    | Assignees
+  else
+    em Assignees
+
 mixin contact-us(withIcon)
   a(href='mailto=support@tailordev.fr', class='btn btn-link contact-us')
     if withIcon !== false
