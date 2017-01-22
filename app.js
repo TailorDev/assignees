@@ -162,8 +162,10 @@ app.get('/auth/github', (req, res, next) => {
   // `write:repo_hook` for installing a hook
   const scopes = ['user:email', 'read:org', 'write:repo_hook'];
 
+  req.sanitizeQuery('private').toBoolean();
+
   // `repo` for reading private repos :x
-  if (!!req.query.private) {
+  if (req.query.private === true) {
     scopes.push('repo');
   }
 
