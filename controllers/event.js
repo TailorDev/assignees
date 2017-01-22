@@ -34,10 +34,6 @@ exports.listen = (req, res) => {
       return res.send({ status: 'ignored', reason: 'repository is paused' });
     }
 
-    if (repository.skip_wip && /wip/i.test(pullTitle)) {
-      return res.send({ status: 'ignored', reason: 'skip wip' });
-    }
-
     // TODO: move this logic to a worker
 
     User.findOne({ _id: repository.enabled_by.user_id }, (err, user) => {

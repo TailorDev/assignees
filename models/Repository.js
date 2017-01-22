@@ -18,7 +18,6 @@ const repositorySchema = new mongoose.Schema({
     login: String,
   },
   max_reviewers: { type: Number, default: 1 },
-  skip_wip: { type: Boolean, default: false },
 });
 
 repositorySchema.methods.getIconSVG = function getIconSVG() {

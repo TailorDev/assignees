@@ -292,12 +292,10 @@ exports.configureRepo = (req, res) => {
     }
 
     req.sanitizeBody('max').toInt();
-    req.sanitizeBody('skip').toBoolean();
 
     req.checkBody('max', 'The number of reviewers should be an integer')
       .isInt('The minimum number of reviewers should be 1', { min: 1 })
     ;
-    req.checkBody('skip').optional().isBoolean();
 
     req.getValidationResult().then((result) => {
       if (!result.isEmpty()) {
@@ -305,11 +303,10 @@ exports.configureRepo = (req, res) => {
           req.flash('errors', { msg: error.msg });
         });
       } else {
-        const { max, skip } = req.body;
+        const { max } = req.body;
 
         repository
           .set({
-            skip_wip: !!skip || false,
             max_reviewers: max,
           })
           .save()
