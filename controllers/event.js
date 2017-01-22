@@ -2,76 +2,90 @@ const gh = require('../helpers/github');
 const User = require('../models/User');
 const Repository = require('../models/Repository');
 
+const newError = (statusCode, status, reason, req) => {
+  const err = new Error();
+
+  err.statusCode = statusCode;
+  err.status = status;
+  err.reason = reason;
+  err.payload = req.body;
+
+  return err;
+};
+
 /**
  * Listen to GitHub events
  */
-exports.listen = (req, res) => {
+exports.listen = async (req, res) => {
   if (req.header('x-github-event') === 'ping') {
     return res.send('PONG');
   }
 
   if (req.header('x-github-event') !== 'pull_request') {
-    return res.send({ status: 'ignored', reason: 'I don\t listen to such events.' });
+    return res.send({ status: 'ignored', reason: 'I do not listen to such events' });
   }
 
   if (req.body.action !== 'opened') {
-    return res.send({ status: 'ignored', reason: 'Action is not "opened".' });
+    return res.send({ status: 'ignored', reason: 'action is not "opened"' });
   }
 
   // TODO: check params
-
   const repoId = req.body.repository.id;
-  const pullTitle = req.body.pull_request.title;
   const pullNumber = req.body.pull_request.number;
   const pullAuthor = req.body.pull_request.user.login;
 
-  Repository.findOne({ github_id: repoId }, (err, repository) => {
-    if (!repository) {
-      return res.send({ status: 'ignored', reason: 'unknown repository' });
-    }
+  const repository = await Repository.findOne({
+    github_id: repoId,
+  })
+  .catch(() => null);
 
-    if (!repository.enabled) {
-      return res.send({ status: 'ignored', reason: 'repository is paused' });
-    }
+  if (!repository) {
+    throw newError(404, 'ignored', 'unknown repository', req);
+  }
 
-    // TODO: move this logic to a worker
+  if (!repository.enabled) {
+    throw newError(403, 'ignored', 'repository is paused', req);
+  }
 
-    User.findOne({ _id: repository.enabled_by.user_id }, (err, user) => {
-      const github = gh.auth(user);
+  // TODO: move this logic to a worker
 
-      github
-        .repos
-        .getCollaborators({
+  const user = await User.findOne({
+    _id: repository.enabled_by.user_id
+  })
+  .catch(() => null);
+
+  if (!user) {
+    throw newError(401, 'ignored', 'user not found', req);
+  }
+
+  const github = gh.auth(user);
+
+  return github.repos
+    .getCollaborators({
+      owner: repository.owner,
+      repo: repository.name,
+    })
+    .then(collaborators => collaborators
+      .map(c => c.login)
+      .filter(login => login !== pullAuthor)
+      .sort(() => 0.5 - Math.random())
+      .slice(0, repository.max_reviewers)
+    )
+    .then((reviewers) => {
+      if (reviewers.length === 0) {
+        throw newError(422, 'aborted', 'no reviewers found', req);
+      }
+
+      return github
+        .pullRequests
+        .createReviewRequest({
           owner: repository.owner,
           repo: repository.name,
-        })
-        .then(collaborators => collaborators
-            .map(c => c.login)
-            .filter(login => login !== pullAuthor)
-            .sort(() => 0.5 - Math.random())
-            .slice(0, repository.max_reviewers))
-        .then((reviewers) => {
-          if (reviewers.length === 0) {
-            return res.send({ status: 'aborted', reason: 'no reviewers found' });
-          }
-
-          return github
-            .pullRequests
-            .createReviewRequest({
-              owner: repository.owner,
-              repo: repository.name,
-              number: pullNumber,
-              reviewers,
-            })
-          ;
-        })
-        .then(() => {
-          res.send({ status: 'ok' });
-        })
-        .catch(() => {
-          res.send({ status: 'errored' });
+          number: pullNumber,
+          reviewers,
         })
       ;
-    });
-  });
+    })
+    .then(res.send({ status: 'ok' }))
+  ;
 };

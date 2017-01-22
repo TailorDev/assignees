@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node --harmony-async-await app.js",
-    "test": "mocha --reporter spec"
+    "test": "mocha --harmony --reporter spec"
   },
   "dependencies": {
     "async": "^2.1.2",

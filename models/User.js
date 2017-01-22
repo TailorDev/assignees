@@ -52,7 +52,7 @@ userSchema.methods.isAdmin = function isAdmin() {
   return this.github && admins.includes(this.github);
 };
 
-userSchema.methods.canSee = function (repository) {
+userSchema.methods.canSee = function canSee(repository) {
   return this.repositories.includes(repository.github_id);
 };
 

@@ -171,16 +171,18 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 /**
  * Real app routes
  */
+const errorHandler = fn => (...args) => fn(...args).catch(args[2]);
+
 app.get('/projects', passportConfig.isAuthenticated, projectController.listOrgs);
-app.get('/projects/:owner', passportConfig.isAuthenticated, projectController.listRepos);
-app.post('/projects/:owner/:repo/enable', passportConfig.isAuthenticated, projectController.enable);
-app.post('/projects/:owner/:repo/pause', passportConfig.isAuthenticated, projectController.pause);
-app.post('/projects/:owner/:repo/configure', passportConfig.isAuthenticated, projectController.configureRepo);
+app.get('/projects/:owner', passportConfig.isAuthenticated, errorHandler(projectController.listRepos));
+app.post('/projects/:owner/:repo/enable', passportConfig.isAuthenticated, errorHandler(projectController.enable));
+app.post('/projects/:owner/:repo/pause', passportConfig.isAuthenticated, errorHandler(projectController.pause));
+app.post('/projects/:owner/:repo/configure', passportConfig.isAuthenticated, errorHandler(projectController.configureRepo));
 
-app.post('/sync/organizations', passportConfig.isAuthenticated, projectController.syncOrgs);
-app.post('/sync/projects/:owner', passportConfig.isAuthenticated, projectController.syncRepos);
+app.post('/sync/organizations', passportConfig.isAuthenticated, errorHandler(projectController.syncOrgs));
+app.post('/sync/projects/:owner', passportConfig.isAuthenticated, errorHandler(projectController.syncRepos));
 
-app.post('/events', eventController.listen);
+app.post('/events', errorHandler(eventController.listen));
 
 // Admin corner
 app.get('/dashboard', passportConfig.isAdmin, adminController.index);
@@ -204,8 +206,17 @@ app.use((err, req, res, next) => {
     .join(' ')
   );
 
-  return res.status(500).render('error/500', {
-    title: 'Server Error',
+  return res.format({
+    'application/json': () => {
+      res.status(err.statusCode || 500).send({
+        message: 'Server Error',
+      });
+    },
+    default: () => {
+      res.status(500).render('error/500', {
+        title: 'Server Error',
+      });
+    },
   });
 });
 

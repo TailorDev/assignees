@@ -31,7 +31,7 @@ exports.listRepos = (req, res, next) => {
   const currentOrg = organizations.find(o => o.name === owner);
 
   if (!currentOrg) {
-    return next(); // 404
+    return Promise.resolve().then(next); // 404
   }
 
   return Repository.find({
@@ -55,8 +55,7 @@ exports.listRepos = (req, res, next) => {
       repositories,
       current_org: currentOrg,
     });
-  })
-  .catch(err => next(err));
+  });
 };
 
 /**
@@ -73,7 +72,7 @@ exports.enable = async (req, res, next) => {
   .catch(() => null);
 
   if (repository === null || !user.canSee(repository)) {
-    return next(); // 404
+    return Promise.resolve().then(next); // 404
   }
 
   if (repository.enabled) {
@@ -122,7 +121,6 @@ exports.enable = async (req, res, next) => {
       req.flash('success', { msg: `Project "${repo}" is successfully configured.` });
       res.redirect(`/projects/${owner}`);
     })
-    .catch(err => next(err))
   ;
 };
 
@@ -140,7 +138,7 @@ exports.pause = async (req, res, next) => {
   .catch(() => null);
 
   if (repository === null || !user.canSee(repository)) {
-    return next(); // 404
+    return Promise.resolve().then(next); // 404
   }
 
   if (!repository.enabled) {
@@ -161,14 +159,13 @@ exports.pause = async (req, res, next) => {
       req.flash('success', { msg: `Project "${repo}" has been paused.` });
       res.redirect(`/projects/${owner}`);
     })
-    .catch(err => next(err))
   ;
 };
 
 /**
  * Sync organizations
  */
-exports.syncOrgs = (req, res, next) => {
+exports.syncOrgs = (req, res) => {
   const user = req.user;
 
   return gh.auth(user).users
@@ -201,14 +198,13 @@ exports.syncOrgs = (req, res, next) => {
       req.flash('success', { msg: 'Organizations successfully synchronized.' });
       res.redirect('/projects');
     })
-    .catch(err => next(err))
   ;
 };
 
 /**
  * Sync repositories
  */
-exports.syncRepos = (req, res, next) => {
+exports.syncRepos = (req, res) => {
   const owner = req.params.owner;
   const user = req.user;
 
@@ -285,7 +281,6 @@ exports.syncRepos = (req, res, next) => {
       req.flash('success', { msg: `"${owner}" repositories successfully synchronized.` });
       res.redirect(`/projects/${owner}`);
     })
-    .catch(err => next(err))
   ;
 };
 
@@ -303,7 +298,7 @@ exports.configureRepo = async (req, res, next) => {
   .catch(() => null);
 
   if (repository === null || !user.canSee(repository)) {
-    return next(); // 404
+    return Promise.resolve().then(next); // 404
   }
 
   req.sanitizeBody('max').toInt();
@@ -330,6 +325,5 @@ exports.configureRepo = async (req, res, next) => {
       req.flash('success', { msg: 'Configuration successfully updated.' });
       res.redirect(`/projects/${owner}`);
     })
-    .catch(err => next(err))
   ;
 };
