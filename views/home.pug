@@ -49,7 +49,17 @@ block content
     .col-md-4
       h3.text-center This is how it looks!
       br
-      p
-        img(src='/images/assignees-projects.png', class='img-responsive')
+      div.screenshots
+        button(data-toggle='modal', data-target='.screenshot-projects')
+          img(src='/images/assignees-projects.png', class='img-responsive')
+        div(class='modal fade screenshot-projects', role='dialog')
+          .modal-dialog.modal-lg
+            .modal-content
+              .modal-header
+                button(class='close', data-dismiss='modal', aria-label='Close')
+                  span(aria-hidden='true') &times;
+                h4.modal-title Hi, I am #[+project-name]. Nice to meet you!
+              .modal-body
+                img(src='/images/assignees-projects.png', class='img-responsive')
 
 

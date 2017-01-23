@@ -16,3 +16,14 @@
     @extend .btn-lg;
   }
 }
+
+.screenshots {
+  > button {
+    background-color: transparent;
+    border: 0;
+  }
+
+  .screenshot-projects img {
+    width: 1000px;
+  }
+}
