@@ -23,6 +23,7 @@
     "errorhandler": "^1.4.3",
     "express": "^4.14.0",
     "express-flash": "^0.0.2",
+    "express-request-id": "~1.2.0",
     "express-session": "^1.14.2",
     "express-sslify": "~1.2.0",
     "express-status-monitor": "^0.1.5",

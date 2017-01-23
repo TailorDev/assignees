@@ -60,6 +60,7 @@ app.disable('x-powered-by');
 
 if (app.get('env') === 'production') {
   app.use(require('express-sslify').HTTPS({ trustProtoHeader: true })); // eslint-disable-line global-require
+  app.use(require('express-request-id')()); // eslint-disable-line global-require
 }
 
 app.set('views', path.join(__dirname, 'views'));
@@ -220,12 +221,20 @@ app.use((req, res, next) => res.status(404).render('error/404', {
 }));
 
 app.use((err, req, res, next) => {
-  console.log(
-    '[error]',
-    `req_method=${req.method}`,
-    `req_headers=${util.inspect(req.headers)}`,
-    Object.getOwnPropertyNames(err).map(k => `${k}=${util.inspect(err[k])}`).join(' ')
-  );
+  const info = [
+    `request_method=${req.method}`,
+    `request_headers=${util.inspect(req.headers)}`,
+  ];
+
+  if (req.id) {
+    info.push(`request_id=${req.id}`);
+  }
+
+  info.push(Object.getOwnPropertyNames(err).map(
+    k => `${k}=${util.inspect(err[k])}`
+  ));
+
+  console.log('[error]', info.join(' '));
 
   return res.format({
     json: () => {
