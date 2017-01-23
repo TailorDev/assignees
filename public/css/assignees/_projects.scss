@@ -33,7 +33,7 @@
     }
 
     .name {
-      @extend .col-md-9;
+      @extend .col-md-10;
 
       a {
         color: $gray-darker;
@@ -61,7 +61,7 @@
     }
 
     .actions {
-      @extend .col-md-3;
+      @extend .col-md-2;
 
       text-align:right;
 

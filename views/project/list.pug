@@ -41,7 +41,7 @@ block content
               div.name
                 if r.enabled
                   .row
-                    .col-md-6
+                    .col-md-7
                       | !{r.getIconSVG()}
                       | &nbsp;
                       | #[a(href=r.getURL(), title='Browse this project on GitHub') #{r.name}]
@@ -50,7 +50,7 @@ block content
                         | enabled by&nbsp;
                         | #{r.enabled_by.login === user.github_login ? 'you' : r.enabled_by.login}
 
-                    .col-md-6.hidden-xs
+                    .col-md-5.hidden-xs
                       form(
                         action=`/projects/${current_org.name}/${r.name}/configure`,
                         method='POST',
