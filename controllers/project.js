@@ -214,9 +214,9 @@ exports.syncRepos = (req, res) => {
       let fetchRepositories;
 
       if (owner === user.github_login) {
-        fetchRepositories = gh.auth(user).repos.getForUser({ username: owner, per_page: 50 });
+        fetchRepositories = gh.auth(user).repos.getAll({ affiliation: 'owner', per_page: 100 });
       } else {
-        fetchRepositories = gh.auth(user).repos.getForOrg({ org: owner, per_page: 50 });
+        fetchRepositories = gh.auth(user).repos.getForOrg({ org: owner, per_page: 100 });
       }
 
       return fetchRepositories
