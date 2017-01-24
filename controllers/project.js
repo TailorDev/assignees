@@ -220,6 +220,8 @@ exports.syncRepos = (req, res) => {
       }
 
       return fetchRepositories
+        // exclude repos without admin rights
+        .then(repos => repos.filter(r => r.permissions.admin === true))
         .then((repos) => {
           // update existing repos
           repos
