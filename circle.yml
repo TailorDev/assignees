@@ -3,7 +3,7 @@ machine:
     version: 7.4
   environment:
     PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
-    MONGODB_URI: mongodb://db:27017/assignees
+    MONGODB_URI: mongodb://localhost:27017/assignees
     GITHUB_ID: 123
     GITHUB_SECRET: 123
     SESSION_SECRET: s3cr3t

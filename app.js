@@ -1,7 +1,6 @@
 /**
  * Module dependencies.
  */
-const util = require('util');
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -20,6 +19,7 @@ const cacheBust = require('cache-busted');
 const d3Format = require('d3-format');
 
 const gh = require('./helpers/github');
+const errors = require('./middlewares/errors');
 
 /**
  * Controllers (route handlers).
@@ -55,60 +55,29 @@ mongoose.connection.on('error', () => {
  */
 app.set('port', process.env.PORT || 3000);
 
-app.enable('trust proxy');
-app.disable('x-powered-by');
-
 if (app.get('env') === 'production') {
+  app.enable('trust proxy');
   app.use(require('express-sslify').HTTPS({ trustProtoHeader: true })); // eslint-disable-line global-require
   app.use(require('express-request-id')()); // eslint-disable-line global-require
 }
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-// pretty html == better bootstrap output (yes, I know...)
-app.locals.pretty = true;
-app.locals.moment = moment;
-app.locals.d3Format = d3Format;
-app.locals.github_app_id = process.env.GITHUB_APP_ID;
 
+// compress all responses
 app.use(compression());
-app.use(sass({
-  src: path.join(__dirname, 'public'),
-  dest: path.join(__dirname, 'public'),
-}));
 
-if (app.get('env') === 'development') {
-  app.use(require('morgan')('dev')); // eslint-disable-line global-require
+if (app.get('env') === 'test') {
+  app.use(bodyParser.json());
+} else {
+  // verify GitHub webhook signatures
+  app.use(bodyParser.json({ verify: gh.verifySignature }));
 }
-
-// middleware to verify GitHub webhooks
-app.use(bodyParser.json({
-  verify: (req, res, buffer) => {
-    if (req.path !== '/events') {
-      return;
-    }
-
-    [
-      'x-hub-signature',
-      'x-github-event',
-      'x-github-delivery',
-    ].forEach((header) => {
-      if (!req.headers[header]) {
-        throw new Error(`Header ${header} is missing.`);
-      }
-    });
-
-    const expected = req.headers['x-hub-signature'];
-    const computed = gh.computeSignature(buffer);
-
-    if (expected !== computed) {
-      throw new Error('Invalid signature');
-    }
-  },
-}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
+
+// session
 app.use(session({
   resave: true,
   saveUninitialized: true,
@@ -122,6 +91,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
+
+// security
+app.disable('x-powered-by');
 app.use((req, res, next) => {
   if (req.path === '/events') {
     next();
@@ -131,6 +103,8 @@ app.use((req, res, next) => {
 });
 app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
+
+// user
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -148,6 +122,18 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// assets / views
+app.use(sass({
+  src: path.join(__dirname, 'public'),
+  dest: path.join(__dirname, 'public'),
+}));
+
+app.locals.pretty = true; // pretty html == better bootstrap output (yes, I know...)
+app.locals.moment = moment;
+app.locals.d3Format = d3Format;
+app.locals.github_app_id = process.env.GITHUB_APP_ID;
+
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 cacheBust.handler(app);
 
@@ -208,10 +194,9 @@ app.post('/events', errorHandler(eventController.listen));
 // Admin corner
 app.get('/dashboard', passportConfig.isAdmin, adminController.index);
 
-/**
- * Error Handler.
- */
+// error handling and logging
 if (app.get('env') === 'development') {
+  app.use(require('morgan')('dev')); // eslint-disable-line global-require
   app.use(require('errorhandler')()); // eslint-disable-line global-require
 }
 
@@ -220,35 +205,8 @@ app.use((req, res, next) => res.status(404).render('error/404', {
   title: 'Page Not Found',
 }));
 
-app.use((err, req, res, next) => {
-  const info = [
-    `request_method=${req.method}`,
-    `request_headers=${util.inspect(req.headers)}`,
-  ];
-
-  if (req.id) {
-    info.push(`request_id=${req.id}`);
-  }
-
-  info.push(Object.getOwnPropertyNames(err).map(
-    k => `${k}=${util.inspect(err[k])}`
-  ));
-
-  console.log('[error]', info.join(' '));
-
-  return res.format({
-    json: () => {
-      res.status(err.statusCode || 500).send({
-        message: 'Server Error',
-      });
-    },
-    html: () => {
-      res.status(500).render('error/500', {
-        title: 'Server Error',
-      });
-    },
-  });
-});
+// handle all other errors
+app.use(errors());
 
 /**
  * Start Express server.

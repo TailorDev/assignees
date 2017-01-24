@@ -1,3 +1,7 @@
+mixin feature-flag
+  if user.isAdmin()
+    block
+
 mixin project-name(emphasis)
   if emphasis == false
     | Assignees
