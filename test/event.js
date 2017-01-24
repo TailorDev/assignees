@@ -6,9 +6,9 @@ const sinon = require('sinon');
 require('sinon-mongoose');
 require('sinon-as-promised');
 
-const app = require('../../app');
-const Repository = require('../../models/Repository');
-const User = require('../../models/User');
+const app = require('../app');
+const Repository = require('../models/Repository');
+const User = require('../models/User');
 
 describe('POST /events', () => {
   const githubApi = nock('https://api.github.com');
