@@ -59,11 +59,24 @@ exports.listen = async (req, res) => {
   }
 
   const github = gh.auth(user);
-
-  return github.repos
+  const collaborators = await github.repos
     .getCollaborators({
       owner: repository.owner,
       repo: repository.name,
+    })
+  ;
+
+  Promise.all(
+    repository.teams.map(
+      team => github.orgs.getTeamMembers({ id: team }).map(m => m.login)
+    ))
+    .then((members) => members.reduce((a, b) => a.concat(b), []))
+    .then((members) => {
+      if (members.length === 0) {
+        return collaborators;
+      }
+
+      return collaborators.filter(c => members.includes(c.login));
     })
     .then(collaborators => collaborators
       .map(c => c.login)

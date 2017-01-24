@@ -49,12 +49,19 @@ exports.listRepos = (req, res, next) => {
     // enabled projects first
     repositories.sort(a => (a.enabled ? -1 : 1));
 
-    res.render('project/list', {
-      title: 'Projects',
-      organizations,
-      repositories,
-      current_org: currentOrg,
-    });
+    return gh.auth(user).orgs
+      .getTeams({ org: owner })
+      .catch(() => [])
+      .then((teams) => {
+        res.render('project/list', {
+          title: 'Projects',
+          organizations,
+          repositories,
+          teams,
+          current_org: currentOrg,
+        });
+      })
+    ;
   });
 };
 
@@ -320,8 +327,16 @@ exports.configureRepo = async (req, res, next) => {
 
   const { max } = req.body;
 
+  let teams = [];
+  if (req.body.teams) {
+    teams = [].concat(req.body.teams);
+  }
+
   return repository
-    .set({ max_reviewers: max })
+    .set({
+      max_reviewers: max,
+      teams,
+    })
     .save()
     .then(() => {
       req.flash('success', { msg: 'Configuration successfully updated.' });

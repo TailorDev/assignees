@@ -18,6 +18,7 @@ const repositorySchema = new mongoose.Schema({
     login: String,
   },
   max_reviewers: { type: Number, default: 1 },
+  teams: Array,
 });
 
 repositorySchema.methods.getIconSVG = function getIconSVG() {

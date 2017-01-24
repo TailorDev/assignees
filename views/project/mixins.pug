@@ -58,6 +58,20 @@ mixin enabled-repository(r, current_org)
         class='form-inline'
       )
         .form-group.form-group-sm
+          label(for='teams')
+            | Teams:
+          select(
+            title='Default is: all'
+            class='selectpicker',
+            name='teams',
+            data-live-search='true',
+            multiple
+          )
+            for team in teams
+              option(value=team.id, selected=r.teams.includes(`${team.id}`))
+                | #{team.name}
+
+        .form-group.form-group-sm
           label(for='max-reviewers')
             | Max reviewers:
           input(
