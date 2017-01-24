@@ -47,7 +47,7 @@ exports.verifySignature = (req, res, buffer) => {
   });
 
   const expected = req.headers['x-hub-signature'];
-  const computed = `sha1=${crypto.createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET).update(blob).digest('hex')}`;
+  const computed = `sha1=${crypto.createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET).update(buffer).digest('hex')}`;
 
   if (expected !== computed) {
     throw new Error('Invalid signature');
