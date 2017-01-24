@@ -3,10 +3,12 @@ mixin no-repository
     .panel-heading
       | No repositories
     .panel-body
-      p It appears that you don't have any repositories in this organization yet, or you may not have sufficient permissions.
-      p You can also try to synchronize this organization again. Of course, you can
-        +contact-us
-        | whenever you want.
+      p.text-justify
+        | It appears that you do not have any repositories in this organization yet,
+        | or you may not have sufficient permissions (indeed, "admin" rights are needed
+        | to enable a project).
+        | You can also try to synchronize this organization again. Of course, you can
+        | #[+contact-us] whenever you want.
 
 mixin last-sync(url, text, last_synchronized_at)
   .last-sync
@@ -28,3 +30,46 @@ mixin no-org-chosen
     .panel-body
       p We have synchronized your GitHub organizations automatically.
       p Now, it is up to you to pick one in order to enable any of your projects you have (admin) access to.
+
+mixin repository-name(r)
+  p.repository-name
+    | !{r.getIconSVG()}
+    | &nbsp;
+    | #[a(href=r.getURL(), title='Browse this project on GitHub') #{r.name}]
+    | &nbsp;
+    if r.enabled
+      span.label.label-success
+        | enabled by&nbsp;
+        | #{r.enabled_by.login === user.github_login ? 'you' : r.enabled_by.login}
+    else if r.github_hook_id
+      | &nbsp;
+      span.label.label-default paused
+
+mixin enabled-repository(r, current_org)
+  .row
+    .col-xs-12
+      +repository-name(r)
+
+  .row
+    .col-xs-12.hidden-xs.repository-configuration
+      form(
+        action=`/projects/${current_org.name}/${r.name}/configure`,
+        method='POST',
+        class='form-inline'
+      )
+        .form-group.form-group-sm
+          label(for='max-reviewers')
+            | Max reviewers:
+          input(
+            name='max',
+            value=r.max_reviewers,
+            type='number',
+            min=1,
+            class='form-control max-reviewers-input',
+            id='max-reviewers'
+          )
+
+        input(type='hidden', name='_csrf', value=_csrf)
+        button(type='submit', class='btn btn-default btn-sm')
+          i.fa.fa-wrench
+          | save

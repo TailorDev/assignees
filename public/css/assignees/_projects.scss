@@ -25,6 +25,8 @@
     @extend .list-group-item;
 
     margin: 0;
+    padding-left: 0;
+    padding-right: 0;
 
     font-weight: 500;
 
@@ -32,17 +34,21 @@
       background-color: $private-repository-color;
     }
 
-    .name {
-      @extend .col-md-10;
+    &-name {
+      margin: 5px 0 6px 0px;
 
       a {
         color: $gray-darker;
-      }
 
-      a:focus,
-      a:hover {
-        color: $brand-primary;
+        &:focus,
+        &:hover {
+          color: $brand-primary;
+        }
       }
+    }
+
+    &-configuration {
+      margin-top: 1rem;
 
       form {
         > * {
@@ -60,21 +66,21 @@
       }
     }
 
-    .actions {
-      @extend .col-md-2;
+    .label {
+      display: inline-block;
+      max-width: 80%;
 
-      text-align:right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      vertical-align: text-bottom;
 
-      .action {
-        display: inline-block;
-        margin-left: 1rem;
-      }
+      background-color: $gray-darker;
     }
 
-    .name,
     .actions {
-      height: 50px;
-      line-height: 50px;
+      text-align: right;
+      padding-left: 0;
     }
   }
 
@@ -84,25 +90,13 @@
 
     list-style-type: none;
   }
-
-  .label {
-    display: inline-block;
-    max-width: 80%;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    vertical-align: text-bottom;
-
-    background-color: $gray-darker;
-  }
 }
 
 .last-sync {
   @extend .row;
   @extend .hidden-xs;
 
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
 
   & > form {
     @extend .col-md-12;
@@ -116,4 +110,11 @@
 
 .application-link {
   margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .organizations .active {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+  }
 }
