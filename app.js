@@ -225,7 +225,9 @@ app.use((req, res, next) => res.status(404).render('error/404', {
 }));
 
 if (app.get('env') === 'test') {
-  app.use((err, req, res, next) => res.status(err.statusCode || 500).end());
+  app.use((err, req, res, next) => {
+    res.status(err.statusCode || 500).end();
+  });
 } else {
   app.use((err, req, res, next) => {
     const info = [

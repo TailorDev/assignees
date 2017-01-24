@@ -217,4 +217,95 @@ describe('POST /events', () => {
       })
     ;
   });
+
+  it('should handle repositories with teams', (done) => {
+    const event = {
+      action: 'opened',
+      repository: {
+        id: 123,
+      },
+      pull_request: {
+        number: '10',
+        user: {
+          login: 'john',
+        },
+      },
+    };
+
+    const repository = {
+      owner: 'foo',
+      name: 'bar',
+      enabled: true,
+      enabled_by: {
+        user_id: 'user-id',
+      },
+      teams: [ 'team-id-1', 'team-id-2' ],
+      max_reviewers: 2,
+    };
+
+    const user = {
+      user_id: 'user-id',
+      getGitHubToken: () => 'token',
+    };
+
+    const repoMock = sinon.mock(Repository);
+    repoMock.expects('findOne').resolves(repository);
+
+    const userMock = sinon.mock(User);
+    userMock.expects('findOne').resolves(user);
+
+    githubApi
+      .get('/repos/foo/bar/collaborators')
+      .query({ access_token: 'token' })
+      .reply(200, [
+        { login: 'babar' },
+        { login: 'emma' },
+        { login: 'gilles' },
+        { login: 'sharah' },
+        { login: 'titeuf' },
+        { login: 'titi' },
+      ])
+    ;
+
+    githubApi
+      .get('/teams/team-id-1/members')
+      .query({ access_token: 'token' })
+      .reply(200, [
+        { login: 'babar' },
+        { login: 'titi' },
+        { login: 'john' },
+      ])
+    ;
+
+    githubApi
+      .get('/teams/team-id-2/members')
+      .query({ access_token: 'token' })
+      .reply(200, [
+        { login: 'babar' },
+        { login: 'emma' },
+      ])
+    ;
+
+    githubApi
+      .post('/repos/foo/bar/pulls/10/requested_reviewers', (body) => {
+        return !body.reviewers.includes('john');
+      })
+      .query({ access_token: 'token' })
+      .reply(201)
+    ;
+
+    request(app)
+      .post('/events')
+      .set('x-github-event', 'pull_request')
+      .send(event)
+      .end((err, res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body.status).to.equal('ok');
+
+        repoMock.restore();
+        userMock.restore();
+        done();
+      })
+    ;
+  });
 });
