@@ -31,5 +31,25 @@ exports.getExistingWebhookConfig = (id, owner, repo, active) => Object.assign(
   { id }
 );
 
-exports.computeSignature = blob =>
-  `sha1=${crypto.createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET).update(blob).digest('hex')}`;
+exports.verifySignature = (req, res, buffer) => {
+  if (req.path !== '/events') {
+    return;
+  }
+
+  [
+    'x-hub-signature',
+    'x-github-event',
+    'x-github-delivery',
+  ].forEach((header) => {
+    if (!req.headers[header]) {
+      throw new Error(`Header ${header} is missing.`);
+    }
+  });
+
+  const expected = req.headers['x-hub-signature'];
+  const computed = `sha1=${crypto.createHmac('sha1', process.env.GITHUB_WEBHOOK_SECRET).update(blob).digest('hex')}`;
+
+  if (expected !== computed) {
+    throw new Error('Invalid signature');
+  }
+};
