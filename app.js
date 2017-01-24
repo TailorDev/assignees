@@ -82,30 +82,34 @@ if (app.get('env') === 'development') {
 }
 
 // middleware to verify GitHub webhooks
-app.use(bodyParser.json({
-  verify: (req, res, buffer) => {
-    if (req.path !== '/events') {
-      return;
-    }
-
-    [
-      'x-hub-signature',
-      'x-github-event',
-      'x-github-delivery',
-    ].forEach((header) => {
-      if (!req.headers[header]) {
-        throw new Error(`Header ${header} is missing.`);
+if (app.get('env') === 'test') {
+  app.use(bodyParser.json());
+} else {
+  app.use(bodyParser.json({
+    verify: (req, res, buffer) => {
+      if (req.path !== '/events') {
+        return;
       }
-    });
 
-    const expected = req.headers['x-hub-signature'];
-    const computed = gh.computeSignature(buffer);
+      [
+        'x-hub-signature',
+        'x-github-event',
+        'x-github-delivery',
+      ].forEach((header) => {
+        if (!req.headers[header]) {
+          throw new Error(`Header ${header} is missing.`);
+        }
+      });
 
-    if (expected !== computed) {
-      throw new Error('Invalid signature');
-    }
-  },
-}));
+      const expected = req.headers['x-hub-signature'];
+      const computed = gh.computeSignature(buffer);
+
+      if (expected !== computed) {
+        throw new Error('Invalid signature');
+      }
+    },
+  }));
+}
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(expressValidator());
@@ -220,35 +224,37 @@ app.use((req, res, next) => res.status(404).render('error/404', {
   title: 'Page Not Found',
 }));
 
-app.use((err, req, res, next) => {
-  const info = [
-    `request_method=${req.method}`,
-    `request_headers=${util.inspect(req.headers)}`,
-  ];
+if (app.get('env') === 'test') {
+  app.use((err, req, res, next) => res.status(err.statusCode || 500).end());
+} else {
+  app.use((err, req, res, next) => {
+    const info = [
+      `request_method=${req.method}`,
+      `request_headers=${util.inspect(req.headers)}`,
+    ];
 
-  if (req.id) {
-    info.push(`request_id=${req.id}`);
-  }
+    if (req.id) {
+      info.push(`request_id=${req.id}`);
+    }
 
-  info.push(Object.getOwnPropertyNames(err).map(
-    k => `${k}=${util.inspect(err[k])}`
-  ));
+    info.push(Object.getOwnPropertyNames(err).map(
+      k => `${k}=${util.inspect(err[k])}`
+    ));
 
-  console.log('[error]', info.join(' '));
-
-  return res.format({
-    json: () => {
-      res.status(err.statusCode || 500).send({
-        message: 'Server Error',
-      });
-    },
-    html: () => {
-      res.status(500).render('error/500', {
-        title: 'Server Error',
-      });
-    },
+    return res.format({
+      json: () => {
+        res.status(err.statusCode || 500).send({
+          message: 'Server Error',
+        });
+      },
+      html: () => {
+        res.status(500).render('error/500', {
+          title: 'Server Error',
+        });
+      },
+    });
   });
-});
+}
 
 /**
  * Start Express server.

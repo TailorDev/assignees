@@ -17,6 +17,10 @@ const newError = (statusCode, status, reason, req) => {
  * Listen to GitHub events
  */
 exports.listen = async (req, res) => {
+  if (!req.header('x-github-event')) {
+    return res.status(400).end();
+  }
+
   if (req.header('x-github-event') === 'ping') {
     return res.send('PONG');
   }
@@ -66,39 +70,37 @@ exports.listen = async (req, res) => {
     })
   ;
 
-  Promise.all(
-    repository.teams.map(
-      team => github.orgs.getTeamMembers({ id: team }).map(m => m.login)
-    ))
+  Promise.all(repository.teams.map(
+    team => github.orgs.getTeamMembers({ id: team }).map(m => m.login)
+  ))
     .then((members) => members.reduce((a, b) => a.concat(b), []))
-    .then((members) => {
-      if (members.length === 0) {
-        return collaborators;
-      }
+  .then((members) => {
+    if (members.length === 0) {
+      return collaborators;
+    }
 
-      return collaborators.filter(c => members.includes(c.login));
-    })
-    .then(collaborators => collaborators
-      .map(c => c.login)
-      .filter(login => login !== pullAuthor)
-      .sort(() => 0.5 - Math.random())
-      .slice(0, repository.max_reviewers)
-    )
-    .then((reviewers) => {
-      if (reviewers.length === 0) {
-        throw newError(422, 'aborted', 'no reviewers found', req);
-      }
+    return collaborators.filter(c => members.includes(c.login));
+  })
+  .then(collaborators => collaborators
+    .map(c => c.login)
+    .filter(login => login !== pullAuthor)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, repository.max_reviewers)
+  )
+  .then((reviewers) => {
+    if (reviewers.length === 0) {
+      throw newError(422, 'aborted', 'no reviewers found', req);
+    }
 
-      return github
-        .pullRequests
-        .createReviewRequest({
-          owner: repository.owner,
-          repo: repository.name,
-          number: pullNumber,
-          reviewers,
-        })
-      ;
-    })
-    .then(res.send({ status: 'ok' }))
-  ;
+    return github
+      .pullRequests
+      .createReviewRequest({
+        owner: repository.owner,
+        repo: repository.name,
+        number: pullNumber,
+        reviewers,
+      })
+    ;
+  })
+  .then(res.send({ status: 'ok' }));
 };
