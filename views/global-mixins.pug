@@ -1,5 +1,5 @@
-mixin feature-flag
-  if user.isAdmin()
+mixin feature-flag(enabled)
+  if !!enabled || user.isAdmin()
     block
 
 mixin project-name(emphasis)

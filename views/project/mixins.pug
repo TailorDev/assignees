@@ -57,7 +57,7 @@ mixin enabled-repository(r, current_org)
         method='POST',
         class='form-inline'
       )
-        +feature-flag
+        +feature-flag(true)
           .form-group.form-group-sm
             label(for='teams')
               | Teams:
