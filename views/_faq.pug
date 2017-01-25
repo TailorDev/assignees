@@ -32,7 +32,22 @@ div(
   role='tablist',
   aria-multiselectable='true'
 )
-  +faq-entry('how', 'How does that work?', true)
+  +faq-entry('why', 'Why should I use this service?', true)
+    p.text-justify
+      | Glad you asked! We believe that code reviews are one of the best tools to
+      | improve quality in software development. There are plenty of services
+      | available for performing code reviews and even GitHub introduced
+      | #[a(href='https://github.com/features/projects/codereview') their own mechanism].
+      | Yet, assigning the right people to do code reviews is tedious, hence
+      | #[+project-name].
+    p.text-justify
+      | To go a step further, we think that code reviews allow your collaborators
+      | to take ownership over your projects. #[em "With great power comes great responsibility"],
+      | said someone once. We have worked with people from different backgrounds
+      | and code reviews became our silver bullet to involve them. People become more
+      | engaged and efficient when you trust them, you should try!
+
+  +faq-entry('how', 'How does that work?')
     p.text-justify
       | #[+project-name] registers a #[a(href='https://developer.github.com/webhooks/') webhook]
       | on each project you decide to enable in your personal interface. This hook allows
@@ -52,7 +67,7 @@ div(
       | When you sign in to #[+project-name], we ask for permissions to access some of your data on GitHub.
       | We need such permissions to provide you the list of your organizations and repositories so
       | that you can enable #[+project-name] on any of your repositories in a simple manner.
-      | We automatically setup #[+project-name] on your repositories as soon as you "start" using #[+project-name]
+      | We automatically setup #[+project-name] on your repositories as soon as you "enable" using #[+project-name]
       | on them. Reviewers get assigned on your behalf. Let's review the different "scopes" (the
       | term used by GitHub to sort the different permissions you can grant to applications like
       | #[+project-name]):
