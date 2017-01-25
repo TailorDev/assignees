@@ -15,7 +15,6 @@ const passport = require('passport');
 const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
 const moment = require('moment');
-const cacheBust = require('cache-busted');
 const d3Format = require('d3-format');
 
 const gh = require('./helpers/github');
@@ -133,9 +132,9 @@ app.locals.pretty = true; // pretty html == better bootstrap output (yes, I know
 app.locals.moment = moment;
 app.locals.d3Format = d3Format;
 app.locals.github_app_id = process.env.GITHUB_APP_ID;
+app.locals.asset = require('./middlewares/assets')();
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
-cacheBust.handler(app);
 
 /**
  * Primary app routes.

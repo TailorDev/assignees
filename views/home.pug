@@ -51,7 +51,7 @@ block content
       br
       div.screenshots
         button(data-toggle='modal', data-target='.screenshot-projects')
-          img(src='/images/assignees-projects.png?v3', class='img-responsive')
+          img(src=asset('/images/assignees-projects.png'), class='img-responsive')
         div(class='modal fade screenshot-projects', role='dialog')
           .modal-dialog.modal-lg
             .modal-content
@@ -60,4 +60,4 @@ block content
                   span(aria-hidden='true') &times;
                 h4.modal-title Hi, I am #[+project-name]. Nice to meet you!
               .modal-body
-                img(src='/images/assignees-projects.png?v3', class='img-responsive')
+                img(src=asset('/images/assignees-projects.png'), class='img-responsive')
