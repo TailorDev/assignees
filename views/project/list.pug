@@ -40,7 +40,7 @@ block content
             li(class=`repository${r.private ? ' is-private' : ''}`)
               .col-sm-10
                 if r.enabled
-                  +enabled-repository(r, current_org, teams)
+                  +enabled-repository(r, current_org)
                 else
                   +repository-name(r)
 
