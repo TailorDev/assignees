@@ -179,15 +179,17 @@ app.get('/auth/github/callback', passport.authenticate('github', {
  * Real app routes
  */
 const errorHandler = fn => (...args) => fn(...args).catch(args[2]);
+const ownerParam = ':owner([0-9a-zA-Z]+[-0-9a-zA-Z]*)';
+const repoParam = ':repo([-_\.0-9a-zA-Z]+)';
 
 app.get('/projects', passportConfig.isAuthenticated, projectController.listOrgs);
-app.get('/projects/:owner', passportConfig.isAuthenticated, errorHandler(projectController.listRepos));
-app.post('/projects/:owner/:repo/enable', passportConfig.isAuthenticated, errorHandler(projectController.enable));
-app.post('/projects/:owner/:repo/pause', passportConfig.isAuthenticated, errorHandler(projectController.pause));
-app.post('/projects/:owner/:repo/configure', passportConfig.isAuthenticated, errorHandler(projectController.configureRepo));
+app.get(`/projects/${ownerParam}`, passportConfig.isAuthenticated, errorHandler(projectController.listRepos));
+app.post(`/projects/${ownerParam}/${repoParam}/enable`, passportConfig.isAuthenticated, errorHandler(projectController.enable));
+app.post(`/projects/${ownerParam}/${repoParam}/pause`, passportConfig.isAuthenticated, errorHandler(projectController.pause));
+app.post(`/projects/${ownerParam}/${repoParam}/configure`, passportConfig.isAuthenticated, errorHandler(projectController.configureRepo));
 
 app.post('/sync/organizations', passportConfig.isAuthenticated, errorHandler(projectController.syncOrgs));
-app.post('/sync/projects/:owner', passportConfig.isAuthenticated, errorHandler(projectController.syncRepos));
+app.post(`/sync/projects/${ownerParam}`, passportConfig.isAuthenticated, errorHandler(projectController.syncRepos));
 
 app.post('/events', errorHandler(eventController.listen));
 
