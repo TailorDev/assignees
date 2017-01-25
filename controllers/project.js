@@ -329,7 +329,8 @@ exports.configureRepo = async (req, res, next) => {
 
   let teams = [];
   if (req.body.teams) {
-    teams = [].concat(req.body.teams);
+    // sanitize team ids
+    teams = [].concat(req.body.teams).map(Number).filter(n => !isNaN(n) && n > 0);
   }
 
   return repository
