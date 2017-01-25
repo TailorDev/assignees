@@ -69,7 +69,7 @@ mixin enabled-repository(r, current_org)
               multiple
             )
               for team in teams
-                option(value=team.id, selected=r.teams.includes(team.id))
+                option(value=team.id, selected=r.getTeams().includes(team.id))
                   | #{team.name}
 
         .form-group.form-group-sm

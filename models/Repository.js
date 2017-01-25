@@ -38,6 +38,10 @@ repositorySchema.methods.getURL = function getURL() {
   return `https://github.com/${this.owner}/${this.name}`;
 };
 
+repositorySchema.methods.getTeams = function getTeams() {
+  return this.teams || [];
+};
+
 const Repository = mongoose.model('Repository', repositorySchema);
 
 module.exports = Repository;

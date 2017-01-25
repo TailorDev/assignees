@@ -72,7 +72,7 @@ exports.listen = async (req, res) => {
   ;
 
   // fetch all team members (if any)
-  Promise.all(repository.teams.map(
+  Promise.all(repository.getTeams().map(
     team => github.orgs.getTeamMembers({ id: team })
   ))
   // gather all members in a list
@@ -83,7 +83,7 @@ exports.listen = async (req, res) => {
   .then(members => [...new Set(members)])
   // whitelist collaborators if there are teams
   .then(members => {
-    if (repository.teams.length === 0) {
+    if (repository.getTeams().length === 0) {
       return collaborators;
     }
 

@@ -173,7 +173,7 @@ describe('POST /events', () => {
       enabled_by: {
         user_id: 'user-id',
       },
-      teams: [],
+      getTeams: () => [],
     };
 
     const user = {
@@ -239,7 +239,7 @@ describe('POST /events', () => {
       enabled_by: {
         user_id: 'user-id',
       },
-      teams: [ 'team-id-1', 'team-id-2' ],
+      getTeams: () => [ 'team-id-1', 'team-id-2' ],
       max_reviewers: 2,
     };
 
