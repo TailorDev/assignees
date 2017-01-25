@@ -1,8 +1,8 @@
 extends ../layout
 
-mixin card(value, text, icon)
+mixin card(value, text, icon, style)
   .col-lg-3.col-md-6
-    .panel.panel-default
+    div(class=`panel panel-${style ? style : 'default'}`)
       .panel-heading
         .row
           .col-xs-3
@@ -19,8 +19,13 @@ block content
   h2 #{title}
   hr
 
+  h3 Projects
   .row
-    +card(nbRepositories, 'repositories', 'code-fork')
-    +card(nbEnabledRepos, 'enabled repos', 'check-circle-o')
+    +card(nbRepos, 'projects', 'code-fork')
+    +card(nbReposEnabled, 'projects enabled', 'check-circle-o', 'primary')
+    +card(nbReposWithTeams, 'projects with teams', 'filter', 'primary')
+
+  h3 Users
+  .row
     +card(nbUsers, 'users', 'users')
-    +card(nbPrivateUsers, 'users with private repos', 'lock')
+    +card(nbUsersWithPrivateAccess, 'users with private repos', 'lock')

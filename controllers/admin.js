@@ -5,20 +5,26 @@ const User = require('../models/User');
  * Dashboard
  */
 exports.index = async (req, res) => {
-  const nbRepositories = await Repository.count()
+  const nbRepos = await Repository.count()
     .catch(err => null);
-  const nbEnabledRepos = await Repository.count({ enabled: true, })
+  const nbReposEnabled = await Repository.count({ enabled: true, })
     .catch(err => null);
   const nbUsers = await User.count()
     .catch(err => null);
-  const nbPrivateUsers = await User.count({ 'tokens.scopes': { $in: ['repo'] } })
-    .catch(err => null);
+  const nbUsersWithPrivateAccess = await User.count({
+    'tokens.scopes': { $in: ['repo'] },
+  }).catch(err => null);
+  const nbReposWithTeams = await Repository.count({
+    enabled: true,
+    teams: { $not: { $size: 0 } },
+  }).catch(err => null);
 
   return res.render('dashboard/index', {
     title: 'Dashboard',
-    nbRepositories,
+    nbRepos,
     nbUsers,
-    nbPrivateUsers,
-    nbEnabledRepos,
+    nbUsersWithPrivateAccess,
+    nbReposEnabled,
+    nbReposWithTeams,
   });
 };
