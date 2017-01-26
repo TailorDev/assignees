@@ -1,5 +1,5 @@
 mixin feature-flag(enabled)
-  if !!enabled || user.isAdmin()
+  if !!enabled
     block
 
 mixin project-name(emphasis)
@@ -19,7 +19,8 @@ mixin sign-in
     button(type='submit')
       i.fa.fa-github
       | Sign in with GitHub
-    .checkbox
-      label
-        input(type='checkbox', name='private', checked=true)
-        | Include #[strong private repositories]
+    +feature-flag(false)
+      .checkbox
+        label
+          input(type='checkbox', name='private', checked=true)
+          | Include #[strong private repositories]
