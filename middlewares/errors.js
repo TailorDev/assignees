@@ -17,6 +17,11 @@ module.exports = () => {
       info.push(`request_id=${req.id}`);
     }
 
+    if (req.user) {
+      info.push(`user_id=${req.user._id}`);
+      info.push(`user_username=${req.user.github_login}`);
+    }
+
     info.push(Object.getOwnPropertyNames(err).map(
       k => `${k}=${util.inspect(err[k])}`
     ));
