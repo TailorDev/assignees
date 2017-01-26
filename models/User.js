@@ -63,7 +63,7 @@ userSchema.methods.getGitHubToken = function getGitHubToken() {
 // inclusion is checked here, not equality
 userSchema.methods.hasGitHubScopes = function hasGitHubScopes(scopes) {
   const token = this.tokens.find(t => t.kind === 'github');
-  const userScopes = token ? token.scopes : [];
+  const userScopes = token ? (token.scopes || []) : [];
 
   return scopes.filter(s => userScopes.includes(s) !== true).length === 0;
 };

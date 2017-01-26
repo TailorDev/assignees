@@ -76,7 +76,10 @@ describe('User Model', () => {
       expect(user1.hasGitHubScopes(['foo'])).to.be.false;
 
       const user2 = createUserWithScopes([]);
-      expect(user1.hasGitHubScopes([])).to.be.true;
+      expect(user2.hasGitHubScopes([])).to.be.true;
+
+      const user3 = createUserWithScopes(undefined);
+      expect(user3.hasGitHubScopes([])).to.be.true;
     });
 
     it('should return true when user own (at least) all given scopes', () => {
