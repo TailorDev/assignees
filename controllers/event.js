@@ -1,3 +1,4 @@
+const deck = require('deck');
 const gh = require('../helpers/github');
 const User = require('../models/User');
 const Repository = require('../models/Repository');
@@ -110,13 +111,14 @@ exports.listen = async (req, res) => {
       .then(commits => commits.map(commit => commit.author.login))
     ))
     .then(authors => authors.reduce((a, b) => a.concat(b), []))
-    .then(authors => [...new Set(authors)])
     .then(authors => authors.filter(author => author !== pullAuthor))
+    // create a dict with { login: weight }
+    .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}))
   ;
 
   let collaborators;
   // ...in case we find no one suitable
-  if (authorsFromHistory.length === 0) {
+  if (Object.keys(authorsFromHistory).length === 0) {
     collaborators = await github.repos
       .getCollaborators({
         owner: repository.owner,
@@ -125,6 +127,7 @@ exports.listen = async (req, res) => {
       .catch([])
       .then(collaborators => collaborators.map(collaborator => collaborator.login))
       .then(collaborators => collaborators.filter(collaborator => collaborator !== pullAuthor))
+      .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
     ;
   } else {
     // better.
@@ -143,17 +146,18 @@ exports.listen = async (req, res) => {
   .then(members => [...new Set(members)])
   // whitelist collaborators if there are teams
   .then(members => {
-    if (repository.getTeams().length === 0) {
-      return collaborators;
+    if (repository.getTeams().length > 0) {
+      Object.keys(collaborators).forEach((k) => {
+        if (!members.includes(k)) {
+          delete collaborators[k];
+        }
+      });
     }
 
-    return collaborators.filter(collaborator => members.includes(collaborator));
+    return collaborators;
   })
-  // select N reviewers
-  .then(collaborators => collaborators
-    .sort(() => 0.5 - Math.random())
-    .slice(0, repository.max_reviewers)
-  )
+  // weigthed shuffle, then select N reviewers
+  .then(collaborators => deck.shuffle(collaborators).slice(0, repository.max_reviewers))
   // create review request
   .then((reviewers) => {
     if (reviewers.length === 0) {
