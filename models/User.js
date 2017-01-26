@@ -61,7 +61,8 @@ userSchema.methods.getGitHubToken = function getGitHubToken() {
 };
 
 userSchema.methods.hasGitHubScopes = function hasGitHubScopes(scopes) {
-  const userScopes = this.tokens.find(t => t.kind === 'github').scopes || [];
+  const token = this.tokens.find(t => t.kind === 'github');
+  const userScopes = token ? token.scopes : [];
 
   if (userScopes.length < scopes.length) {
     return false;
