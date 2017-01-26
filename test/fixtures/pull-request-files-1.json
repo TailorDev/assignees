@@ -1,0 +1,62 @@
+[
+    {
+        "additions": 5,
+        "blob_url": "https://github.com/willdurand/Hateoas/blob/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Annotation/Exclusion.php",
+        "changes": 5,
+        "contents_url": "https://api.github.com/repos/willdurand/Hateoas/contents/src/Hateoas/Configuration/Annotation/Exclusion.php?ref=ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7",
+        "deletions": 0,
+        "filename": "src/Hateoas/Configuration/Annotation/Exclusion.php",
+        "patch": "@@ -38,4 +38,9 @@\n      * @var string\n      */\n     public $excludeIf = null;\n+\n+    /**\n+     * @var array\n+     */\n+    public $notGroups = null;\n }",
+        "raw_url": "https://github.com/willdurand/Hateoas/raw/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Annotation/Exclusion.php",
+        "sha": "bc4f15014747fe7c9b2c701d452ed6de158816f5",
+        "status": "modified"
+    },
+    {
+        "additions": 16,
+        "blob_url": "https://github.com/willdurand/Hateoas/blob/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Exclusion.php",
+        "changes": 17,
+        "contents_url": "https://api.github.com/repos/willdurand/Hateoas/contents/src/Hateoas/Configuration/Exclusion.php?ref=ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7",
+        "deletions": 1,
+        "filename": "src/Hateoas/Configuration/Exclusion.php",
+        "patch": "@@ -32,18 +32,25 @@ class Exclusion\n      */\n     private $excludeIf;\n \n+    /**\n+     * @var null|array\n+     */\n+    private $notGroups;\n+\n     public function __construct(\n         array $groups = null,\n         $sinceVersion = null,\n         $untilVersion = null,\n         $maxDepth = null,\n-        $excludeIf = null\n+        $excludeIf = null,\n+        array $notGroups = null\n     ) {\n         $this->groups = $groups;\n         $this->sinceVersion = null !== $sinceVersion ? (float) $sinceVersion : null;\n         $this->untilVersion = null !== $untilVersion ? (float) $untilVersion : null;\n         $this->maxDepth = null !== $maxDepth ? (int) $maxDepth : null;\n         $this->excludeIf = $excludeIf;\n+        $this->notGroups = $notGroups;\n     }\n \n     /**\n@@ -85,4 +92,12 @@ public function getExcludeIf()\n     {\n         return $this->excludeIf;\n     }\n+\n+    /**\n+     * @return null|array\n+     */\n+    public function getNotGroups()\n+    {\n+        return $this->notGroups;\n+    }\n }",
+        "raw_url": "https://github.com/willdurand/Hateoas/raw/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Exclusion.php",
+        "sha": "2b8f0451c393c4dc9b1e13ab0a333b59a5b32804",
+        "status": "modified"
+    },
+    {
+        "additions": 2,
+        "blob_url": "https://github.com/willdurand/Hateoas/blob/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php",
+        "changes": 3,
+        "contents_url": "https://api.github.com/repos/willdurand/Hateoas/contents/src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php?ref=ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7",
+        "deletions": 1,
+        "filename": "src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php",
+        "patch": "@@ -72,7 +72,8 @@ private function parseExclusion(Annotation\\Exclusion $exclusion)\n             $exclusion->sinceVersion,\n             $exclusion->untilVersion,\n             $exclusion->maxDepth,\n-            $exclusion->excludeIf\n+            $exclusion->excludeIf,\n+            $exclusion->notGroups\n         );\n     }\n ",
+        "raw_url": "https://github.com/willdurand/Hateoas/raw/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php",
+        "sha": "a16ae3307760ea4c8e4618705d5823cf408b6679",
+        "status": "modified"
+    },
+    {
+        "additions": 11,
+        "blob_url": "https://github.com/willdurand/Hateoas/blob/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Serializer/ExclusionManager.php",
+        "changes": 11,
+        "contents_url": "https://api.github.com/repos/willdurand/Hateoas/contents/src/Hateoas/Serializer/ExclusionManager.php?ref=ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7",
+        "deletions": 0,
+        "filename": "src/Hateoas/Serializer/ExclusionManager.php",
+        "patch": "@@ -70,6 +70,17 @@ private function shouldSkip($object, Exclusion $exclusion = null, SerializationC\n             return true;\n         }\n \n+        if (null !== $exclusion) {\n+            $exclusionGroups = $exclusion->getNotGroups();\n+            $contextGroups = $context->attributes->get('groups')->get();\n+            if (\n+                is_array($exclusionGroups) &&\n+                0 < count(array_intersect($contextGroups, $exclusionGroups))\n+            ) {\n+                return true;\n+            }\n+        }\n+\n         return false;\n     }\n }",
+        "raw_url": "https://github.com/willdurand/Hateoas/raw/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Serializer/ExclusionManager.php",
+        "sha": "a57e0bf6b22f38bda0812824300399172d6c8d35",
+        "status": "modified"
+    },
+    {
+        "additions": 1,
+        "blob_url": "https://github.com/willdurand/Hateoas/blob/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php",
+        "changes": 1,
+        "contents_url": "https://api.github.com/repos/willdurand/Hateoas/contents/src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php?ref=ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7",
+        "deletions": 0,
+        "filename": "src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php",
+        "patch": "@@ -20,5 +20,6 @@ public function __construct(Exclusion $exclusion = null)\n         $this->sinceVersion = $exclusion->getSinceVersion();\n         $this->untilVersion = $exclusion->getUntilVersion();\n         $this->maxDepth = $exclusion->getMaxDepth();\n+        $this->notGroups = $exclusion->getNotGroups();\n     }\n }",
+        "raw_url": "https://github.com/willdurand/Hateoas/raw/ae96fb9bfe898ef88d1eb610a6903df2c2bd27a7/src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php",
+        "sha": "4d0c67a100d9cb7b9f25935a351adeb895851c05",
+        "status": "modified"
+    }
+]
