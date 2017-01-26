@@ -49,27 +49,12 @@ exports.listRepos = (req, res, next) => {
     // enabled projects first
     repositories.sort(a => (a.enabled ? -1 : 1));
 
-    let fetchTeams = Promise.resolve([]);
-    if (owner !== user.github_login) {
-      fetchTeams = gh.auth(user).orgs
-        .getTeams({
-          org: owner,
-        })
-        .catch([])
-      ;
-    }
-
-    return fetchTeams
-      .then((teams) => {
-        res.render('project/list', {
-          title: 'Projects',
-          organizations,
-          repositories,
-          teams,
-          current_org: currentOrg,
-        });
-      })
-    ;
+    return res.render('project/list', {
+      title: 'Projects',
+      organizations,
+      repositories,
+      current_org: currentOrg,
+    });
   });
 };
 
@@ -338,16 +323,9 @@ exports.configureRepo = async (req, res, next) => {
 
   const { max } = req.body;
 
-  let teams = [];
-  if (req.body.teams) {
-    // sanitize team ids
-    teams = [].concat(req.body.teams).map(Number).filter(n => !isNaN(n) && n > 0);
-  }
-
   return repository
     .set({
       max_reviewers: max,
-      teams,
     })
     .save()
     .then(() => {

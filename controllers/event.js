@@ -134,45 +134,26 @@ exports.listen = async (req, res) => {
     collaborators = authorsFromHistory;
   }
 
-  // 3 - fetch all team members (if any)
-  Promise.all(repository.getTeams().map(
-    team => github.orgs.getTeamMembers({ id: team })
-  ))
-  // gather all members in a list
-  .then(members => members.reduce((a, b) => a.concat(b), []))
-  // list logins only
-  .then(members => members.map(m => m.login))
-  // array unique
-  .then(members => [...new Set(members)])
-  // whitelist collaborators if there are teams
-  .then(members => {
-    if (repository.getTeams().length > 0) {
-      Object.keys(collaborators).forEach((k) => {
-        if (!members.includes(k)) {
-          delete collaborators[k];
-        }
-      });
-    }
+  // 3 - We're almost there
+  return Promise.resolve(collaborators)
+    // weigthed shuffle, then select N reviewers
+    .then(collaborators => deck.shuffle(collaborators).slice(0, repository.max_reviewers))
+    // create review request
+    .then((reviewers) => {
+      if (reviewers.length === 0) {
+        throw newError(422, 'aborted', 'no reviewers found', req);
+      }
 
-    return collaborators;
-  })
-  // weigthed shuffle, then select N reviewers
-  .then(collaborators => deck.shuffle(collaborators).slice(0, repository.max_reviewers))
-  // create review request
-  .then((reviewers) => {
-    if (reviewers.length === 0) {
-      throw newError(422, 'aborted', 'no reviewers found', req);
-    }
-
-    return github
-      .pullRequests
-      .createReviewRequest({
-        owner: repository.owner,
-        repo: repository.name,
-        number: pullNumber,
-        reviewers,
-      })
-    ;
-  })
-  .then(res.send({ status: 'ok' }));
+      return github
+        .pullRequests
+        .createReviewRequest({
+          owner: repository.owner,
+          repo: repository.name,
+          number: pullNumber,
+          reviewers,
+        })
+      ;
+    })
+    .then(res.send({ status: 'ok' }))
+  ;
 };

@@ -18,7 +18,6 @@ const repositorySchema = new mongoose.Schema({
     login: String,
   },
   max_reviewers: { type: Number, default: 1 },
-  teams: Array,
 });
 
 repositorySchema.methods.getIconSVG = function getIconSVG() {
@@ -36,10 +35,6 @@ repositorySchema.methods.getIconSVG = function getIconSVG() {
 
 repositorySchema.methods.getURL = function getURL() {
   return `https://github.com/${this.owner}/${this.name}`;
-};
-
-repositorySchema.methods.getTeams = function getTeams() {
-  return this.teams || [];
 };
 
 const Repository = mongoose.model('Repository', repositorySchema);

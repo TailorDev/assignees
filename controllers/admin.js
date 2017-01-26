@@ -14,10 +14,6 @@ exports.index = async (req, res) => {
   const nbUsersWithPrivateAccess = await User.count({
     'tokens.scopes': { $in: ['repo'] },
   }).catch(err => null);
-  const nbReposWithTeams = await Repository.count({
-    enabled: true,
-    teams: { $not: { $size: 0 } },
-  }).catch(err => null);
 
   return res.render('dashboard/index', {
     title: 'Dashboard',
@@ -25,6 +21,5 @@ exports.index = async (req, res) => {
     nbUsers,
     nbUsersWithPrivateAccess,
     nbReposEnabled,
-    nbReposWithTeams,
   });
 };

@@ -162,7 +162,7 @@ describe('POST /events', () => {
   });
 
   describe('with smart selection', () => {
-    it('should handle repositories with empty teams', (done) => {
+    it('should handle find reviewers', (done) => {
       const event = {
         action: 'opened',
         repository: {
@@ -186,7 +186,6 @@ describe('POST /events', () => {
         enabled_by: {
           user_id: 'user-id',
         },
-        getTeams: () => [],
         max_reviewers: 3,
       };
 
@@ -259,125 +258,10 @@ describe('POST /events', () => {
         })
       ;
     });
-
-    it('should handle repositories with teams', (done) => {
-      const event = {
-        action: 'opened',
-        repository: {
-          id: 123,
-        },
-        pull_request: {
-          number: '10',
-          user: {
-            login: 'john',
-          },
-          base: {
-            ref: 'master',
-          },
-        },
-      };
-
-      const repository = {
-        owner: 'foo',
-        name: 'bar',
-        enabled: true,
-        enabled_by: {
-          user_id: 'user-id',
-        },
-        getTeams: () => [ 'team-id-1', 'team-id-2' ],
-        max_reviewers: 3,
-      };
-
-      const user = {
-        user_id: 'user-id',
-        getGitHubToken: () => 'token',
-      };
-
-      const repoMock = sinon.mock(Repository);
-      repoMock.expects('findOne').resolves(repository);
-
-      const userMock = sinon.mock(User);
-      userMock.expects('findOne').resolves(user);
-
-      githubApi
-        .get('/repos/foo/bar/pulls/10/files')
-        .query({ per_page: 100, access_token: 'token' })
-        .reply(200, require('./fixtures/pull-request-files-1.json'))
-      ;
-
-      githubApi
-        .get('/repos/foo/bar/commits')
-        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php' })
-        .reply(200, require('./fixtures/repo-commits-driver.json'))
-      ;
-
-      githubApi
-        .get('/repos/foo/bar/commits')
-        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Exclusion.php' })
-        .reply(200, require('./fixtures/repo-commits-exclusion.json'))
-      ;
-
-      githubApi
-        .get('/repos/foo/bar/commits')
-        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Annotation/Exclusion.php' })
-        .reply(200, require('./fixtures/repo-commits-annotation-exclusion.json'))
-      ;
-
-      githubApi
-        .get('/repos/foo/bar/commits')
-        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Serializer/ExclusionManager.php' })
-        .reply(200, require('./fixtures/repo-commits-manager.json'))
-      ;
-
-      githubApi
-        .get('/repos/foo/bar/commits')
-        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php' })
-        .reply(200, require('./fixtures/repo-commits-property.json'))
-      ;
-
-      githubApi
-        .get('/teams/team-id-1/members')
-        .query({ access_token: 'token' })
-        .reply(200, [
-          { login: 'mvrhov' },
-          { login: 'willdurand' },
-        ])
-      ;
-
-      githubApi
-        .get('/teams/team-id-2/members')
-        .query({ access_token: 'token' })
-        .reply(200, [
-          { login: 'willdurand' },
-        ])
-      ;
-
-      githubApi
-        .post('/repos/foo/bar/pulls/10/requested_reviewers', (body) => {
-          return body.reviewers.includes('willdurand') && body.reviewers.includes('mvrhov');
-        })
-        .query({ access_token: 'token' })
-        .reply(201)
-      ;
-
-      request(app)
-        .post('/events')
-        .set('x-github-event', 'pull_request')
-        .send(event)
-        .end((err, res) => {
-          expect(res.status).to.equal(200);
-          expect(res.body.status).to.equal('ok');
-
-          repoMock.restore();
-          userMock.restore();
-          done();
-        })
-      ;
-    });
   });
 
   describe('without smart selection', () => {
-    it('should handle repositories with teams', (done) => {
+    it('should find reviewers from collaborators', (done) => {
       const event = {
         action: 'opened',
         repository: {
@@ -401,7 +285,6 @@ describe('POST /events', () => {
         enabled_by: {
           user_id: 'user-id',
         },
-        getTeams: () => [ 'team-id-1', 'team-id-2' ],
         max_reviewers: 2,
       };
 
@@ -466,27 +349,8 @@ describe('POST /events', () => {
       ;
 
       githubApi
-        .get('/teams/team-id-1/members')
-        .query({ access_token: 'token' })
-        .reply(200, [
-          { login: 'babar' },
-          { login: 'titi' },
-          { login: 'john' },
-        ])
-      ;
-
-      githubApi
-        .get('/teams/team-id-2/members')
-        .query({ access_token: 'token' })
-        .reply(200, [
-          { login: 'babar' },
-          { login: 'emma' },
-        ])
-      ;
-
-      githubApi
         .post('/repos/foo/bar/pulls/10/requested_reviewers', (body) => {
-          return !body.reviewers.includes('john');
+          return !body.reviewers.includes('john') && body.reviewers.length === 2;
         })
         .query({ access_token: 'token' })
         .reply(201)

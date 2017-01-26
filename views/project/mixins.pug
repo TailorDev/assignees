@@ -57,21 +57,6 @@ mixin enabled-repository(r, current_org)
         method='POST',
         class='form-inline'
       )
-        if r.owner !== user.github_login
-          .form-group.form-group-sm
-            label(for='teams')
-              | Teams:
-            select(
-              title='Default is: all'
-              class='selectpicker',
-              name='teams',
-              data-live-search='true',
-              multiple
-            )
-              for team in teams
-                option(value=team.id, selected=r.getTeams().includes(team.id))
-                  | #{team.name}
-
         .form-group.form-group-sm
           label(for='max-reviewers')
             | Max reviewers:
