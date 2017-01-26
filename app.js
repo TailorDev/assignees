@@ -71,11 +71,10 @@ if (app.get('env') === 'production') {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
 
     if (process.env.APP_DOMAIN && host !== process.env.APP_DOMAIN) {
-      res.redirect(301, `${protocol}://${process.env.APP_DOMAIN}${req.originalUrl}`);
-      next();
-    } else {
-      next();
+      return res.redirect(301, `${protocol}://${process.env.APP_DOMAIN}${req.originalUrl}`);
     }
+
+    next();
   });
 }
 
