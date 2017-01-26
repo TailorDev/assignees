@@ -1,0 +1,212 @@
+[
+    {
+        "author": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/217628?v=3",
+            "events_url": "https://api.github.com/users/willdurand/events{/privacy}",
+            "followers_url": "https://api.github.com/users/willdurand/followers",
+            "following_url": "https://api.github.com/users/willdurand/following{/other_user}",
+            "gists_url": "https://api.github.com/users/willdurand/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/willdurand",
+            "id": 217628,
+            "login": "willdurand",
+            "organizations_url": "https://api.github.com/users/willdurand/orgs",
+            "received_events_url": "https://api.github.com/users/willdurand/received_events",
+            "repos_url": "https://api.github.com/users/willdurand/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/willdurand/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/willdurand/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/willdurand"
+        },
+        "comments_url": "https://api.github.com/repos/willdurand/Hateoas/commits/4aaa9d7470d4f5c1d417b24f10c90f2551617910/comments",
+        "commit": {
+            "author": {
+                "date": "2015-04-13T07:20:32Z",
+                "email": "will+git@drnd.me",
+                "name": "William Durand"
+            },
+            "comment_count": 0,
+            "committer": {
+                "date": "2015-04-13T07:20:32Z",
+                "email": "will+git@drnd.me",
+                "name": "William Durand"
+            },
+            "message": "CS",
+            "tree": {
+                "sha": "ce122a11274665496de7dc9b674a684522a07c58",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/git/trees/ce122a11274665496de7dc9b674a684522a07c58"
+            },
+            "url": "https://api.github.com/repos/willdurand/Hateoas/git/commits/4aaa9d7470d4f5c1d417b24f10c90f2551617910"
+        },
+        "committer": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/217628?v=3",
+            "events_url": "https://api.github.com/users/willdurand/events{/privacy}",
+            "followers_url": "https://api.github.com/users/willdurand/followers",
+            "following_url": "https://api.github.com/users/willdurand/following{/other_user}",
+            "gists_url": "https://api.github.com/users/willdurand/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/willdurand",
+            "id": 217628,
+            "login": "willdurand",
+            "organizations_url": "https://api.github.com/users/willdurand/orgs",
+            "received_events_url": "https://api.github.com/users/willdurand/received_events",
+            "repos_url": "https://api.github.com/users/willdurand/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/willdurand/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/willdurand/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/willdurand"
+        },
+        "html_url": "https://github.com/willdurand/Hateoas/commit/4aaa9d7470d4f5c1d417b24f10c90f2551617910",
+        "parents": [
+            {
+                "html_url": "https://github.com/willdurand/Hateoas/commit/56c8d7befef2013a2c2b7b3ad7aae2b9f553e0c9",
+                "sha": "56c8d7befef2013a2c2b7b3ad7aae2b9f553e0c9",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/commits/56c8d7befef2013a2c2b7b3ad7aae2b9f553e0c9"
+            }
+        ],
+        "sha": "4aaa9d7470d4f5c1d417b24f10c90f2551617910",
+        "url": "https://api.github.com/repos/willdurand/Hateoas/commits/4aaa9d7470d4f5c1d417b24f10c90f2551617910"
+    },
+    {
+        "author": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/5676753?v=3",
+            "events_url": "https://api.github.com/users/slaat/events{/privacy}",
+            "followers_url": "https://api.github.com/users/slaat/followers",
+            "following_url": "https://api.github.com/users/slaat/following{/other_user}",
+            "gists_url": "https://api.github.com/users/slaat/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/slaat",
+            "id": 5676753,
+            "login": "slaat",
+            "organizations_url": "https://api.github.com/users/slaat/orgs",
+            "received_events_url": "https://api.github.com/users/slaat/received_events",
+            "repos_url": "https://api.github.com/users/slaat/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/slaat/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/slaat/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/slaat"
+        },
+        "comments_url": "https://api.github.com/repos/willdurand/Hateoas/commits/315463db766e9681ad52bd2608007f69326f5bba/comments",
+        "commit": {
+            "author": {
+                "date": "2015-03-25T14:19:46Z",
+                "email": "christoph.salat@gmail.com",
+                "name": "slaat"
+            },
+            "comment_count": 0,
+            "committer": {
+                "date": "2015-03-25T14:19:46Z",
+                "email": "christoph.salat@gmail.com",
+                "name": "slaat"
+            },
+            "message": "Added Hint for Fos/Rest users",
+            "tree": {
+                "sha": "a84e4a2801c97b0ec095cc2c50b36d1085c3e21a",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/git/trees/a84e4a2801c97b0ec095cc2c50b36d1085c3e21a"
+            },
+            "url": "https://api.github.com/repos/willdurand/Hateoas/git/commits/315463db766e9681ad52bd2608007f69326f5bba"
+        },
+        "committer": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/5676753?v=3",
+            "events_url": "https://api.github.com/users/slaat/events{/privacy}",
+            "followers_url": "https://api.github.com/users/slaat/followers",
+            "following_url": "https://api.github.com/users/slaat/following{/other_user}",
+            "gists_url": "https://api.github.com/users/slaat/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/slaat",
+            "id": 5676753,
+            "login": "slaat",
+            "organizations_url": "https://api.github.com/users/slaat/orgs",
+            "received_events_url": "https://api.github.com/users/slaat/received_events",
+            "repos_url": "https://api.github.com/users/slaat/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/slaat/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/slaat/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/slaat"
+        },
+        "html_url": "https://github.com/willdurand/Hateoas/commit/315463db766e9681ad52bd2608007f69326f5bba",
+        "parents": [
+            {
+                "html_url": "https://github.com/willdurand/Hateoas/commit/e685f71373444c4f369bbd4c88e19d2d40731123",
+                "sha": "e685f71373444c4f369bbd4c88e19d2d40731123",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/commits/e685f71373444c4f369bbd4c88e19d2d40731123"
+            }
+        ],
+        "sha": "315463db766e9681ad52bd2608007f69326f5bba",
+        "url": "https://api.github.com/repos/willdurand/Hateoas/commits/315463db766e9681ad52bd2608007f69326f5bba"
+    },
+    {
+        "author": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/611271?v=3",
+            "events_url": "https://api.github.com/users/adrienbrault/events{/privacy}",
+            "followers_url": "https://api.github.com/users/adrienbrault/followers",
+            "following_url": "https://api.github.com/users/adrienbrault/following{/other_user}",
+            "gists_url": "https://api.github.com/users/adrienbrault/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/adrienbrault",
+            "id": 611271,
+            "login": "adrienbrault",
+            "organizations_url": "https://api.github.com/users/adrienbrault/orgs",
+            "received_events_url": "https://api.github.com/users/adrienbrault/received_events",
+            "repos_url": "https://api.github.com/users/adrienbrault/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/adrienbrault/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/adrienbrault/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/adrienbrault"
+        },
+        "comments_url": "https://api.github.com/repos/willdurand/Hateoas/commits/8f5f4c9c5d5229d3f77fea513745fbf778732084/comments",
+        "commit": {
+            "author": {
+                "date": "2013-10-10T19:19:36Z",
+                "email": "adrien.brault@gmail.com",
+                "name": "Adrien Brault"
+            },
+            "comment_count": 0,
+            "committer": {
+                "date": "2013-10-10T23:06:41Z",
+                "email": "adrien.brault@gmail.com",
+                "name": "Adrien Brault"
+            },
+            "message": "Add relation/embed exclusion config using the serializer exclusion strategies",
+            "tree": {
+                "sha": "0c7a573879d9e89bad41385cf2ae834567e121c3",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/git/trees/0c7a573879d9e89bad41385cf2ae834567e121c3"
+            },
+            "url": "https://api.github.com/repos/willdurand/Hateoas/git/commits/8f5f4c9c5d5229d3f77fea513745fbf778732084"
+        },
+        "committer": {
+            "avatar_url": "https://avatars.githubusercontent.com/u/611271?v=3",
+            "events_url": "https://api.github.com/users/adrienbrault/events{/privacy}",
+            "followers_url": "https://api.github.com/users/adrienbrault/followers",
+            "following_url": "https://api.github.com/users/adrienbrault/following{/other_user}",
+            "gists_url": "https://api.github.com/users/adrienbrault/gists{/gist_id}",
+            "gravatar_id": "",
+            "html_url": "https://github.com/adrienbrault",
+            "id": 611271,
+            "login": "adrienbrault",
+            "organizations_url": "https://api.github.com/users/adrienbrault/orgs",
+            "received_events_url": "https://api.github.com/users/adrienbrault/received_events",
+            "repos_url": "https://api.github.com/users/adrienbrault/repos",
+            "site_admin": false,
+            "starred_url": "https://api.github.com/users/adrienbrault/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/adrienbrault/subscriptions",
+            "type": "User",
+            "url": "https://api.github.com/users/adrienbrault"
+        },
+        "html_url": "https://github.com/willdurand/Hateoas/commit/8f5f4c9c5d5229d3f77fea513745fbf778732084",
+        "parents": [
+            {
+                "html_url": "https://github.com/willdurand/Hateoas/commit/42d8782147fd7e4df446a63918afc92a9589d788",
+                "sha": "42d8782147fd7e4df446a63918afc92a9589d788",
+                "url": "https://api.github.com/repos/willdurand/Hateoas/commits/42d8782147fd7e4df446a63918afc92a9589d788"
+            }
+        ],
+        "sha": "8f5f4c9c5d5229d3f77fea513745fbf778732084",
+        "url": "https://api.github.com/repos/willdurand/Hateoas/commits/8f5f4c9c5d5229d3f77fea513745fbf778732084"
+    }
+]
