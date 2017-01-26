@@ -84,7 +84,7 @@ exports.enable = async (req, res, next) => {
   let createOrEditHook;
   if (repository.github_hook_id) {
     createOrEditHook = gh.auth(user).repos.editHook(
-      gh.getExistingWebhookConfig(repository.github_hook_id, owner, 'repo', true)
+      gh.getExistingWebhookConfig(repository.github_hook_id, owner, repo, true)
     );
   } else {
     createOrEditHook = gh.auth(user).repos.createHook(
