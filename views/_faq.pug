@@ -56,11 +56,9 @@ div(
       | among a list of potential reviewers. You can configure the upper limit of
       | reviewers to assign, and #[+project-name] will do her best to assign them.
     p.text-justify
-      | Currently, #[+project-name] randomly picks the reviewers among all the collaborators
-      | of the project (excluding the author of the Pull Request).
-      | In the near future, the selection will be refined to select the best reviewers,
-      | #[em i.e.] the people who contributed to similar parts of the patch proposed
-      | within the Pull Request.
+      | This selection looks at the changes in the Pull Request and look back into
+      | the history to find the best reviewers, #[em i.e.] the people who contributed
+      | to similar parts of the patch proposed within the Pull Request.
 
   +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify
@@ -78,11 +76,10 @@ div(
           | #[a(href='/account') your account] on #[+project-name]. You can update your information whenever
           | you want, and all the information we read from your GitHub profile are displayed;
         li
-          | To show you all of your repositories, including the ones from any organization you’re part of,
-          | we need the #[code read:org]. The GitHub API hides any organizations
-          | you’re a private member of without this scope. So to make sure we show
-          | you all of your repositories, we require this scope. We cannot read the data or code of your
-          | repositories with this scope;
+          | To show you all of your repositories, including the ones from any organization you are part of,
+          | we need the #[code read:org]. The GitHub API hides any organizations you are a private member
+          | of without this scope. So to make sure we show you all of your repositories, we require this
+          | scope. We cannot read the data or code of your repositories with this scope;
         li
           | Getting reviewers on your projects with #[+project-name] is as simple as enabling it and
           | waiting for a new Pull Request. We take care of the rest. The #[code write:repo_hook]
