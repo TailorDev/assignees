@@ -60,15 +60,12 @@ userSchema.methods.getGitHubToken = function getGitHubToken() {
   return this.tokens.find(t => t.kind === 'github').accessToken || null;
 };
 
+// inclusion is checked here, not equality
 userSchema.methods.hasGitHubScopes = function hasGitHubScopes(scopes) {
   const token = this.tokens.find(t => t.kind === 'github');
   const userScopes = token ? token.scopes : [];
 
-  if (userScopes.length < scopes.length) {
-    return false;
-  }
-
-  return userScopes.filter(s => scopes.includes(s) !== true).length === 0;
+  return scopes.filter(s => userScopes.includes(s) !== true).length === 0;
 };
 
 const User = mongoose.model('User', userSchema);

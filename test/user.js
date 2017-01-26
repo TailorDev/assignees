@@ -62,4 +62,36 @@ describe('User Model', () => {
       done();
     });
   });
+
+  describe('hasGitHubScopes()', () => {
+    const createUserWithScopes = (scopes) => {
+      return new User({
+        tokens: [{ kind: 'github', token: '', scopes }],
+      });
+    };
+
+    it('should deal with empty values', () => {
+      const user1 = new User();
+      expect(user1.hasGitHubScopes([])).to.be.true;
+      expect(user1.hasGitHubScopes(['foo'])).to.be.false;
+
+      const user2 = createUserWithScopes([]);
+      expect(user1.hasGitHubScopes([])).to.be.true;
+    });
+
+    it('should return true when user own (at least) all given scopes', () => {
+      const user = createUserWithScopes(['foo', 'bar', 'baz']);
+
+      expect(user.hasGitHubScopes(['foo'])).to.be.true;
+      expect(user.hasGitHubScopes(['baz', 'foo'])).to.be.true;
+      expect(user.hasGitHubScopes(['bar', 'baz', 'foo'])).to.be.true;
+    });
+
+    it('should return false when user does not own all given scopes', () => {
+      const user = createUserWithScopes(['foo', 'bar', 'baz']);
+
+      expect(user.hasGitHubScopes(['foo', ''])).to.be.false;
+      expect(user.hasGitHubScopes(['bar', 'nope', 'foo'])).to.be.false;
+    });
+  });
 });
