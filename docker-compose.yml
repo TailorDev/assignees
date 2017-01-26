@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
+      APP_DOMAIN: assignees.dev
       MONGODB_URI: mongodb://db:27017/assignees
       GITHUB_ID: 19383c627ba67c57fcb9
       GITHUB_SECRET: 2ecf59c031dc6f9a0dad2ac739fcf0e136f20ef7

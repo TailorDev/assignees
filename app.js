@@ -136,6 +136,15 @@ app.locals.asset = require('./middlewares/assets')();
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 
+// redirect to custom domain (if any)
+app.get('*', (req, res, next) => {
+  if (process.env.APP_DOMAIN && req.headers.host !== process.env.APP_DOMAIN) {
+    res.redirect(`${req.protocol}://${process.env.APP_DOMAIN}:${req.port}${req.url}`, 301);
+  } else {
+    next();
+  }
+});
+
 /**
  * Primary app routes.
  */
