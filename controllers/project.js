@@ -49,9 +49,17 @@ exports.listRepos = (req, res, next) => {
     // enabled projects first
     repositories.sort(a => (a.enabled ? -1 : 1));
 
-    return gh.auth(user).orgs
-      .getTeams({ org: owner })
-      .catch(() => [])
+    let fetchTeams = Promise.resolve([]);
+    if (owner !== user.github_login) {
+      fetchTeams = gh.auth(user).orgs
+        .getTeams({
+          org: owner,
+        })
+        .catch([])
+      ;
+    }
+
+    return fetchTeams
       .then((teams) => {
         res.render('project/list', {
           title: 'Projects',
