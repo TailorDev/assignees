@@ -35,6 +35,9 @@ passport.use(new GitHubStrategy({
           return done(null, existingUser);
         }
 
+        // when not all *required* scopes have been granted, we need to
+        // "reset" user info so that we are sure to use the right token.
+
         existingUser.tokens = [{
           kind: 'github',
           accessToken,
