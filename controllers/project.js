@@ -283,6 +283,9 @@ exports.syncRepos = (req, res) => {
                 return organization;
               });
 
+              // TODO: here we should filter by org, otherwise one
+              // may see repos he does not have access to anymore.
+
               // list of repo ids the user is allowed to see
               user.repositories = [...new Set(
                 user.repositories.concat(repos.map(r => r.id))
