@@ -30,7 +30,7 @@
                 i.fa.fa-lock
                 | Dashboard
 
-          if user.hasAccessTo('private_repos')
+          if user.hasAccessTo('private_repos') && !user.hasGitHubScopes(['repo'])
             li
               a(href='/auth/github?private=true', class='sign-in')
                 i.fa.fa-github
