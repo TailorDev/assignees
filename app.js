@@ -92,8 +92,9 @@ app.use(expressValidator());
 // session
 app.use(session({
   resave: true,
-  saveUninitialized: true,
+  saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
+  secure: process.env.NODE_ENV === 'production',
   name: 'assignees',
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
