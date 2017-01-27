@@ -76,14 +76,14 @@ const listUserFeatures = async (username) => {
     return error(`user "${username}" not found`);
   }
 
-  success(`User "${user.github_login}" has the following features: ${util.inspect(user.features)}`);
+  success(`user "${user.github_login}" has the following features: ${util.inspect(user.features)}`);
 };
 
 // implements the different commands
 program
   .command('feature:add [username] [feature]')
   .description('add feature to user')
-  .action(async (username, feature, options) => {
+  .action(async (username, feature) => {
     try {
       process.exitCode = await updateUserFeature(username, feature, ADD);
     } catch(e) {
@@ -98,7 +98,7 @@ program
 program
   .command('feature:remove [username] [feature]')
   .description('remove feature to user')
-  .action(async (username, feature, options) => {
+  .action(async (username, feature) => {
     try {
       process.exitCode = await updateUserFeature(username, feature, REMOVE);
     } catch(e) {
@@ -113,7 +113,7 @@ program
 program
   .command('feature:list [username...]')
   .description('list enabled features of user')
-  .action(async (usernames, options) => {
+  .action(async (usernames) => {
     try {
       process.exitCode = await Promise.all(
         usernames.map(username => listUserFeatures(username))
