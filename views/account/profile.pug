@@ -2,18 +2,18 @@ extends ../layout
 
 block content
   .page-header
-    h3 Profile Information
+    h3 Profile information
 
   form.form-horizontal(action='/account/profile', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
     .form-group
-      label.col-sm-3.control-label(for='email') Email
-      .col-sm-7
-        input.form-control(type='email', name='email', id='email', value=user.email)
-    .form-group
       label.col-sm-3.control-label(for='name') Name
       .col-sm-7
         input.form-control(type='text', name='name', id='name', value=user.profile.name)
+    .form-group
+      label.col-sm-3.control-label(for='email') Email
+      .col-sm-7
+        input.form-control(type='email', name='email', id='email', value=user.email)
     .form-group
       label.col-sm-3.control-label(for='location') Location
       .col-sm-7
@@ -30,16 +30,17 @@ block content
       .col-sm-offset-3.col-sm-4
         button.btn.btn.btn-primary(type='submit')
           i.fa.fa-pencil
-          | Update Profile
+          | Update my information
 
   .page-header
-    h3 Delete Account
+    h3 Delete account
 
   form.form-horizontal(action='/account/delete', method='POST')
     .form-group
-      p.col-sm-offset-3.col-sm-4 You can delete your account, but keep in mind this action is irreversible.
+      p.col-sm-offset-3.col-sm-9
+        | You can delete your account, but keep in mind this action is irreversible.
       input(type='hidden', name='_csrf', value=_csrf)
       .col-sm-offset-3.col-sm-4
-        button.btn.btn-danger(type='submit')
+        button.btn.btn-danger(type='submit', onclick='return confirm("Are you 100% sure?")')
           i.fa.fa-trash
-          | Delete my account
+          | Delete your account

@@ -23,7 +23,6 @@ mixin faq-entry(id, title, enabled)
       .panel-body
         block
 
-
 h3.text-center Frequently Asked Questions
 br
 div(
@@ -59,6 +58,7 @@ div(
       | This selection looks at the changes in the Pull Request and look back into
       | the history to find the best reviewers, #[em i.e.] the people who contributed
       | to similar parts of the patch proposed within the Pull Request.
+      | This algorithm is constantly evolving to provide you a better experience.
 
   +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify
@@ -84,8 +84,4 @@ div(
           | Getting reviewers on your projects with #[+project-name] is as simple as enabling it and
           | waiting for a new Pull Request. We take care of the rest. The #[code write:repo_hook]
           | scope allows us to create and update a webhook so that #[+project-name] is notified from GitHub
-          | on new Pull Requests;
-        li
-          | #[strong If you include private repositories], then we need the #[code repo] scope.
-          | We need this level of access because GitHub does not provide the equivalent of
-          | #[code read:org] scope for private repositories.
+          | on new Pull Requests.
