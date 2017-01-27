@@ -2,9 +2,10 @@
 const program = require('commander');
 const mongoose = require('mongoose');
 const chalk = require('chalk');
-const util = require('util');
 
 const pkg = require('../package.json');
+const inspect = require('../helpers/inspect');
+
 const User = require('../models/User');
 const findReviewers = require('../tasks/findReviewers');
 
@@ -77,7 +78,7 @@ const listUserFeatures = async (username) => {
     return error(`user "${username}" not found`);
   }
 
-  success(`user "${user.github_login}" has the following features: ${util.inspect(user.features)}`);
+  success(`user "${user.github_login}" has the following features: ${inspect(user.features)}`);
 };
 
 // implements the different commands

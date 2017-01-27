@@ -1,7 +1,7 @@
 /* eslint no-return-assign: 0 */
-const util = require('util');
 const deck = require('deck');
 
+const inspect = require('../helpers/inspect');
 const Repository = require('../models/Repository');
 const User = require('../models/User');
 const gh = require('../helpers/github');
@@ -33,8 +33,8 @@ const getFiles = async (github, owner, repo, number) => new Promise((resolve, re
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
-    `collaborators=${util.inspect(collaborators)}`,
-    `authors=${util.inspect(authorsFromHistory)}`,
+    `collaborators=${inspect(collaborators)}`,
+    `authors=${inspect(authorsFromHistory)}`,
   ].join(' '));
 };
 
@@ -44,7 +44,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
     `name=${repository.name}`,
     `pull_request_number=${number}`,
     `max_reviewers=${repository.max_reviewers}`,
-    `reviewers=${util.inspect(reviewers)}`,
+    `reviewers=${inspect(reviewers)}`,
   ].join(' '));
 };
 

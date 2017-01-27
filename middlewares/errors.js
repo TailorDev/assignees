@@ -1,6 +1,7 @@
 /* eslint no-unused-vars: 0 */
 const util = require('util');
 const logger = require('../helpers/logger');
+const inspect = require('../helpers/inspect');
 
 module.exports = (env) => {
   if (env === 'test') {
@@ -12,8 +13,8 @@ module.exports = (env) => {
   return (err, req, res, next) => {
     const info = [
       `request_method=${req.method}`,
-      `request_body=${util.inspect(req.body)}`,
-      `request_headers=${util.inspect(req.headers)}`,
+      `request_body=${inspect(req.body)}`,
+      `request_headers=${inspect(req.headers)}`,
     ];
 
     if (req.id) {
@@ -25,9 +26,9 @@ module.exports = (env) => {
       info.push(`user_username=${req.user.github_login}`);
     }
 
-    info.push(Object.getOwnPropertyNames(err).map(
-      k => `${k}=${util.inspect(err[k])}`
-    ));
+    Object.getOwnPropertyNames(err).forEach(
+      k => info.push(`error_${k}=${inspect(err[k])}`)
+    );
 
     logger.error(info.join(' '));
 
