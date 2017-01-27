@@ -10,6 +10,7 @@ module.exports = (env) => {
   return (err, req, res, next) => {
     const info = [
       `request_method=${req.method}`,
+      `request_body=${util.inspect(req.body)}`,
       `request_headers=${util.inspect(req.headers)}`,
     ];
 
