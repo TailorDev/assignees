@@ -131,14 +131,17 @@ exports.listen = async (req, res) => {
     .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
   ;
 
-  let reviewers;
-  if (Object.keys(authorsFromHistory).length === 0) {
-    reviewers = collaborators;
-  } else {
-    // withelist authors, because they must be collaborators
+  let reviewers = [];
+  if (Object.keys(authorsFromHistory).length > 0) {
     const allowed = Object.keys(collaborators);
+
     reviewers = Object.keys(authorsFromHistory).filter(k => allowed.includes(k));
- }
+  }
+
+  // fallback
+  if (reviewers.length === 0) {
+    reviewers = collaborators;
+  }
 
   console.log([
     '[info]',
