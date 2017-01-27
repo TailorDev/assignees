@@ -62,11 +62,6 @@ if (app.get('env') === 'production') {
   // redirect to custom domain (if any)
   // TODO: make it work in dev too
   app.use((req, res, next) => {
-    // TODO: quick fix for existing webhooks
-    if (req.path === '/events') {
-      return next();
-    }
-
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
 
