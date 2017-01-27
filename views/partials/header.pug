@@ -23,11 +23,18 @@
         if user
           li(class=(title == 'Projects') ? 'active' : undefined)
             a(href='/projects') Projects
+
           if user.isAdmin()
             li(class=(title == 'Dashboard') ? 'active' : undefined)
               a(href='/dashboard')
                 i.fa.fa-lock
                 | Dashboard
+
+          if user.hasAccessTo('private_repos')
+            li
+              a(href='/auth/github?private=true', class='sign-in')
+                i.fa.fa-github
+                | Upgrade to #[strong private repositories]
 
       if user
         ul.nav.navbar-nav.navbar-right

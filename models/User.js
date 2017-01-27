@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema({
     website: String,
     picture: String,
   },
+
+  features: Array,
 }, { timestamps: true });
 
 /**
@@ -66,6 +68,14 @@ userSchema.methods.hasGitHubScopes = function hasGitHubScopes(scopes) {
   const userScopes = token ? (token.scopes || []) : [];
 
   return scopes.filter(s => userScopes.includes(s) !== true).length === 0;
+};
+
+userSchema.methods.hasAccessTo = function hasAccessTo(feature) {
+  if (!this.features || this.features.length === 0) {
+    return false;
+  }
+
+  return this.features.includes(feature);
 };
 
 const User = mongoose.model('User', userSchema);
