@@ -247,8 +247,14 @@ describe('POST /events', () => {
       ;
 
       githubApi
+        .get('/repos/foo/bar/collaborators')
+        .query({ access_token: 'token' })
+        .reply(200, require('./fixtures/repo-collaborators-hateoas.json'))
+      ;
+
+      githubApi
         .post('/repos/foo/bar/pulls/10/requested_reviewers', (body) => {
-          return body.reviewers.length === 3;
+          return body.reviewers.length === 2; // only two collaborators
         })
         .query({ access_token: 'token' })
         .reply(201)

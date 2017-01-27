@@ -118,30 +118,38 @@ exports.listen = async (req, res) => {
     .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}))
   ;
 
-  let collaborators;
-  // ...in case we find no one suitable
+  const collaborators = await github.repos
+    .getCollaborators({
+      owner: repository.owner,
+      repo: repository.name,
+    })
+    .catch([])
+    // filter collaborators who don't have push access
+    .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
+    .then(collaborators => collaborators.map(collaborator => collaborator.login))
+    .then(collaborators => collaborators.filter(collaborator => collaborator !== pullAuthor))
+    .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
+  ;
+
+  let reviewers;
   if (Object.keys(authorsFromHistory).length === 0) {
-    collaborators = await github.repos
-      .getCollaborators({
-        owner: repository.owner,
-        repo: repository.name,
-      })
-      .catch([])
-      // filter collaborators who don't have push access
-      .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
-      .then(collaborators => collaborators.map(collaborator => collaborator.login))
-      .then(collaborators => collaborators.filter(collaborator => collaborator !== pullAuthor))
-      .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
-    ;
+    reviewers = collaborators;
   } else {
-    // better.
-    collaborators = authorsFromHistory;
-  }
+    // withelist authors, because they must be collaborators
+    const allowed = Object.keys(collaborators);
+    reviewers = Object.keys(authorsFromHistory).filter(k => allowed.includes(k));
+ }
+
+  console.log([
+    '[info]',
+    `collaborators=${util.inspect(collaborators)}`,
+    `authors=${util.inspect(authorsFromHistory)}`,
+  ].join(' '));
 
   // 3 - We're almost there
-  return Promise.resolve(collaborators)
+  return Promise.resolve(reviewers)
     // weigthed shuffle, then select N reviewers
-    .then(collaborators => deck.shuffle(collaborators).slice(0, repository.max_reviewers))
+    .then(reviewers => deck.shuffle(reviewers).slice(0, repository.max_reviewers))
     // create review request
     .then((reviewers) => {
       if (reviewers.length === 0) {
@@ -149,6 +157,7 @@ exports.listen = async (req, res) => {
       }
 
       console.log([
+        '[info]',
         `owner=${repository.owner}`,
         `name=${repository.name}`,
         `pull_request_number=${pullNumber}`,

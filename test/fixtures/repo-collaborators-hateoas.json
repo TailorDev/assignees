@@ -1,0 +1,74 @@
+[
+    {
+        "avatar_url": "https://avatars.githubusercontent.com/u/217628?v=3",
+        "events_url": "https://api.github.com/users/willdurand/events{/privacy}",
+        "followers_url": "https://api.github.com/users/willdurand/followers",
+        "following_url": "https://api.github.com/users/willdurand/following{/other_user}",
+        "gists_url": "https://api.github.com/users/willdurand/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/willdurand",
+        "id": 217628,
+        "login": "willdurand",
+        "organizations_url": "https://api.github.com/users/willdurand/orgs",
+        "permissions": {
+            "admin": true,
+            "pull": true,
+            "push": true
+        },
+        "received_events_url": "https://api.github.com/users/willdurand/received_events",
+        "repos_url": "https://api.github.com/users/willdurand/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/willdurand/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/willdurand/subscriptions",
+        "type": "User",
+        "url": "https://api.github.com/users/willdurand"
+    },
+    {
+        "avatar_url": "https://avatars.githubusercontent.com/u/611271?v=3",
+        "events_url": "https://api.github.com/users/adrienbrault/events{/privacy}",
+        "followers_url": "https://api.github.com/users/adrienbrault/followers",
+        "following_url": "https://api.github.com/users/adrienbrault/following{/other_user}",
+        "gists_url": "https://api.github.com/users/adrienbrault/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/adrienbrault",
+        "id": 611271,
+        "login": "adrienbrault",
+        "organizations_url": "https://api.github.com/users/adrienbrault/orgs",
+        "permissions": {
+            "admin": false,
+            "pull": true,
+            "push": true
+        },
+        "received_events_url": "https://api.github.com/users/adrienbrault/received_events",
+        "repos_url": "https://api.github.com/users/adrienbrault/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/adrienbrault/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/adrienbrault/subscriptions",
+        "type": "User",
+        "url": "https://api.github.com/users/adrienbrault"
+    },
+    {
+        "avatar_url": "https://avatars.githubusercontent.com/u/6253494?v=3",
+        "events_url": "https://api.github.com/users/scrutinizer-auto-fixer/events{/privacy}",
+        "followers_url": "https://api.github.com/users/scrutinizer-auto-fixer/followers",
+        "following_url": "https://api.github.com/users/scrutinizer-auto-fixer/following{/other_user}",
+        "gists_url": "https://api.github.com/users/scrutinizer-auto-fixer/gists{/gist_id}",
+        "gravatar_id": "",
+        "html_url": "https://github.com/scrutinizer-auto-fixer",
+        "id": 6253494,
+        "login": "scrutinizer-auto-fixer",
+        "organizations_url": "https://api.github.com/users/scrutinizer-auto-fixer/orgs",
+        "permissions": {
+            "admin": false,
+            "pull": true,
+            "push": true
+        },
+        "received_events_url": "https://api.github.com/users/scrutinizer-auto-fixer/received_events",
+        "repos_url": "https://api.github.com/users/scrutinizer-auto-fixer/repos",
+        "site_admin": false,
+        "starred_url": "https://api.github.com/users/scrutinizer-auto-fixer/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/scrutinizer-auto-fixer/subscriptions",
+        "type": "User",
+        "url": "https://api.github.com/users/scrutinizer-auto-fixer"
+    }
+]
