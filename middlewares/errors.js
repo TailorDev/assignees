@@ -1,7 +1,7 @@
 const util = require('util');
 
-module.exports = () => {
-  if (process.env.NODE_ENV === 'test') {
+module.exports = (env) => {
+  if (env === 'test') {
     return (err, req, res, next) => {
       res.status(err.statusCode || 500).end();
     };
