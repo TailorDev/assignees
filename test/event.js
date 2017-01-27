@@ -13,6 +13,16 @@ const User = require('../models/User');
 describe('POST /events', () => {
   const githubApi = nock('https://api.github.com');
 
+  beforeEach(()=> {
+    nock.disableNetConnect();
+    nock.enableNetConnect('127.0.0.1');
+  });
+
+  afterEach(() => {
+    nock.cleanAll();
+    nock.enableNetConnect();
+  });
+
   it('should filter incoming requests', (done) => {
     request(app)
       .post('/events')
@@ -249,6 +259,8 @@ describe('POST /events', () => {
         .set('x-github-event', 'pull_request')
         .send(event)
         .end((err, res) => {
+          expect(githubApi.isDone()).to.be.true;
+
           expect(res.status).to.equal(200);
           expect(res.body.status).to.equal('ok');
 
@@ -339,12 +351,12 @@ describe('POST /events', () => {
         .get('/repos/foo/bar/collaborators')
         .query({ access_token: 'token' })
         .reply(200, [
-          { login: 'babar' },
-          { login: 'emma' },
-          { login: 'gilles' },
-          { login: 'sharah' },
-          { login: 'titeuf' },
-          { login: 'titi' },
+          { login: 'babar', permissions: { push: true } },
+          { login: 'emma', permissions: { push: true } },
+          { login: 'gilles', permissions: { push: true } },
+          { login: 'sharah', permissions: { push: true } },
+          { login: 'titeuf', permissions: { push: true } },
+          { login: 'titi', permissions: { push: true } },
         ])
       ;
 
@@ -361,6 +373,113 @@ describe('POST /events', () => {
         .set('x-github-event', 'pull_request')
         .send(event)
         .end((err, res) => {
+          expect(githubApi.isDone()).to.be.true;
+
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal('ok');
+
+          repoMock.restore();
+          userMock.restore();
+          done();
+        })
+      ;
+    });
+
+    it('should filter collaborators and only select those who have `pull` right', (done) => {
+      const event = {
+        action: 'opened',
+        repository: {
+          id: 123,
+        },
+        pull_request: {
+          number: '10',
+          user: {
+            login: 'john',
+          },
+          base: {
+            ref: 'master',
+          },
+        },
+      };
+
+      const repository = {
+        owner: 'foo',
+        name: 'bar',
+        enabled: true,
+        enabled_by: {
+          user_id: 'user-id',
+        },
+        max_reviewers: 10, // high number to get all selected reviewers
+      };
+
+      const user = {
+        user_id: 'user-id',
+        getGitHubToken: () => 'token',
+      };
+
+      const repoMock = sinon.mock(Repository);
+      repoMock.expects('findOne').resolves(repository);
+
+      const userMock = sinon.mock(User);
+      userMock.expects('findOne').resolves(user);
+
+      githubApi
+        .get('/repos/foo/bar/pulls/10/files')
+        .query({ per_page: 100, access_token: 'token' })
+        .reply(200, require('./fixtures/pull-request-files-1.json'))
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/commits')
+        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Metadata/Driver/AnnotationDriver.php' })
+        .reply(200, [])
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/commits')
+        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Exclusion.php' })
+        .reply(200, [])
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/commits')
+        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Configuration/Annotation/Exclusion.php' })
+        .reply(200, [])
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/commits')
+        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Serializer/ExclusionManager.php' })
+        .reply(200, [])
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/commits')
+        .query({ per_page: 30, access_token: 'token', path: 'src/Hateoas/Serializer/Metadata/RelationPropertyMetadata.php' })
+        .reply(200, [])
+      ;
+
+      githubApi
+        .get('/repos/foo/bar/collaborators')
+        .query({ access_token: 'token' })
+        .reply(200, require('./fixtures/repo-collaborators.json'))
+      ;
+
+      githubApi
+        .post('/repos/foo/bar/pulls/10/requested_reviewers', (body) => {
+          return !body.reviewers.includes('Eamyne') && !body.reviewers.includes('AlexandreJouve');
+        })
+        .query({ access_token: 'token' })
+        .reply(201)
+      ;
+
+      request(app)
+        .post('/events')
+        .set('x-github-event', 'pull_request')
+        .send(event)
+        .end((err, res) => {
+          expect(githubApi.isDone()).to.be.true;
+
           expect(res.status).to.equal(200);
           expect(res.body.status).to.equal('ok');
 

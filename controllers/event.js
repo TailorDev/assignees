@@ -125,6 +125,8 @@ exports.listen = async (req, res) => {
         repo: repository.name,
       })
       .catch([])
+      // filter collaborators who don't have push access
+      .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
       .then(collaborators => collaborators.map(collaborator => collaborator.login))
       .then(collaborators => collaborators.filter(collaborator => collaborator !== pullAuthor))
       .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
