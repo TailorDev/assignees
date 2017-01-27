@@ -1,7 +1,10 @@
+/* eslint no-unused-vars: 0 */
 const util = require('util');
+const logger = require('../helpers/logger');
+const inspect = require('../helpers/inspect');
 
-module.exports = () => {
-  if (process.env.NODE_ENV === 'test') {
+module.exports = (env) => {
+  if (env === 'test') {
     return (err, req, res, next) => {
       res.status(err.statusCode || 500).end();
     };
@@ -10,7 +13,8 @@ module.exports = () => {
   return (err, req, res, next) => {
     const info = [
       `request_method=${req.method}`,
-      `request_headers=${util.inspect(req.headers)}`,
+      `request_body=${inspect(req.body)}`,
+      `request_headers=${inspect(req.headers)}`,
     ];
 
     if (req.id) {
@@ -22,11 +26,11 @@ module.exports = () => {
       info.push(`user_username=${req.user.github_login}`);
     }
 
-    info.push(Object.getOwnPropertyNames(err).map(
-      k => `${k}=${util.inspect(err[k])}`
-    ));
+    Object.getOwnPropertyNames(err).forEach(
+      k => info.push(`error_${k}=${inspect(err[k])}`)
+    );
 
-    console.log('[error]', info.join(' '));
+    logger.error(info.join(' '));
 
     return res.format({
       json: () => {
@@ -40,5 +44,5 @@ module.exports = () => {
         });
       },
     });
-  }
+  };
 };

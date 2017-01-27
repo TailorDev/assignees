@@ -43,55 +43,55 @@ passport.use(new GitHubStrategy({
       req.flash('info', { msg: 'We have updated your information to reflect new GitHub permissions.' });
       done(err, req.user);
     });
-  } else {
-    User.findOne({ github: profile.id }, (err, existingUser) => {
-      if (err) {
-        return done(err);
+  }
+
+  User.findOne({ github: profile.id }, (err, existingUser) => {
+    if (err) {
+      return done(err);
+    }
+
+    if (existingUser) {
+      if (existingUser.hasGitHubScopes(req.session.scopes)) {
+        return done(null, existingUser);
       }
 
-      if (existingUser) {
-        if (existingUser.hasGitHubScopes(req.session.scopes)) {
-          return done(null, existingUser);
-        }
+      // when not all *required* scopes have been granted, we need to
+      // "reset" user info so that we are sure to use the right token.
 
-        // when not all *required* scopes have been granted, we need to
-        // "reset" user info so that we are sure to use the right token.
-
-        existingUser.tokens = [{
-          kind: 'github',
-          accessToken,
-          scopes: req.session.scopes,
-        }];
-        existingUser.repositories = [];
-        existingUser.organizations = [];
-        existingUser.last_synchronized_at = null;
-
-        return existingUser.save((err) => {
-          req.flash('info', { msg: 'We have updated your information to reflect new GitHub permissions.' });
-          done(err, existingUser);
-        });
-      }
-
-      const user = new User();
-
-      user.github = profile.id;
-      user.github_login = profile._json.login;
-      user.email = profile._json.email;
-      user.tokens = [{
+      existingUser.tokens = [{
         kind: 'github',
         accessToken,
         scopes: req.session.scopes,
       }];
-      user.profile.name = profile.displayName;
-      user.profile.picture = profile._json.avatar_url;
-      user.profile.location = profile._json.location;
-      user.profile.website = profile._json.blog;
+      existingUser.repositories = [];
+      existingUser.organizations = [];
+      existingUser.last_synchronized_at = null;
 
-      user.save((err) => {
-        done(err, user);
+      return existingUser.save((err) => {
+        req.flash('info', { msg: 'We have updated your information to reflect new GitHub permissions.' });
+        done(err, existingUser);
       });
+    }
+
+    const user = new User();
+
+    user.github = profile.id;
+    user.github_login = profile._json.login;
+    user.email = profile._json.email;
+    user.tokens = [{
+      kind: 'github',
+      accessToken,
+      scopes: req.session.scopes,
+    }];
+    user.profile.name = profile.displayName;
+    user.profile.picture = profile._json.avatar_url;
+    user.profile.location = profile._json.location;
+    user.profile.website = profile._json.blog;
+
+    user.save((err) => {
+      done(err, user);
     });
-  }
+  });
 }));
 
 /**

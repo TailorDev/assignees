@@ -2,10 +2,12 @@
 const program = require('commander');
 const mongoose = require('mongoose');
 const chalk = require('chalk');
-const util = require('util');
 
 const pkg = require('../package.json');
+const inspect = require('../helpers/inspect');
+
 const User = require('../models/User');
+const findReviewers = require('../tasks/findReviewers');
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
@@ -76,14 +78,14 @@ const listUserFeatures = async (username) => {
     return error(`user "${username}" not found`);
   }
 
-  success(`User "${user.github_login}" has the following features: ${util.inspect(user.features)}`);
+  success(`user "${user.github_login}" has the following features: ${inspect(user.features)}`);
 };
 
 // implements the different commands
 program
   .command('feature:add [username] [feature]')
   .description('add feature to user')
-  .action(async (username, feature, options) => {
+  .action(async (username, feature) => {
     try {
       process.exitCode = await updateUserFeature(username, feature, ADD);
     } catch(e) {
@@ -98,7 +100,7 @@ program
 program
   .command('feature:remove [username] [feature]')
   .description('remove feature to user')
-  .action(async (username, feature, options) => {
+  .action(async (username, feature) => {
     try {
       process.exitCode = await updateUserFeature(username, feature, REMOVE);
     } catch(e) {
@@ -113,11 +115,45 @@ program
 program
   .command('feature:list [username...]')
   .description('list enabled features of user')
-  .action(async (usernames, options) => {
+  .action(async (usernames) => {
     try {
       process.exitCode = await Promise.all(
         usernames.map(username => listUserFeatures(username))
       );
+    } catch(e) {
+      console.log(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program
+  .command('pr:process [repositoryId] [number] [author]')
+  .description('process pull request')
+  .option('--dryrun', 'do not create review request')
+  .action(async (repositoryId, number, author, options) => {
+    const dryrun = options.dryrun || false;
+
+    if (dryrun) {
+      console.log('DRY RUN mode enabled');
+    }
+
+    try {
+      await findReviewers({
+        maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
+        nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
+        createReviewRequest: dryrun === false,
+        logger: {
+          info: success,
+          error: error,
+        },
+      })(repositoryId, number, author);
+
+      if (!dryrun) {
+        success('reviewer(s) assigned');
+      }
     } catch(e) {
       console.log(chalk.red(e.stack));
       process.exitCode = 1;
