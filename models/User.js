@@ -78,6 +78,10 @@ userSchema.methods.hasAccessTo = function hasAccessTo(feature) {
   return this.features.includes(feature);
 };
 
+userSchema.statics.findOneById = function findOneById(id) {
+  return this.findOne({ _id: id }).catch(() => null);
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

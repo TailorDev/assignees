@@ -37,6 +37,10 @@ repositorySchema.methods.getURL = function getURL() {
   return `https://github.com/${this.owner}/${this.name}`;
 };
 
+repositorySchema.statics.findOneByGitHubId = function findOneByGitHubId(id) {
+  return this.findOne({ github_id: id }).catch(() => null);
+};
+
 const Repository = mongoose.model('Repository', repositorySchema);
 
 module.exports = Repository;
