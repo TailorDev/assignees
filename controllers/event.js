@@ -1,40 +1,11 @@
-const util = require('util');
-const deck = require('deck');
+const logger = require('../helpers/logger');
 
-const gh = require('../helpers/github');
-const User = require('../models/User');
-const Repository = require('../models/Repository');
-
-const MAX_PR_FILES_TO_PROCESS = process.env.MAX_PR_FILES_TO_PROCESS || 5;
-const NB_COMMITS_TO_RETRIEVE = process.env.NB_COMMITS_TO_RETRIEVE || 30;
-
-const newError = (statusCode, status, reason, req) => {
-  const err = new Error();
-
-  err.statusCode = statusCode;
-  err.status = status;
-  err.reason = reason;
-  err.payload = req.body;
-
-  return err;
-};
-
-const getFiles = async (github, owner, repo, number) => {
-  return new Promise((resolve, reject) => {
-    github.pullRequests.getFiles({
-      owner,
-      repo,
-      number,
-      per_page: 100,
-    }, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-};
+const findReviewers = require('../tasks/findReviewers')({
+  maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
+  nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
+  createReviewRequest: true,
+  logger,
+});
 
 /**
  * Listen to GitHub events
@@ -56,129 +27,12 @@ exports.listen = async (req, res) => {
     return res.send({ status: 'ignored', reason: 'action is not "opened"' });
   }
 
-  // TODO: check params
-  const repoId = req.body.repository.id;
-  const pullNumber = req.body.pull_request.number;
-  const pullAuthor = req.body.pull_request.user.login;
+  await findReviewers(
+    req.body.repository.id,
+    req.body.pull_request.number,
+    req.body.pull_request.user.login,
+    req.id || null
+  );
 
-  const repository = await Repository.findOne({
-    github_id: repoId,
-  })
-  .catch(() => null);
-
-  if (!repository) {
-    throw newError(404, 'ignored', 'unknown repository', req);
-  }
-
-  if (!repository.enabled) {
-    throw newError(403, 'ignored', 'repository is paused', req);
-  }
-
-  // TODO: move this logic to a worker
-
-  const user = await User.findOne({
-    _id: repository.enabled_by.user_id
-  })
-  .catch(() => null);
-
-  if (!user) {
-    throw newError(401, 'ignored', 'user not found', req);
-  }
-
-  // the GitHub dance
-  const github = gh.auth(user);
-
-  // 1 - get all files for the current PR
-  let files = await getFiles(github, repository.owner, repository.name, pullNumber);
-  // 1.1 - sort files by the number of deletions
-  files.sort((a, b) => {
-    const countA = a.deletions;
-    const countB = b.deletions;
-
-    return countA > countB ? -1 : (countA < countB ? 1 : 0);
-  });
-  // 1.2 - only take MAX_PR_FILES_TO_PROCESS files
-  files = files.slice(0, MAX_PR_FILES_TO_PROCESS);
-
-  // 2 - retrieve the logins of people who touched this files
-  const authorsFromHistory = await Promise.all(
-    files.map(file =>
-      github.repos.getCommits({
-        owner: repository.owner,
-        repo: repository.name,
-        path: file.filename,
-        per_page: NB_COMMITS_TO_RETRIEVE,
-      })
-      .catch([])
-      .then(commits => commits.map(commit => commit.author.login))
-    ))
-    .then(authors => authors.reduce((a, b) => a.concat(b), []))
-    .then(authors => authors.filter(author => author !== pullAuthor))
-    // create a dict with { login: weight }
-    .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}))
-  ;
-
-  const collaborators = await github.repos
-    .getCollaborators({
-      owner: repository.owner,
-      repo: repository.name,
-    })
-    .catch([])
-    // filter collaborators who don't have push access
-    .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
-    .then(collaborators => collaborators.map(collaborator => collaborator.login))
-    .then(collaborators => collaborators.filter(collaborator => collaborator !== pullAuthor))
-    .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
-  ;
-
-  let reviewers = [];
-  if (Object.keys(authorsFromHistory).length > 0) {
-    const allowed = Object.keys(collaborators);
-
-    reviewers = Object.keys(authorsFromHistory).filter(k => allowed.includes(k));
-  }
-
-  // fallback
-  if (reviewers.length === 0) {
-    reviewers = collaborators;
-  }
-
-  console.log([
-    '[info]',
-    `collaborators=${util.inspect(collaborators)}`,
-    `authors=${util.inspect(authorsFromHistory)}`,
-  ].join(' '));
-
-  // 3 - We're almost there
-  return Promise.resolve(reviewers)
-    // weigthed shuffle, then select N reviewers
-    .then(reviewers => deck.shuffle(reviewers).slice(0, repository.max_reviewers))
-    // create review request
-    .then((reviewers) => {
-      if (reviewers.length === 0) {
-        throw newError(422, 'aborted', 'no reviewers found', req);
-      }
-
-      console.log([
-        '[info]',
-        `owner=${repository.owner}`,
-        `name=${repository.name}`,
-        `pull_request_number=${pullNumber}`,
-        `max_reviewers=${repository.max_reviewers}`,
-        `reviewers=${util.inspect(reviewers)}`,
-      ].join(' '));
-
-      return github
-        .pullRequests
-        .createReviewRequest({
-          owner: repository.owner,
-          repo: repository.name,
-          number: pullNumber,
-          reviewers,
-        })
-      ;
-    })
-    .catch((err) => console.log('[error] call=createReviewRequest', { error: err}))
-    .then(res.send({ status: 'ok' }))
-  ;
+  res.send({ status: 'ok' });
 };
