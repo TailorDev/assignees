@@ -1,4 +1,6 @@
+const util = require('util');
 const deck = require('deck');
+
 const gh = require('../helpers/github');
 const User = require('../models/User');
 const Repository = require('../models/Repository');
@@ -146,6 +148,14 @@ exports.listen = async (req, res) => {
         throw newError(422, 'aborted', 'no reviewers found', req);
       }
 
+      console.log([
+        `owner=${repository.owner}`,
+        `name=${repository.name}`,
+        `pull_request_number=${pullNumber}`,
+        `max_reviewers=${repository.max_reviewers}`,
+        `reviewers=${util.inspect(reviewers)}`,
+      ].join(' '));
+
       return github
         .pullRequests
         .createReviewRequest({
@@ -156,6 +166,7 @@ exports.listen = async (req, res) => {
         })
       ;
     })
+    .catch((err) => console.log('[error] call=createReviewRequest', { error: err}))
     .then(res.send({ status: 'ok' }))
   ;
 };
