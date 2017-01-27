@@ -23,7 +23,26 @@ passport.use(new GitHubStrategy({
   passReqToCallback: true,
 }, (req, accessToken, refreshToken, profile, done) => {
   if (req.user) {
-    done(null, req.user);
+    if (req.user.hasGitHubScopes(req.session.scopes)) {
+      return done(null, req.user);
+    }
+
+    // when not all *required* scopes have been granted, we need to
+    // "reset" user info so that we are sure to use the right token.
+
+    req.user.tokens = [{
+      kind: 'github',
+      accessToken,
+      scopes: req.session.scopes,
+    }];
+    req.user.repositories = [];
+    req.user.organizations = [];
+    req.user.last_synchronized_at = null;
+
+    return req.user.save((err) => {
+      req.flash('info', { msg: 'We have updated your information to reflect new GitHub permissions.' });
+      done(err, req.user);
+    });
   } else {
     User.findOne({ github: profile.id }, (err, existingUser) => {
       if (err) {
