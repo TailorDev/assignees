@@ -163,8 +163,7 @@ app.post('/account/delete', passportConfig.isAuthenticated, userController.postD
  * OAuth / GitHub
  */
 app.get('/auth/github', (req, res, next) => {
-  // `write:repo_hook` for installing a hook
-  const scopes = ['user:email', 'read:org', 'write:repo_hook', 'public_repo'];
+  const scopes = ['user:email', 'read:org', 'public_repo'];
 
   req.sanitizeQuery('private').toBoolean();
 

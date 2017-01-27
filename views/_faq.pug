@@ -65,8 +65,9 @@ div(
       | When you sign in to #[+project-name], we ask for permissions to access some of your data on GitHub.
       | We need such permissions to provide you the list of your organizations and repositories so
       | that you can enable #[+project-name] on any of your repositories in a simple manner.
-      | We automatically setup #[+project-name] on your repositories as soon as you "enable" using #[+project-name]
-      | on them. Reviewers get assigned on your behalf. Let's review the different "scopes" (the
+      | We automatically setup #[+project-name] on your repositories as soon as you "enable" using
+      | #[+project-name] on them.
+      | Reviewers get assigned on your behalf. Let's review the different "scopes" (the
       | term used by GitHub to sort the different permissions you can grant to applications like
       | #[+project-name]):
     p.text-justify
@@ -81,7 +82,9 @@ div(
           | of without this scope. So to make sure we show you all of your repositories, we require this
           | scope. We cannot read the data or code of your repositories with this scope;
         li
-          | Getting reviewers on your projects with #[+project-name] is as simple as enabling it and
-          | waiting for a new Pull Request. We take care of the rest. The #[code write:repo_hook]
-          | scope allows us to create and update a webhook so that #[+project-name] is notified from GitHub
-          | on new Pull Requests.
+          | In order to find the best reviewers, we need to look at the collaborators of your projects.
+          | #[a(href='https://github.com/dear-github/dear-github/issues/113') Unfortunately], the GitHub
+          | API does not give a restricted access to such information, and that is why we need the
+          | #[code public_repo] scope. We use this scope exclusively to find the collaborators of your
+          | public repositories and to install a webhook on the projects you decide to enable, so that
+          | #[+project-name] is notified from GitHub on new Pull Requests.
