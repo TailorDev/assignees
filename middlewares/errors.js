@@ -1,4 +1,5 @@
 const util = require('util');
+const logger = require('../helpers/logger');
 
 module.exports = (env) => {
   if (env === 'test') {
@@ -27,7 +28,7 @@ module.exports = (env) => {
       k => `${k}=${util.inspect(err[k])}`
     ));
 
-    console.log('[error]', info.join(' '));
+    logger.error(info.join(' '));
 
     return res.format({
       json: () => {
