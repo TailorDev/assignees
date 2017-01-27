@@ -92,7 +92,7 @@ program
     } finally {
       mongoose.connection.close();
     }
-  }) 
+  })
 ;
 
 program
@@ -107,7 +107,7 @@ program
     } finally {
       mongoose.connection.close();
     }
-  }) 
+  })
 ;
 
 program
