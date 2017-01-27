@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 const util = require('util');
 const logger = require('../helpers/logger');
 
@@ -42,5 +43,5 @@ module.exports = (env) => {
         });
       },
     });
-  }
+  };
 };

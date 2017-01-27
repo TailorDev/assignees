@@ -1,3 +1,4 @@
+/* eslint arrow-body-style: 1 */
 const gh = require('../helpers/github');
 const Repository = require('../models/Repository');
 
@@ -104,7 +105,7 @@ exports.enable = async (req, res, next) => {
 
       throw err;
     })
-    .then(hook => {
+    .then((hook) => {
       return repository
         .set({
           enabled: true,
@@ -170,7 +171,7 @@ exports.syncOrgs = (req, res) => {
 
   return gh.auth(user).users
     .getOrgs({})
-    .then(organizations => {
+    .then((organizations) => {
       return [
         {
           name: user.github_login,
@@ -185,7 +186,7 @@ exports.syncOrgs = (req, res) => {
         avatar_url: o.avatar_url,
       })));
     })
-    .then(organizations => {
+    .then((organizations) => {
       return user
         .set({
           organizations,

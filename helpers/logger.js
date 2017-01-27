@@ -1,3 +1,5 @@
+/* eslint no-console: 0 */
+
 const info = (message) => {
   console.log(`[info] ${message}`);
 };

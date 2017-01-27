@@ -1,6 +1,4 @@
-/**
- * Module dependencies.
- */
+/* eslint no-console: 0*/
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -192,16 +190,44 @@ app.get('/auth/github/callback', passport.authenticate('github', {
  */
 const errorHandler = fn => (...args) => fn(...args).catch(args[2]);
 const ownerParam = ':owner([0-9a-zA-Z]+[-0-9a-zA-Z]*)';
-const repoParam = ':repo([-_\.0-9a-zA-Z]+)';
+const repoParam = ':repo([-_.0-9a-zA-Z]+)';
 
-app.get('/projects', passportConfig.isAuthenticated, projectController.listOrgs);
-app.get(`/projects/${ownerParam}`, passportConfig.isAuthenticated, errorHandler(projectController.listRepos));
-app.post(`/projects/${ownerParam}/${repoParam}/enable`, passportConfig.isAuthenticated, errorHandler(projectController.enable));
-app.post(`/projects/${ownerParam}/${repoParam}/pause`, passportConfig.isAuthenticated, errorHandler(projectController.pause));
-app.post(`/projects/${ownerParam}/${repoParam}/configure`, passportConfig.isAuthenticated, errorHandler(projectController.configureRepo));
+app.get(
+  '/projects',
+  passportConfig.isAuthenticated,
+  projectController.listOrgs
+);
+app.get(
+  `/projects/${ownerParam}`,
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.listRepos)
+);
+app.post(
+  `/projects/${ownerParam}/${repoParam}/enable`,
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.enable)
+);
+app.post(
+  `/projects/${ownerParam}/${repoParam}/pause`,
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.pause)
+);
+app.post(
+  `/projects/${ownerParam}/${repoParam}/configure`,
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.configureRepo)
+);
 
-app.post('/sync/organizations', passportConfig.isAuthenticated, errorHandler(projectController.syncOrgs));
-app.post(`/sync/projects/${ownerParam}`, passportConfig.isAuthenticated, errorHandler(projectController.syncRepos));
+app.post(
+  '/sync/organizations',
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.syncOrgs)
+);
+app.post(
+  `/sync/projects/${ownerParam}`,
+  passportConfig.isAuthenticated,
+  errorHandler(projectController.syncRepos)
+);
 
 app.post('/events', errorHandler(eventController.listen));
 
@@ -210,14 +236,16 @@ app.get('/dashboard', passportConfig.isAdmin, adminController.index);
 
 // error handling and logging
 if (app.get('env') === 'development') {
-  app.use(require('morgan')('dev')); // eslint-disable-line global-require
-  app.use(require('errorhandler')()); // eslint-disable-line global-require
+  app.use(require('morgan')('dev')); // eslint-disable-line
+  app.use(require('errorhandler')()); // eslint-disable-line
 }
 
 // handle 404
-app.use((req, res, next) => res.status(404).render('error/404', {
-  title: 'Page Not Found',
-}));
+app.use((req, res) => {
+  res.status(404).render('error/404', {
+    title: 'Page Not Found',
+  });
+});
 
 // handle all other errors
 app.use(errors(app.get('env')));

@@ -1,3 +1,4 @@
+/* eslint no-return-assign: 0 */
 const util = require('util');
 const deck = require('deck');
 
@@ -15,22 +16,20 @@ const createHttpError = (statusCode, status, reason) => {
   return err;
 };
 
-const getFiles = async (github, owner, repo, number) => {
-  return new Promise((resolve, reject) => {
-    github.pullRequests.getFiles({
-      owner,
-      repo,
-      number,
-      per_page: 100,
-    }, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
+const getFiles = async (github, owner, repo, number) => new Promise((resolve, reject) => {
+  github.pullRequests.getFiles({
+    owner,
+    repo,
+    number,
+    per_page: 100,
+  }, (err, result) => {
+    if (err) {
+      reject(err);
+    } else {
+      resolve(result);
+    }
   });
-};
+});
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
@@ -56,7 +55,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
  *   createReviewRequest: boolean,
  * }
  */
-module.exports = (config) => async (repositoryId, number, author) => {
+module.exports = config => async (repositoryId, number, author) => {
   const repository = await Repository.findOneByGitHubId(repositoryId);
 
   if (!repository) {
@@ -83,7 +82,7 @@ module.exports = (config) => async (repositoryId, number, author) => {
     const countA = a.deletions;
     const countB = b.deletions;
 
-    return countA > countB ? -1 : (countA < countB ? 1 : 0);
+    return countA > countB ? -1 : (countA < countB ? 1 : 0); // eslint-disable-line
   });
   // 1.2 - only take maxPullRequestFilesToProcess files
   files = files.slice(0, config.maxPullRequestFilesToProcess);
@@ -103,7 +102,7 @@ module.exports = (config) => async (repositoryId, number, author) => {
     .then(authors => authors.reduce((a, b) => a.concat(b), []))
     .then(authors => authors.filter(a => a !== author))
     // create a dict with { login: weight }
-    .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}))
+    .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {})) // eslint-disable-line
   ;
 
   const collaborators = await github.repos
@@ -116,7 +115,7 @@ module.exports = (config) => async (repositoryId, number, author) => {
     .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
     .then(collaborators => collaborators.map(collaborator => collaborator.login))
     .then(collaborators => collaborators.filter(collaborator => collaborator !== author))
-    .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {}))
+    .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {})) // eslint-disable-line
   ;
 
   let reviewers = [];
