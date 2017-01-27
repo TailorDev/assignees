@@ -1,0 +1,134 @@
+#!/usr/bin/env node
+const program = require('commander');
+const mongoose = require('mongoose');
+const chalk = require('chalk');
+const util = require('util');
+
+const pkg = require('../package.json');
+const User = require('../models/User');
+
+mongoose.Promise = global.Promise;
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
+mongoose.connection.on('error', () => {
+  console.log('%s MongoDB connection error :(', chalk.red('✗'));
+  process.exit(-1);
+});
+
+program
+  .version(pkg.version)
+;
+
+const success = (message) => {
+  console.log(`${chalk.green('SUCCESS')} ${message}`);
+  return 0;
+};
+
+const error = (message) => {
+  console.log(`${chalk.red('NOPE')} ${message}`);
+  return 1;
+};
+
+const ADD = 'add';
+const REMOVE = 'remove';
+
+const updateUserFeature = async (username, feature, operation) => {
+  const user = await User.findOne({ github_login: username }).catch(null);
+
+  if (!user) {
+    return error(`User "${username}" not found`);
+  }
+
+  if (!feature) {
+    return error('invalid feature');
+  }
+
+  const features = user.features ? (user.features || []) : [];
+
+  switch (operation) {
+    case ADD:
+      if (features.includes(feature)) {
+        return error('user already has this feature, aborting');
+      }
+
+      features.push(feature);
+
+      return user.set({ features }).save().then(() => {
+        return success(`added feature "${feature}" to user "${username}"`);
+      });
+
+    case REMOVE:
+      if (!features.includes(feature)) {
+        return error('user does not have this feature, aborting');
+      }
+
+      return user.set({
+        features: features.filter(f => f !== feature),
+      }).save().then(() => {
+        return success(`removed feature "${feature}" on user "${username}"`);
+      });
+  }
+};
+
+const listUserFeatures = async (username) => {
+  const user = await User.findOne({ github_login: username }).catch(null);
+
+  if (!user) {
+    return error(`user "${username}" not found`);
+  }
+
+  success(`User "${user.github_login}" has the following features: ${util.inspect(user.features)}`);
+};
+
+// implements the different commands
+program
+  .command('feature:add [username] [feature]')
+  .description('add feature to user')
+  .action(async (username, feature, options) => {
+    try {
+      process.exitCode = await updateUserFeature(username, feature, ADD);
+    } catch(e) {
+      console.log(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  }) 
+;
+
+program
+  .command('feature:remove [username] [feature]')
+  .description('remove feature to user')
+  .action(async (username, feature, options) => {
+    try {
+      process.exitCode = await updateUserFeature(username, feature, REMOVE);
+    } catch(e) {
+      console.log(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  }) 
+;
+
+program
+  .command('feature:list [username...]')
+  .description('list enabled features of user')
+  .action(async (usernames, options) => {
+    try {
+      process.exitCode = await Promise.all(
+        usernames.map(username => listUserFeatures(username))
+      );
+    } catch(e) {
+      console.log(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program.parse(process.argv);
+
+if (!program.args.length) {
+  program.help();
+}
