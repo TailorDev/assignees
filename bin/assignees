@@ -12,7 +12,18 @@ const mongoose = require('../config/mongoose')(logger);
 const findReviewersTask = require('../tasks/findReviewers');
 const listUserFeaturesTask = require('../tasks/listUserFeatures');
 const updateUserFeatureTask = require('../tasks/updateUserFeature');
-const { ADD, REMOVE } = require('../tasks/updateUserFeature');
+
+const updateUserFeatureAction = operation => async (username, feature) => {
+  const updateUserFeature = updateUserFeatureTask.configure({ logger });
+  try {
+    await updateUserFeature(username, feature, operation);
+  } catch(e) {
+    logger.error(chalk.red(e.stack));
+    process.exitCode = 1;
+  } finally {
+    mongoose.connection.close();
+  }
+};
 
 program
   .version(require('../package.json').version)
@@ -21,33 +32,13 @@ program
 program
   .command('feature:add [username] [feature]')
   .description('add feature to user')
-  .action(async (username, feature) => {
-    const updateUserFeature = updateUserFeatureTask.configure({ logger });
-    try {
-      process.exitCode = await updateUserFeature(username, feature, ADD);
-    } catch(e) {
-      console.log(chalk.red(e.stack));
-      process.exitCode = 1;
-    } finally {
-      mongoose.connection.close();
-    }
-  })
+  .action(updateUserFeatureAction(updateUserFeatureTask.ADD))
 ;
 
 program
   .command('feature:remove [username] [feature]')
   .description('remove feature to user')
-  .action(async (username, feature) => {
-    const updateUserFeature = updateUserFeatureTask.configure({ logger });
-    try {
-      process.exitCode = await updateUserFeature(username, feature, REMOVE);
-    } catch(e) {
-      console.log(chalk.red(e.stack));
-      process.exitCode = 1;
-    } finally {
-      mongoose.connection.close();
-    }
-  })
+  .action(updateUserFeatureAction(updateUserFeatureTask.REMOVE))
 ;
 
 program
@@ -57,11 +48,9 @@ program
     const listUserFeatures = listUserFeaturesTask.configure({ logger });
 
     try {
-      process.exitCode = await Promise.all(
-        usernames.map(username => listUserFeatures(username))
-      );
+      await Promise.all(usernames.map(username => listUserFeatures(username)));
     } catch(e) {
-      console.log(chalk.red(e.stack));
+      logger.error(chalk.red(e.stack));
       process.exitCode = 1;
     } finally {
       mongoose.connection.close();
@@ -77,7 +66,7 @@ program
     const dryrun = options.dryrun || false;
 
     if (dryrun) {
-      console.log('DRY RUN mode enabled');
+      logger.info('DRY RUN mode enabled');
     }
 
     const findReviewers = findReviewersTask.configure({
@@ -93,7 +82,7 @@ program
         logger.info('reviewer(s) assigned');
       }
     } catch(e) {
-      console.log(chalk.red(e.stack));
+      logger.error(chalk.red(e.stack));
       process.exitCode = 1;
     } finally {
       mongoose.connection.close();
