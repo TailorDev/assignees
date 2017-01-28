@@ -188,7 +188,7 @@ app.get('/auth/github/callback', passport.authenticate('github', {
 /**
  * Real app routes
  */
-const errorHandler = fn => (...args) => fn(...args).catch(args[2]);
+const withErrorHandler = fn => (...args) => fn(...args).catch(args[2]);
 const ownerParam = ':owner([0-9a-zA-Z]+[-0-9a-zA-Z]*)';
 const repoParam = ':repo([-_.0-9a-zA-Z]+)';
 
@@ -200,36 +200,36 @@ app.get(
 app.get(
   `/projects/${ownerParam}`,
   passportConfig.isAuthenticated,
-  errorHandler(projectController.listRepos)
+  withErrorHandler(projectController.listRepos)
 );
 app.post(
   `/projects/${ownerParam}/${repoParam}/enable`,
   passportConfig.isAuthenticated,
-  errorHandler(projectController.enable)
+  withErrorHandler(projectController.enable)
 );
 app.post(
   `/projects/${ownerParam}/${repoParam}/pause`,
   passportConfig.isAuthenticated,
-  errorHandler(projectController.pause)
+  withErrorHandler(projectController.pause)
 );
 app.post(
   `/projects/${ownerParam}/${repoParam}/configure`,
   passportConfig.isAuthenticated,
-  errorHandler(projectController.configureRepo)
+  withErrorHandler(projectController.configureRepo)
 );
 
 app.post(
   '/sync/organizations',
   passportConfig.isAuthenticated,
-  errorHandler(projectController.syncOrgs)
+  withErrorHandler(projectController.syncOrgs)
 );
 app.post(
   `/sync/projects/${ownerParam}`,
   passportConfig.isAuthenticated,
-  errorHandler(projectController.syncRepos)
+  withErrorHandler(projectController.syncRepos)
 );
 
-app.post('/events', errorHandler(eventController.listen));
+app.post('/events', withErrorHandler(eventController.listen));
 
 // Admin corner
 app.get('/dashboard', passportConfig.isAdmin, adminController.index);
