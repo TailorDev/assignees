@@ -48,8 +48,6 @@ const logReviewers = (logger, repository, number, reviewers) => {
   ].join(' '));
 };
 
-
-
 /**
  * config = {
  *   maxPullRequestFilesToProcess: number,
@@ -57,7 +55,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
  *   createReviewRequest: boolean,
  * }
  */
-module.exports = config => async (repositoryId, number, author, logger) => {
+exports.configure = config => async (repositoryId, number, author, logger) => {
   const repository = await Repository.findOneByGitHubId(repositoryId);
 
   if (!repository) {

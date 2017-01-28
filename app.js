@@ -7,7 +7,6 @@ const lusca = require('lusca');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
 const path = require('path');
-const mongoose = require('mongoose');
 const passport = require('passport');
 const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
@@ -33,17 +32,8 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
-const logger = require('./helpers/logger').new(app.get('env'));
-
-/**
- * Connect to MongoDB.
- */
-mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-mongoose.connection.on('error', () => {
-  logger.error('✗ MongoDB connection error. Please make sure MongoDB is running.');
-  process.exit();
-});
+const logger = require('./helpers/logger').consoleLogger(app.get('env'));
+const mongoose = require('./config/mongoose')(logger);
 
 /**
  * Express configuration.

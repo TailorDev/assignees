@@ -1,15 +1,17 @@
 /* eslint no-console: 0 */
 
-const prependMessage = (pre, fn) => (...args) => {
+const prependMessage = (log, pre) => (...args) => {
   const message = args.shift();
 
-  fn(`${pre} ${message}`, ...args);
+  log(`${pre} ${message}`, ...args);
 };
 
 // basic logger
-const logger = {
-  info: (...args) => prependMessage('[info]', console.log)(...args),
-  error: (...args) => prependMessage('[error]', console.log)(...args),
+const prependableLogger = (log, preInfo, preError) => {
+  return {
+    info: (...args) => prependMessage(log, preInfo)(...args),
+    error: (...args) => prependMessage(log, preError)(...args),
+  };
 };
 
 const nullLogger = {
@@ -17,7 +19,7 @@ const nullLogger = {
   error: () => {},
 };
 
-exports.withRequestId = (logger, requestId) => {
+const withRequestId = (logger, requestId) => {
   if (!requestId) {
     return logger;
   }
@@ -28,10 +30,14 @@ exports.withRequestId = (logger, requestId) => {
   };
 };
 
-exports.new = (env) => {
-  if (env === 'test') {
+exports.prependableLogger = prependableLogger;
+
+exports.withRequestId = withRequestId;
+
+exports.consoleLogger = (env) => {
+  if (env !== 'test') {
     return nullLogger;
   }
 
-  return logger;
+  return prependableLogger(console.log, '[info]', '[error]');
 };

@@ -1,6 +1,6 @@
-const logger = require('../helpers/logger');
+const findReviewersTask = require('../tasks/findReviewers');
 
-const findReviewers = require('../tasks/findReviewers')({
+const findReviewers = findReviewersTask.configure({
   maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
   nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
   createReviewRequest: true,

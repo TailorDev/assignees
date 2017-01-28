@@ -1,96 +1,28 @@
 #!/usr/bin/env node
 const program = require('commander');
-const mongoose = require('mongoose');
 const chalk = require('chalk');
 
-const pkg = require('../package.json');
-const inspect = require('../helpers/inspect');
+const logger = require('../helpers/logger').prependableLogger(
+  console.log,
+  chalk.green('SUCCESS'),
+  chalk.red('NOPE')
+);
+const mongoose = require('../config/mongoose')(logger);
 
-const User = require('../models/User');
-const findReviewers = require('../tasks/findReviewers');
-
-mongoose.Promise = global.Promise;
-mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
-mongoose.connection.on('error', () => {
-  console.log('%s MongoDB connection error :(', chalk.red('✗'));
-  process.exit(-1);
-});
+const findReviewersTask = require('../tasks/findReviewers');
+const listUserFeaturesTask = require('../tasks/listUserFeatures');
+const updateUserFeatureTask = require('../tasks/updateUserFeature');
+const { ADD, REMOVE } = require('../tasks/updateUserFeature');
 
 program
-  .version(pkg.version)
+  .version(require('../package.json').version)
 ;
 
-const success = (message) => {
-  console.log(`${chalk.green('SUCCESS')} ${message}`);
-  return 0;
-};
-
-const error = (message) => {
-  console.log(`${chalk.red('NOPE')} ${message}`);
-  return 1;
-};
-
-const logger = {
-  info: success,
-  error: error,
-};
-
-const ADD = 'add';
-const REMOVE = 'remove';
-
-const updateUserFeature = async (username, feature, operation) => {
-  const user = await User.findOne({ github_login: username }).catch(null);
-
-  if (!user) {
-    return error(`User "${username}" not found`);
-  }
-
-  if (!feature) {
-    return error('invalid feature');
-  }
-
-  const features = user.features ? (user.features || []) : [];
-
-  switch (operation) {
-    case ADD:
-      if (features.includes(feature)) {
-        return error('user already has this feature, aborting');
-      }
-
-      features.push(feature);
-
-      return user.set({ features }).save().then(() => {
-        return success(`added feature "${feature}" to user "${username}"`);
-      });
-
-    case REMOVE:
-      if (!features.includes(feature)) {
-        return error('user does not have this feature, aborting');
-      }
-
-      return user.set({
-        features: features.filter(f => f !== feature),
-      }).save().then(() => {
-        return success(`removed feature "${feature}" on user "${username}"`);
-      });
-  }
-};
-
-const listUserFeatures = async (username) => {
-  const user = await User.findOne({ github_login: username }).catch(null);
-
-  if (!user) {
-    return error(`user "${username}" not found`);
-  }
-
-  success(`user "${user.github_login}" has the following features: ${inspect(user.features)}`);
-};
-
-// implements the different commands
 program
   .command('feature:add [username] [feature]')
   .description('add feature to user')
   .action(async (username, feature) => {
+    const updateUserFeature = updateUserFeatureTask.configure({ logger });
     try {
       process.exitCode = await updateUserFeature(username, feature, ADD);
     } catch(e) {
@@ -106,6 +38,7 @@ program
   .command('feature:remove [username] [feature]')
   .description('remove feature to user')
   .action(async (username, feature) => {
+    const updateUserFeature = updateUserFeatureTask.configure({ logger });
     try {
       process.exitCode = await updateUserFeature(username, feature, REMOVE);
     } catch(e) {
@@ -121,6 +54,8 @@ program
   .command('feature:list [username...]')
   .description('list enabled features of user')
   .action(async (usernames) => {
+    const listUserFeatures = listUserFeaturesTask.configure({ logger });
+
     try {
       process.exitCode = await Promise.all(
         usernames.map(username => listUserFeatures(username))
@@ -145,15 +80,17 @@ program
       console.log('DRY RUN mode enabled');
     }
 
+    const findReviewers = findReviewersTask.configure({
+      maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
+      nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
+      createReviewRequest: dryrun === false,
+    });
+
     try {
-      await findReviewers({
-        maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
-        nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
-        createReviewRequest: dryrun === false,
-      })(repositoryId, number, author, logger);
+      await findReviewers(repositoryId, number, author, logger);
 
       if (!dryrun) {
-        success('reviewer(s) assigned');
+        logger.info('reviewer(s) assigned');
       }
     } catch(e) {
       console.log(chalk.red(e.stack));
