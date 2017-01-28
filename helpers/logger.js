@@ -35,7 +35,7 @@ exports.prependableLogger = prependableLogger;
 exports.withRequestId = withRequestId;
 
 exports.consoleLogger = (env) => {
-  if (env !== 'test') {
+  if (env === 'test') {
     return nullLogger;
   }
 
