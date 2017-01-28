@@ -237,7 +237,7 @@ app.use((req, res) => {
 });
 
 // handle all other errors
-app.use(require('./middlewares/error')(app.get('env')));
+app.use(require('./middlewares/error'));
 
 /**
  * Start Express server.

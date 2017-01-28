@@ -276,6 +276,67 @@ describe('POST /events', () => {
         })
       ;
     });
+
+    it('should handle PR with 0 files', (done) => {
+      const event = {
+        action: 'opened',
+        repository: {
+          id: 123,
+        },
+        pull_request: {
+          number: '10',
+          user: {
+            login: 'john',
+          },
+          base: {
+            ref: 'master',
+          },
+        },
+      };
+
+      const repository = {
+        owner: 'foo',
+        name: 'bar',
+        enabled: true,
+        enabled_by: {
+          user_id: 'user-id',
+        },
+        max_reviewers: 3,
+      };
+
+      const user = {
+        user_id: 'user-id',
+        getGitHubToken: () => 'token',
+      };
+
+      const repoMock = sinon.mock(Repository);
+      repoMock.expects('findOne').resolves(repository);
+
+      const userMock = sinon.mock(User);
+      userMock.expects('findOne').resolves(user);
+
+      githubApi
+        .get('/repos/foo/bar/pulls/10/files')
+        .query({ per_page: 100, access_token: 'token' })
+        .reply(200, [])
+      ;
+
+      request(app)
+        .post('/events')
+        .set('x-github-event', 'pull_request')
+        .send(event)
+        .end((err, res) => {
+          expect(githubApi.isDone()).to.be.true;
+
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal('ok');
+
+          repoMock.restore();
+          userMock.restore();
+          done();
+        })
+      ;
+    });
   });
 
   describe('without smart selection', () => {

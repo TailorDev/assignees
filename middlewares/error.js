@@ -3,47 +3,39 @@ const util = require('util');
 
 const inspect = require('../helpers/inspect');
 
-module.exports = (env) => {
-  if (env === 'test') {
-    return (err, req, res, next) => {
-      res.status(err.statusCode || 500).end();
-    };
+module.exports = (err, req, res, next) => {
+  const info = [];
+
+  if (req.user) {
+    info.push(`user_id=${req.user._id}`);
+    info.push(`user_login=${req.user.github_login}`);
   }
 
-  return (err, req, res, next) => {
-    const info = [];
+  info.push([
+    `request_method=${req.method}`,
+    `request_body=${inspect(req.body)}`,
+    `request_headers=${inspect(req.headers)}`,
+  ].join(' '));
 
-    if (req.user) {
-      info.push(`user_id=${req.user._id}`);
-      info.push(`user_login=${req.user.github_login}`);
-    }
+  Object.getOwnPropertyNames(err).forEach(
+    k => info.push(`error_${k}=${inspect(err[k])}`)
+  );
 
-    info.push([
-      `request_method=${req.method}`,
-      `request_body=${inspect(req.body)}`,
-      `request_headers=${inspect(req.headers)}`,
-    ].join(' '));
+  req.logger.error(info.join(' '));
 
-    Object.getOwnPropertyNames(err).forEach(
-      k => info.push(`error_${k}=${inspect(err[k])}`)
-    );
-
-    req.logger.error(info.join(' '));
-
-    return res.format({
-      json: () => {
-        res.status(err.statusCode || 500).send({
-          message: 'Server Error',
-        });
-      },
-      html: () => {
-        res.status(500).render('error/500', {
-          title: 'Server Error',
-        });
-      },
-      default: () => {
-        res.status(406).send('Not Acceptable');
-      },
-    });
-  };
+  return res.format({
+    json: () => {
+      res.status(err.statusCode || 500).send({
+        message: 'Server Error',
+      });
+    },
+    html: () => {
+      res.status(500).render('error/500', {
+        title: 'Server Error',
+      });
+    },
+    default: () => {
+      res.status(406).send('Not Acceptable');
+    },
+  });
 };

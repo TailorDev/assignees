@@ -23,8 +23,8 @@ const withRequestId = (logger, requestId) => {
   }
 
   return {
-    info: message => logger.info(`request_id=${requestId} ${message}`),
-    error: message => logger.error(`request_id=${requestId} ${message}`),
+    info: (...args) => prependMessage(logger.info, `request_id=${requestId}`)(...args),
+    error: (...args) => prependMessage(logger.error, `request_id=${requestId}`)(...args),
   };
 };
 

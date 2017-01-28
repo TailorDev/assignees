@@ -40,20 +40,13 @@ const weigthedShuffle = items => deck.shuffle(items);
 
 const take = number => items => items.slice(0, number);
 
-const getPullRequestFiles = async (github, repository, number) => new Promise((resolve, reject) => {
-  github.pullRequests.getFiles({
+const getPullRequestFiles = async (github, repository, number) => github.pullRequests.
+  getFiles({
     owner: repository.owner,
     repo: repository.name,
     number,
     per_page: 100,
-  }, (err, result) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(result);
-    }
   });
-});
 
 const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => async file => github.repos
     .getCommits({
@@ -74,6 +67,7 @@ const getCollaborators = async (github, repository) => github.repos
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
+    "message='potential reviewers'",
     `collaborators=${inspect(collaborators)}`,
     `authors=${inspect(authorsFromHistory)}`,
   ].join(' '));
@@ -81,6 +75,7 @@ const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
 
 const logReviewers = (logger, repository, number, reviewers) => {
   logger.info([
+    "message='selected reviewers'",
     `owner=${repository.owner}`,
     `name=${repository.name}`,
     `number=${number}`,
@@ -123,6 +118,12 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     .then(sortByNumberOfDeletions)
     .then(take(config.maxPullRequestFilesToProcess))
   ;
+
+  if (files.length === 0) {
+    logger.info("message='no files'");
+
+    return Promise.resolve();
+  }
 
   // 2 - retrieve the logins of people who touched this files
   const authorsFromHistory = await Promise.all(
