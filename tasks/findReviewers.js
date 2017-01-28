@@ -42,7 +42,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
   logger.info([
     `owner=${repository.owner}`,
     `name=${repository.name}`,
-    `pull_request_number=${number}`,
+    `number=${number}`,
     `max_reviewers=${repository.max_reviewers}`,
     `reviewers=${inspect(reviewers)}`,
   ].join(' '));
@@ -53,6 +53,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
  *   maxPullRequestFilesToProcess: number,
  *   nbCommitsToRetrieve: number,
  *   createReviewRequest: boolean,
+ *   logger: { info: Function, error: Function },
  * }
  */
 module.exports = config => async (repositoryId, number, author) => {
@@ -71,6 +72,8 @@ module.exports = config => async (repositoryId, number, author) => {
   if (!user) {
     throw createHttpError(401, 'ignored', 'user not found');
   }
+
+  config.logger.info(`repository_id=${repositoryId} number=${number} author=${author}`);
 
   // the GitHub dance
   const github = gh.auth(user);
