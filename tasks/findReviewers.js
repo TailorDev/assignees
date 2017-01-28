@@ -48,6 +48,17 @@ const logReviewers = (logger, repository, number, reviewers) => {
   ].join(' '));
 };
 
+const loggerWithRequestId = (logger, requestId) => {
+  if (!requestId) {
+    return logger;
+  }
+
+  return {
+    info: (message) => logger.info(`request_id=${requestId} ${message}`),
+    error: (message) => logger.error(`request_id=${requestId} ${message}`),
+  };
+};
+
 /**
  * config = {
  *   maxPullRequestFilesToProcess: number,
@@ -56,7 +67,7 @@ const logReviewers = (logger, repository, number, reviewers) => {
  *   logger: { info: Function, error: Function },
  * }
  */
-module.exports = config => async (repositoryId, number, author) => {
+module.exports = config => async (repositoryId, number, author, requestId) => {
   const repository = await Repository.findOneByGitHubId(repositoryId);
 
   if (!repository) {
@@ -73,7 +84,8 @@ module.exports = config => async (repositoryId, number, author) => {
     throw createHttpError(401, 'ignored', 'user not found');
   }
 
-  config.logger.info(`repository_id=${repositoryId} number=${number} author=${author}`);
+  const logger = loggerWithRequestId(config.logger, requestId);
+  logger.info(`repository_id=${repositoryId} number=${number} author=${author}`);
 
   // the GitHub dance
   const github = gh.auth(user);
@@ -133,7 +145,7 @@ module.exports = config => async (repositoryId, number, author) => {
     reviewers = collaborators;
   }
 
-  logPotentialReviewers(config.logger, collaborators, authorsFromHistory);
+  logPotentialReviewers(logger, collaborators, authorsFromHistory);
 
   // 3 - We're almost there
   return Promise.resolve(reviewers)
@@ -145,7 +157,7 @@ module.exports = config => async (repositoryId, number, author) => {
         throw createHttpError(422, 'aborted', 'no reviewers found');
       }
 
-      logReviewers(config.logger, repository, number, reviewers);
+      logReviewers(logger, repository, number, reviewers);
 
       if (config.createReviewRequest === false) {
         return Promise.resolve();

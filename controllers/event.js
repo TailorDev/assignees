@@ -31,7 +31,7 @@ exports.listen = async (req, res) => {
     req.body.repository.id,
     req.body.pull_request.number,
     req.body.pull_request.user.login,
-    req.id || null
+    req.id
   );
 
   res.send({ status: 'ok' });
