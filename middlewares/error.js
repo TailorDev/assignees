@@ -1,9 +1,9 @@
 /* eslint no-unused-vars: 0 */
 const util = require('util');
-const logger = require('../helpers/logger');
+
 const inspect = require('../helpers/inspect');
 
-module.exports = (env) => {
+module.exports = (env, logger) => {
   if (env === 'test') {
     return (err, req, res, next) => {
       res.status(err.statusCode || 500).end();
@@ -11,11 +11,7 @@ module.exports = (env) => {
   }
 
   return (err, req, res, next) => {
-    const info = [
-      `request_method=${req.method}`,
-      `request_body=${inspect(req.body)}`,
-      `request_headers=${inspect(req.headers)}`,
-    ];
+    const info = [];
 
     if (req.id) {
       info.push(`request_id=${req.id}`);
@@ -23,8 +19,14 @@ module.exports = (env) => {
 
     if (req.user) {
       info.push(`user_id=${req.user._id}`);
-      info.push(`user_username=${req.user.github_login}`);
+      info.push(`user_login=${req.user.github_login}`);
     }
+
+    info.push([
+      `request_method=${req.method}`,
+      `request_body=${inspect(req.body)}`,
+      `request_headers=${inspect(req.headers)}`,
+    ].join(' '));
 
     Object.getOwnPropertyNames(err).forEach(
       k => info.push(`error_${k}=${inspect(err[k])}`)
@@ -42,6 +44,9 @@ module.exports = (env) => {
         res.status(500).render('error/500', {
           title: 'Server Error',
         });
+      },
+      'default': () => {
+        res.status(406).send('Not Acceptable');
       },
     });
   };

@@ -16,7 +16,7 @@ const moment = require('moment');
 const d3Format = require('d3-format');
 
 const gh = require('./helpers/github');
-const errors = require('./middlewares/errors');
+const logger = require('./helpers/logger');
 
 /**
  * Controllers (route handlers).
@@ -51,11 +51,11 @@ mongoose.connection.on('error', () => {
  * Express configuration.
  */
 app.set('port', process.env.PORT || 3000);
+app.use(require('express-request-id')()); // eslint-disable-line global-require
 
 if (app.get('env') === 'production') {
   app.enable('trust proxy');
   app.use(require('express-sslify').HTTPS({ trustProtoHeader: true })); // eslint-disable-line global-require
-  app.use(require('express-request-id')()); // eslint-disable-line global-require
 
   // redirect to custom domain (if any)
   // TODO: make it work in dev too
@@ -144,7 +144,7 @@ app.locals.pretty = true; // pretty html == better bootstrap output (yes, I know
 app.locals.moment = moment;
 app.locals.d3Format = d3Format;
 app.locals.github_app_id = process.env.GITHUB_APP_ID;
-app.locals.asset = require('./middlewares/assets')();
+app.locals.asset = require('./middlewares/asset')();
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 
@@ -248,7 +248,7 @@ app.use((req, res) => {
 });
 
 // handle all other errors
-app.use(errors(app.get('env')));
+app.use(require('./middlewares/error')(app.get('env'), logger));
 
 /**
  * Start Express server.
