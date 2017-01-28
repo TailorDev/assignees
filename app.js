@@ -33,7 +33,7 @@ const passportConfig = require('./config/passport');
  */
 const app = express();
 const logger = require('./helpers/logger').consoleLogger(app.get('env'));
-const mongoose = require('./config/mongoose')(logger);
+require('./config/mongoose')(logger);
 
 /**
  * Express configuration.

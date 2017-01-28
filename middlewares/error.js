@@ -41,7 +41,7 @@ module.exports = (env) => {
           title: 'Server Error',
         });
       },
-      'default': () => {
+      default: () => {
         res.status(406).send('Not Acceptable');
       },
     });

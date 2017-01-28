@@ -7,12 +7,10 @@ const prependMessage = (log, pre) => (...args) => {
 };
 
 // basic logger
-const prependableLogger = (log, preInfo, preError) => {
-  return {
-    info: (...args) => prependMessage(log, preInfo)(...args),
-    error: (...args) => prependMessage(log, preError)(...args),
-  };
-};
+const prependableLogger = (log, preInfo, preError) => ({
+  info: (...args) => prependMessage(log, preInfo)(...args),
+  error: (...args) => prependMessage(log, preError)(...args),
+});
 
 const nullLogger = {
   info: () => {},
@@ -25,8 +23,8 @@ const withRequestId = (logger, requestId) => {
   }
 
   return {
-    info: (message) => logger.info(`request_id=${requestId} ${message}`),
-    error: (message) => logger.error(`request_id=${requestId} ${message}`),
+    info: message => logger.info(`request_id=${requestId} ${message}`),
+    error: message => logger.error(`request_id=${requestId} ${message}`),
   };
 };
 

@@ -16,6 +16,30 @@ const createHttpError = (statusCode, status, reason) => {
   return err;
 };
 
+const sortByNumberOfDeletions = files => files.sort((a, b) => {
+  const countA = a.deletions;
+  const countB = b.deletions;
+
+  return countA > countB ? -1 : (countA < countB ? 1 : 0); // eslint-disable-line
+});
+
+const flattenResults = results => results.reduce((a, b) => a.concat(b), []);
+
+const exclude = excluded => items => items.filter(item => item !== excluded);
+
+// create a dict with { login: weight }
+const createWeightedMap = authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {}); // eslint-disable-line
+
+const selectThoseWithPushAccess = users => users.filter(u => u.permissions.push === true);
+
+const getLoginsFromList = users => users.map(u => u.login);
+
+const getLoginsFromCommits = commits => commits.map(commit => commit.author.login);
+
+const weigthedShuffle = items => deck.shuffle(items);
+
+const take = number => items => items.slice(0, number);
+
 const getPullRequestFiles = async (github, repository, number) => new Promise((resolve, reject) => {
   github.pullRequests.getFiles({
     owner: repository.owner,
@@ -31,15 +55,7 @@ const getPullRequestFiles = async (github, repository, number) => new Promise((r
   });
 });
 
-const sortByNumberOfDeletions = files => files.sort((a, b) => {
-  const countA = a.deletions;
-  const countB = b.deletions;
-
-  return countA > countB ? -1 : (countA < countB ? 1 : 0); // eslint-disable-line
-});
-
-const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => async file => {
-  return github.repos
+const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => async file => github.repos
     .getCommits({
       owner: repository.owner,
       repo: repository.name,
@@ -47,35 +63,14 @@ const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => asy
       per_page: nbCommitsToRetrieve,
     })
     .catch([])
-    .then(getLoginsFromCommits)
-  ;
-};
+    .then(getLoginsFromCommits);
 
-const getCollaborators = async (github, repository) => new Promise((resolve, reject) => {
-  github.repos.getCollaborators({
+const getCollaborators = async (github, repository) => github.repos
+  .getCollaborators({
     owner: repository.owner,
     repo: repository.name,
-  }, (err, result) => {
-    resolve(err ? [] : result);
-  });
-});
-
-const flattenResults = results => results.reduce((a, b) => a.concat(b), []);
-
-const exclude = excluded => items => items.filter(item => item !== excluded);
-
-// create a dict with { login: weight }
-const createWeightedMap = authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {});
-
-const selectThoseWithPushAccess = users => users.filter(u => u.permissions.push === true);
-
-const getLoginsFromList = users => users.map(u => u.login);
-
-const getLoginsFromCommits = commits => commits.map(commit => commit.author.login);
-
-const weigthedShuffle = items => deck.shuffle(items);
-
-const take = number => items => items.slice(0, number);
+  })
+  .catch([]);
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
