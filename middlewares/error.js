@@ -3,7 +3,7 @@ const util = require('util');
 
 const inspect = require('../helpers/inspect');
 
-module.exports = (env, logger) => {
+module.exports = (env) => {
   if (env === 'test') {
     return (err, req, res, next) => {
       res.status(err.statusCode || 500).end();
@@ -12,10 +12,6 @@ module.exports = (env, logger) => {
 
   return (err, req, res, next) => {
     const info = [];
-
-    if (req.id) {
-      info.push(`request_id=${req.id}`);
-    }
 
     if (req.user) {
       info.push(`user_id=${req.user._id}`);
@@ -32,7 +28,7 @@ module.exports = (env, logger) => {
       k => info.push(`error_${k}=${inspect(err[k])}`)
     );
 
-    logger.error(info.join(' '));
+    req.logger.error(info.join(' '));
 
     return res.format({
       json: () => {

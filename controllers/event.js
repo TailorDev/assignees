@@ -4,7 +4,6 @@ const findReviewers = require('../tasks/findReviewers')({
   maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
   nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
   createReviewRequest: true,
-  logger,
 });
 
 /**
@@ -31,7 +30,7 @@ exports.listen = async (req, res) => {
     req.body.repository.id,
     req.body.pull_request.number,
     req.body.pull_request.user.login,
-    req.id
+    req.logger
   );
 
   res.send({ status: 'ok' });

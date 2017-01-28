@@ -48,26 +48,16 @@ const logReviewers = (logger, repository, number, reviewers) => {
   ].join(' '));
 };
 
-const loggerWithRequestId = (logger, requestId) => {
-  if (!requestId) {
-    return logger;
-  }
 
-  return {
-    info: (message) => logger.info(`request_id=${requestId} ${message}`),
-    error: (message) => logger.error(`request_id=${requestId} ${message}`),
-  };
-};
 
 /**
  * config = {
  *   maxPullRequestFilesToProcess: number,
  *   nbCommitsToRetrieve: number,
  *   createReviewRequest: boolean,
- *   logger: { info: Function, error: Function },
  * }
  */
-module.exports = config => async (repositoryId, number, author, requestId) => {
+module.exports = config => async (repositoryId, number, author, logger) => {
   const repository = await Repository.findOneByGitHubId(repositoryId);
 
   if (!repository) {
@@ -84,7 +74,6 @@ module.exports = config => async (repositoryId, number, author, requestId) => {
     throw createHttpError(401, 'ignored', 'user not found');
   }
 
-  const logger = loggerWithRequestId(config.logger, requestId);
   logger.info(`repository_id=${repositoryId} number=${number} author=${author}`);
 
   // the GitHub dance

@@ -30,6 +30,11 @@ const error = (message) => {
   return 1;
 };
 
+const logger = {
+  info: success,
+  error: error,
+};
+
 const ADD = 'add';
 const REMOVE = 'remove';
 
@@ -145,11 +150,7 @@ program
         maxPullRequestFilesToProcess: process.env.maxPullRequestFilesToProcess || 5,
         nbCommitsToRetrieve: process.env.nbCommitsToRetrieve || 30,
         createReviewRequest: dryrun === false,
-        logger: {
-          info: success,
-          error: error,
-        },
-      })(repositoryId, number, author);
+      })(repositoryId, number, author, logger);
 
       if (!dryrun) {
         success('reviewer(s) assigned');

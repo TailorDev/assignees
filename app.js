@@ -1,9 +1,8 @@
-/* eslint no-console: 0*/
+/* eslint global-require: 0 */
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const chalk = require('chalk');
 const lusca = require('lusca');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
@@ -14,9 +13,7 @@ const expressValidator = require('express-validator');
 const sass = require('node-sass-middleware');
 const moment = require('moment');
 const d3Format = require('d3-format');
-
 const gh = require('./helpers/github');
-const logger = require('./helpers/logger');
 
 /**
  * Controllers (route handlers).
@@ -36,6 +33,7 @@ const passportConfig = require('./config/passport');
  * Create Express server.
  */
 const app = express();
+const logger = require('./helpers/logger').new(app.get('env'));
 
 /**
  * Connect to MongoDB.
@@ -43,7 +41,7 @@ const app = express();
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI);
 mongoose.connection.on('error', () => {
-  console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'));
+  logger.error('✗ MongoDB connection error. Please make sure MongoDB is running.');
   process.exit();
 });
 
@@ -51,11 +49,12 @@ mongoose.connection.on('error', () => {
  * Express configuration.
  */
 app.set('port', process.env.PORT || 3000);
-app.use(require('express-request-id')()); // eslint-disable-line global-require
+app.use(require('express-request-id')());
+app.use(require('./middlewares/logger')(logger));
 
 if (app.get('env') === 'production') {
   app.enable('trust proxy');
-  app.use(require('express-sslify').HTTPS({ trustProtoHeader: true })); // eslint-disable-line global-require
+  app.use(require('express-sslify').HTTPS({ trustProtoHeader: true }));
 
   // redirect to custom domain (if any)
   // TODO: make it work in dev too
@@ -248,15 +247,15 @@ app.use((req, res) => {
 });
 
 // handle all other errors
-app.use(require('./middlewares/error')(app.get('env'), logger));
+app.use(require('./middlewares/error')(app.get('env')));
 
 /**
  * Start Express server.
  */
 app.listen(app.get('port'), () => {
-  console.log('%s App is running at http://localhost:%d in %s mode', chalk.green('✓'), app.get('port'), app.get('env'));
+  logger.info('✓ App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
 
-  console.log('  Press CTRL-C to stop\n');
+  logger.info('  Press CTRL-C to stop\n');
 });
 
 module.exports = app;

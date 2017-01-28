@@ -1,24 +1,37 @@
 /* eslint no-console: 0 */
 
-const info = (message) => {
-  console.log(`[info] ${message}`);
+const prependMessage = (pre, fn) => (...args) => {
+  const message = args.shift();
+
+  fn(`${pre} ${message}`, ...args);
 };
 
-const error = (message) => {
-  console.log(`[error] ${message}`);
+// basic logger
+const logger = {
+  info: (...args) => prependMessage('[info]', console.log)(...args),
+  error: (...args) => prependMessage('[error]', console.log)(...args),
 };
 
-let logger;
-if (process.env.NODE_ENV === 'test') {
-  logger = {
-    info: () => {},
-    error: () => {},
-  };
-} else {
-  logger = {
-    info,
-    error,
-  };
-}
+const nullLogger = {
+  info: () => {},
+  error: () => {},
+};
 
-module.exports = logger;
+exports.withRequestId = (logger, requestId) => {
+  if (!requestId) {
+    return logger;
+  }
+
+  return {
+    info: (message) => logger.info(`request_id=${requestId} ${message}`),
+    error: (message) => logger.error(`request_id=${requestId} ${message}`),
+  };
+};
+
+exports.new = (env) => {
+  if (env === 'test') {
+    return nullLogger;
+  }
+
+  return logger;
+};
