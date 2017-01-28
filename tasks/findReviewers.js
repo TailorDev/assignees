@@ -16,10 +16,10 @@ const createHttpError = (statusCode, status, reason) => {
   return err;
 };
 
-const getFiles = async (github, owner, repo, number) => new Promise((resolve, reject) => {
+const getPullRequestFiles = async (github, repository, number) => new Promise((resolve, reject) => {
   github.pullRequests.getFiles({
-    owner,
-    repo,
+    owner: repository.owner,
+    repo: repository.name,
     number,
     per_page: 100,
   }, (err, result) => {
@@ -30,6 +30,52 @@ const getFiles = async (github, owner, repo, number) => new Promise((resolve, re
     }
   });
 });
+
+const sortByNumberOfDeletions = files => files.sort((a, b) => {
+  const countA = a.deletions;
+  const countB = b.deletions;
+
+  return countA > countB ? -1 : (countA < countB ? 1 : 0); // eslint-disable-line
+});
+
+const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => async file => {
+  return github.repos
+    .getCommits({
+      owner: repository.owner,
+      repo: repository.name,
+      path: file.filename,
+      per_page: nbCommitsToRetrieve,
+    })
+    .catch([])
+    .then(getLoginsFromCommits)
+  ;
+};
+
+const getCollaborators = async (github, repository) => new Promise((resolve, reject) => {
+  github.repos.getCollaborators({
+    owner: repository.owner,
+    repo: repository.name,
+  }, (err, result) => {
+    resolve(err ? [] : result);
+  });
+});
+
+const flattenResults = results => results.reduce((a, b) => a.concat(b), []);
+
+const exclude = excluded => items => items.filter(item => item !== excluded);
+
+// create a dict with { login: weight }
+const createWeightedMap = authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {});
+
+const selectThoseWithPushAccess = users => users.filter(u => u.permissions.push === true);
+
+const getLoginsFromList = users => users.map(u => u.login);
+
+const getLoginsFromCommits = commits => commits.map(commit => commit.author.login);
+
+const weigthedShuffle = items => deck.shuffle(items);
+
+const take = number => items => items.slice(0, number);
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
@@ -78,46 +124,26 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
   const github = gh.auth(user);
 
   // 1 - get all files for the current PR
-  let files = await getFiles(github, repository.owner, repository.name, number);
-  // 1.1 - sort files by the number of deletions
-  files.sort((a, b) => {
-    const countA = a.deletions;
-    const countB = b.deletions;
-
-    return countA > countB ? -1 : (countA < countB ? 1 : 0); // eslint-disable-line
-  });
-  // 1.2 - only take maxPullRequestFilesToProcess files
-  files = files.slice(0, config.maxPullRequestFilesToProcess);
+  const files = await getPullRequestFiles(github, repository, number)
+    .then(sortByNumberOfDeletions)
+    .then(take(config.maxPullRequestFilesToProcess))
+  ;
 
   // 2 - retrieve the logins of people who touched this files
   const authorsFromHistory = await Promise.all(
-    files.map(file =>
-      github.repos.getCommits({
-        owner: repository.owner,
-        repo: repository.name,
-        path: file.filename,
-        per_page: config.nbCommitsToRetrieve,
-      })
-      .catch([])
-      .then(commits => commits.map(commit => commit.author.login))
+    files.map(
+      retrievePreviousAuthors(github, repository, config.nbCommitsToRetrieve)
     ))
-    .then(authors => authors.reduce((a, b) => a.concat(b), []))
-    .then(authors => authors.filter(a => a !== author))
-    // create a dict with { login: weight }
-    .then(authors => authors.reduce((prev, curr) => (prev[curr] = ++prev[curr] || 1, prev), {})) // eslint-disable-line
+    .then(flattenResults)
+    .then(exclude(author))
+    .then(createWeightedMap)
   ;
 
-  const collaborators = await github.repos
-    .getCollaborators({
-      owner: repository.owner,
-      repo: repository.name,
-    })
-    .catch([])
-    // filter collaborators who don't have push access
-    .then(collaborators => collaborators.filter(collaborator => collaborator.permissions.push === true))
-    .then(collaborators => collaborators.map(collaborator => collaborator.login))
-    .then(collaborators => collaborators.filter(collaborator => collaborator !== author))
-    .then(collaborators => collaborators.reduce((prev, curr) => (prev[curr] = 1, prev), {})) // eslint-disable-line
+  const collaborators = await getCollaborators(github, repository)
+    .then(selectThoseWithPushAccess)
+    .then(getLoginsFromList)
+    .then(exclude(author))
+    .then(createWeightedMap)
   ;
 
   let reviewers = [];
@@ -136,8 +162,8 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
 
   // 3 - We're almost there
   return Promise.resolve(reviewers)
-    // weigthed shuffle, then select N reviewers
-    .then(reviewers => deck.shuffle(reviewers).slice(0, repository.max_reviewers))
+    .then(weigthedShuffle)
+    .then(take(repository.max_reviewers))
     // create review request
     .then((reviewers) => {
       if (reviewers.length === 0) {
@@ -150,8 +176,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
         return Promise.resolve();
       }
 
-      return github
-        .pullRequests
+      return github.pullRequests
         .createReviewRequest({
           owner: repository.owner,
           repo: repository.name,
