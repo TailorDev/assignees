@@ -40,30 +40,33 @@ const weigthedShuffle = items => deck.shuffle(items);
 
 const take = number => items => items.slice(0, number);
 
-const getPullRequestFiles = async (github, repository, number) => github.pullRequests.
-  getFiles({
+const getPullRequestFiles = async (github, repository, number) => github.pullRequests
+  .getFiles({
     owner: repository.owner,
     repo: repository.name,
     number,
     per_page: 100,
-  });
+  })
+;
 
 const retrievePreviousAuthors = (github, repository, nbCommitsToRetrieve) => async file => github.repos
-    .getCommits({
-      owner: repository.owner,
-      repo: repository.name,
-      path: file.filename,
-      per_page: nbCommitsToRetrieve,
-    })
-    .catch([])
-    .then(getLoginsFromCommits);
+  .getCommits({
+    owner: repository.owner,
+    repo: repository.name,
+    path: file.filename,
+    per_page: nbCommitsToRetrieve,
+  })
+  .catch([])
+  .then(getLoginsFromCommits)
+;
 
 const getCollaborators = async (github, repository) => github.repos
   .getCollaborators({
     owner: repository.owner,
     repo: repository.name,
   })
-  .catch([]);
+  .catch([])
+;
 
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   logger.info([
@@ -73,7 +76,7 @@ const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
   ].join(' '));
 };
 
-const logReviewers = (logger, repository, number, reviewers) => {
+const logSelectReviewers = (logger, repository, number, reviewers) => {
   logger.info([
     "message='selected reviewers'",
     `owner=${repository.owner}`,
@@ -108,7 +111,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     throw createHttpError(401, 'ignored', 'user not found');
   }
 
-  logger.info(`repository_id=${repositoryId} number=${number} author=${author}`);
+  logger.info(`message='processing' repository_id=${repositoryId} number=${number} author=${author}`);
 
   // the GitHub dance
   const github = gh.auth(user);
@@ -145,7 +148,6 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
   let reviewers = [];
   if (Object.keys(authorsFromHistory).length > 0) {
     const allowed = Object.keys(collaborators);
-
     reviewers = Object.keys(authorsFromHistory).filter(k => allowed.includes(k));
   }
 
@@ -166,7 +168,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
         throw createHttpError(422, 'aborted', 'no reviewers found');
       }
 
-      logReviewers(logger, repository, number, reviewers);
+      logSelectReviewers(logger, repository, number, reviewers);
 
       if (config.createReviewRequest === false) {
         return Promise.resolve();
