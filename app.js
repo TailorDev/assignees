@@ -111,11 +111,7 @@ app.use((req, res, next) => {
 });
 app.use((req, res, next) => {
   // After successful login, redirect back to the intended page
-  if (!req.user &&
-      req.path !== '/login' &&
-      req.path !== '/signup' &&
-      !req.path.match(/^\/auth/) &&
-      !req.path.match(/\./)) {
+  if (!req.user && !req.path.match(/^\/auth/) && !req.path.match(/\./)) {
     req.session.returnTo = req.path;
   } else if (req.user && req.path === '/account') {
     req.session.returnTo = req.path;
@@ -244,7 +240,6 @@ app.use(require('./middlewares/error'));
  */
 app.listen(app.get('port'), () => {
   logger.info('✓ App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
-
   logger.info('  Press CTRL-C to stop\n');
 });
 
