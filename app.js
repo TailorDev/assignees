@@ -1,4 +1,6 @@
 /* eslint global-require: 0, comma-dangle: 0, no-param-reassign: 0 */
+process.env.NODE_ENV === 'production' && require('newrelic');
+
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -82,7 +84,7 @@ app.use(session({
   resave: true,
   saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
-  secure: process.env.NODE_ENV === 'production',
+  secure: app.get('env') === 'production',
   name: 'assignees',
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
