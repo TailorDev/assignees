@@ -7,8 +7,9 @@ module.exports = (err, req, res, next) => {
   const info = [];
 
   if (req.user) {
-    info.push(`user_id=${req.user._id}`);
+    info.push(`user_id=${req.user.id}`);
     info.push(`user_login=${req.user.github_login}`);
+    info.push(`user_github_id=${req.user.github}`);
   }
 
   info.push([

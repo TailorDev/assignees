@@ -1,4 +1,4 @@
-/* eslint global-require: 0 */
+/* eslint global-require: 0, comma-dangle: 0, no-param-reassign: 0 */
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
@@ -53,7 +53,8 @@ if (app.get('env') === 'production') {
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
 
     if (process.env.APP_DOMAIN && host !== process.env.APP_DOMAIN) {
-      return res.redirect(301, `${protocol}://${process.env.APP_DOMAIN}${req.originalUrl}`);
+      res.redirect(301, `${protocol}://${process.env.APP_DOMAIN}${req.originalUrl}`);
+      return;
     }
 
     next();
@@ -164,7 +165,8 @@ app.get('/auth/github/callback', passport.authenticate('github', {
   failureRedirect: '/',
 }), (req, res) => {
   if (!req.session.returnTo || req.session.returnTo === '/') {
-    return res.redirect('/projects');
+    res.redirect('/projects');
+    return;
   }
 
   res.redirect(req.session.returnTo);

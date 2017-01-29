@@ -163,12 +163,12 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     .then(weigthedShuffle)
     .then(take(repository.max_reviewers))
     // create review request
-    .then((reviewers) => {
-      if (reviewers.length === 0) {
+    .then((selected) => {
+      if (selected.length === 0) {
         throw createHttpError(422, 'aborted', 'no reviewers found');
       }
 
-      logSelectReviewers(logger, repository, number, reviewers);
+      logSelectReviewers(logger, repository, number, selected);
 
       if (config.createReviewRequest === false) {
         return Promise.resolve();
@@ -179,7 +179,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
           owner: repository.owner,
           repo: repository.name,
           number,
-          reviewers,
+          reviewers: selected,
         })
       ;
     })

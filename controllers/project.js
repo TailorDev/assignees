@@ -45,15 +45,16 @@ exports.listRepos = (req, res, next) => {
   })
   .then((repositories) => {
      // filter repos for user
-    repositories = repositories.filter(r => user.repositories.includes(r.github_id));
-
-    // enabled projects first
-    repositories.sort(a => (a.enabled ? -1 : 1));
+    const userRepositories = repositories
+      .filter(r => user.repositories.includes(r.github_id))
+      // enabled projects first
+      .sort(a => (a.enabled ? -1 : 1))
+    ;
 
     return res.render('project/list', {
       title: 'Projects',
       organizations,
-      repositories,
+      repositories: userRepositories,
       current_org: currentOrg,
     });
   });
@@ -231,12 +232,12 @@ exports.syncRepos = (req, res) => {
               gh: r,
               db: existingRepos.find(e => e.github_id === r.id),
             }))
-            .forEach((repos) => {
-              repos.db
+            .forEach((tuple) => {
+              tuple.db
                 .set({
-                  name: repos.gh.name,
-                  private: repos.gh.private,
-                  fork: repos.gh.fork,
+                  name: tuple.gh.name,
+                  private: tuple.gh.private,
+                  fork: tuple.gh.fork,
                 })
                 .save((err) => {
                   if (err) {
