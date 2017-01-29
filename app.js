@@ -45,7 +45,7 @@ app.use(require('express-request-id')());
 app.use(require('./middlewares/logger')(logger));
 
 if (app.get('env') === 'production') {
-  app.enable('trust proxy');
+  app.enable('trust proxy', 1); // trust first proxy
   app.use(require('express-sslify').HTTPS({ trustProtoHeader: true }));
 
   // redirect to custom domain (if any)
@@ -81,14 +81,14 @@ app.use(expressValidator());
 
 // session
 app.use(session({
-  resave: true,
+  name: 'assignees',
+  resave: false,
   saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
-  secure: app.get('env') === 'production',
-  name: 'assignees',
   store: new MongoStore({
     url: process.env.MONGODB_URI || process.env.MONGOLAB_URI,
     autoReconnect: true,
+    touchAfter: 24 * 3600 // time period in seconds
   }),
 }));
 app.use(passport.initialize());
