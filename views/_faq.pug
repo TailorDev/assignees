@@ -58,24 +58,29 @@ div(
       | This selection looks at the changes in the Pull Request and look back into
       | the history to find the best reviewers, #[em i.e.] the people who contributed
       | to similar parts of the patch proposed within the Pull Request.
-      | This algorithm is constantly evolving to provide you a better experience.
+      | This algorithm is constantly evolving to provide you the best experience.
 
   +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify
-      | When you sign in to #[+project-name], we ask for permissions to access some of your data on GitHub.
-      | We need such permissions to provide you the list of your organizations and repositories so
-      | that you can enable #[+project-name] on any of your repositories in a simple manner.
-      | We automatically setup #[+project-name] on your repositories as soon as you "enable" using
-      | #[+project-name] on them.
-      | Reviewers get assigned on your behalf. Let's review the different "scopes" (the
-      | term used by GitHub to sort the different permissions you can grant to applications like
-      | #[+project-name]):
+      | When you sign in to #[+project-name], we ask for permissions to access
+      | some of your data on GitHub.
+      | We need such permissions to provide you the list of your organizations
+      | and repositories so that you can enable #[+project-name] on any of
+      | your repositories in a simple manner.
+      | We automatically setup #[+project-name] on your repositories as soon
+      | as you "enable" #[+project-name] on them. In addition, reviewers get
+      | assigned on your behalf.
+    p.text-justify
+      | GitHub uses the term "scope" to sort the different permissions you can
+      | grant to applications like #[+project-name]. You will find the different
+      | scopes #[+project-name] needs along with explanations:
     p.text-justify
       ul
         li
           | We ask for the #[code user:email] scope to retrieve your email address and create
           | #[a(href='/account') your account] on #[+project-name]. You can update your information whenever
-          | you want, and all the information we read from your GitHub profile are displayed;
+          | you want, and all the information we read from your GitHub profile are displayed on
+          | #[a(href='/account') this page];
         li
           | To show you all of your repositories, including the ones from any organization you are part of,
           | we need the #[code read:org]. The GitHub API hides any organizations you are a private member
@@ -87,4 +92,16 @@ div(
           | API does not give a restricted access to such information, and that is why we need the
           | #[code public_repo] scope. We use this scope exclusively to find the collaborators of your
           | public repositories and to install a webhook on the projects you decide to enable, so that
-          | #[+project-name] is notified from GitHub on new Pull Requests.
+          | #[+project-name] is notified from GitHub on new opened Pull Requests.
+
+  +faq-entry('differences', 'What are the differences between X and this service?')
+    p.text-justify
+      | #[+project-name] is a free software as a service that is completely
+      | integrated with GitHub. #[a(href='/auth/github') Sign in], enable your
+      | projects, and that's it! No need to setup, host and maintain a software.
+    p.text-justify
+      | Both X and #[+project-name] share the same goal: finding the right
+      | reviewers for a given Pull Request. Yet, there is not a single answer
+      | to this problem and there is room for different algorithms and
+      | trade-offs. What we can tell you about this point is that #[+project-name]
+      | does not rely on #[code git blame] ;-)
