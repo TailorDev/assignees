@@ -1,5 +1,6 @@
 /* eslint global-require: 0, comma-dangle: 0, no-param-reassign: 0 */
-process.env.NODE_ENV === 'production' && require('newrelic');
+/* eslint prefer-arrow-callback: ["error", { "allowNamedFunctions": true }] */
+process.env.NODE_ENV === 'production' && require('newrelic'); // eslint-disable-line
 
 const express = require('express');
 const compression = require('compression');
@@ -50,7 +51,7 @@ if (app.get('env') === 'production') {
 
   // redirect to custom domain (if any)
   // TODO: make it work in dev too
-  app.use((req, res, next) => {
+  app.use(function redirectToAppDomain(req, res, next) {
     const host = req.headers['x-forwarded-host'] || req.headers.host;
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
 
@@ -108,11 +109,11 @@ app.use(lusca.xframe('SAMEORIGIN'));
 app.use(lusca.xssProtection(true));
 
 // user
-app.use((req, res, next) => {
+app.use(function addUserToLocals(req, res, next) {
   res.locals.user = req.user;
   next();
 });
-app.use((req, res, next) => {
+app.use(function redirectUser(req, res, next) {
   // After successful login, redirect back to the intended page
   if (!req.user && !req.path.match(/^\/auth/) && !req.path.match(/\./)) {
     req.session.returnTo = req.path;
@@ -230,7 +231,7 @@ if (app.get('env') === 'development') {
 }
 
 // handle 404
-app.use((req, res) => {
+app.use(function error404Handler(req, res) {
   res.status(404).render('error/404', {
     title: 'Page Not Found',
   });
