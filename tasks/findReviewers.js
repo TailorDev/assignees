@@ -71,11 +71,12 @@ const getCollaborators = async (github, repository) => github.repos
   .catch([])
 ;
 
-const logPotentialReviewers = (logger, collaborators, authorsFromHistory) => {
+const logPotentialReviewers = (logger, collaborators, authorsFromHistory, reviewers) => {
   logger.info([
     "message='potential reviewers'",
     `collaborators=${inspect(collaborators)}`,
     `authors=${inspect(authorsFromHistory)}`,
+    `potential_reviewers=${inspect(reviewers)}`,
   ].join(' '));
 };
 
@@ -159,7 +160,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     reviewers = collaborators;
   }
 
-  logPotentialReviewers(logger, collaborators, authorsFromHistory);
+  logPotentialReviewers(logger, collaborators, authorsFromHistory, reviewers);
 
   // 3 - We're almost there
   return Promise.resolve(reviewers)
