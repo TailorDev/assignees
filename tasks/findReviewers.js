@@ -34,7 +34,10 @@ const selectThoseWithPushAccess = users => users.filter(u => u.permissions.push 
 
 const getLoginsFromList = users => users.map(u => u.login);
 
-const getLoginsFromCommits = commits => commits.map(commit => commit.author.login);
+const getLoginsFromCommits = commits => commits
+  .filter(commit => commit.author !== null)
+  .map(commit => commit.author.login)
+;
 
 const weigthedShuffle = items => deck.shuffle(items);
 
