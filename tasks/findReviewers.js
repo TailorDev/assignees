@@ -71,6 +71,27 @@ const getCollaborators = async (github, repository) => github.repos
   .catch([])
 ;
 
+const getPotentialReviewers = (authorsFromHistory, collaborators) => {
+  const potentialReviewers = authorsFromHistory;
+  const authorLogins = Object.keys(authorsFromHistory);
+
+  if (authorLogins.length > 0) {
+    const collaboratorLogins = Object.keys(collaborators);
+
+    authorLogins.forEach((login) => {
+      if (!collaboratorLogins.includes(login)) {
+        delete potentialReviewers[login];
+      }
+    });
+  }
+
+  if (Object.keys(potentialReviewers).length === 0) {
+    return collaborators;
+  }
+
+  return potentialReviewers;
+};
+
 const logPotentialReviewers = (logger, collaborators, authorsFromHistory, reviewers) => {
   logger.info([
     "message='potential reviewers'",
@@ -149,17 +170,7 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     .then(createWeightedMap)
   ;
 
-  let reviewers = [];
-  if (Object.keys(authorsFromHistory).length > 0) {
-    const allowed = Object.keys(collaborators);
-    reviewers = Object.keys(authorsFromHistory).filter(k => allowed.includes(k));
-  }
-
-  // fallback
-  if (reviewers.length === 0) {
-    reviewers = collaborators;
-  }
-
+  const reviewers = getPotentialReviewers(authorsFromHistory, collaborators);
   logPotentialReviewers(logger, collaborators, authorsFromHistory, reviewers);
 
   // 3 - We're almost there
@@ -189,3 +200,5 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     })
   ;
 };
+
+exports.getPotentialReviewers = getPotentialReviewers;
