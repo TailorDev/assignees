@@ -202,3 +202,4 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
 };
 
 exports.getPotentialReviewers = getPotentialReviewers;
+exports.createWeightedMap = createWeightedMap;
