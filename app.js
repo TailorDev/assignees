@@ -98,7 +98,7 @@ app.use(flash());
 
 // security
 app.disable('x-powered-by');
-app.use((req, res, next) => {
+app.use(function enableCSRF(req, res, next) {
   if (req.path === '/events') {
     next();
   } else {

@@ -97,7 +97,7 @@ passport.use(new GitHubStrategy({
 /**
  * Login Required middleware.
  */
-exports.isAuthenticated = (req, res, next) => {
+exports.isAuthenticated = function isAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -107,7 +107,7 @@ exports.isAuthenticated = (req, res, next) => {
 /**
  * Authorization Required middleware.
  */
-exports.isAdmin = (req, res, next) => {
+exports.isAdmin = function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.isAdmin()) {
     return next();
   }
