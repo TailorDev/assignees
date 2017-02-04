@@ -76,6 +76,10 @@ userSchema.methods.hasAccessTo = function hasAccessTo(feature) {
   return this.features.includes(feature);
 };
 
+userSchema.methods.getUsername = function getUsername() {
+  return this.github_login;
+};
+
 userSchema.statics.findOneById = function findOneById(id) {
   return this.findOne({ _id: id }).catch(() => null);
 };
