@@ -56,7 +56,11 @@ block content
                       i.fa.fa-pause-circle-o
                       | pause
                 else
-                  form(action=`/projects/${current_org.name}/${r.name}/enable`, method='POST')
+                  form(
+                    action=`/projects/${current_org.name}/${r.name}/enable`,
+                    method='POST',
+                    onsubmit='_paq.push([\'trackGoal\', 1]);'
+                  )
                     input(type='hidden', name='_csrf', value=_csrf)
                     button.btn.btn-success
                       i.fa.fa-play-circle-o
