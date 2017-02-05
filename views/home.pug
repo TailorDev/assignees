@@ -14,7 +14,7 @@ block content
   .row
     .col-md-12
       h3.text-center
-        | Involve your collaborators with automatic code review requests.
+        | Introduce better code reviews in your workflow with automatic reviewers selection.
 
   if !user
     .row
@@ -27,19 +27,42 @@ block content
     +feature('Seamless integration', 'magic')
       p.text-justify
         | #[+project-name] integrates seamlessly with GitHub, using the built-in
-        | review request system. #[strong Enable your project] in #[+project-name]
-        | and we take care of the rest.
+        | review request system. #[strong Enable your project] and #[+project-name]
+        | takes care of the rest.
+      p.text-justify
+        | A #[a(href='https://developer.github.com/webhooks/') webhook] is
+        | registered on each project you decide to enable in #[+project-name].
+        | This hook allows #[+project-name] to be notified when a new
+        | Pull Request (PR) is opened.
 
     +feature('Automatic', 'refresh')
       p.text-justify
-        | #[+project-name] listens to GitHub events. When a Pull Request is opened,
-        | #[+project-name] #[strong automatically select the right reviewers] and request
-        | #[a(href='https://help.github.com/articles/requesting-a-pull-request-review/') pull request reviews].
+        | When a Pull Request (PR) is opened, #[+project-name] #[strong automatically select the right reviewers]
+        | and request #[a(href='https://help.github.com/articles/requesting-a-pull-request-review/') pull request reviews].
+      p.text-justify
+        | The selection is based on a list of potential reviewers #[+project-name] builds.
+        | You can configure the upper limit of reviewers to pick in this list.
+
     +feature('Smart', 'random')
       p.text-justify
         | #[+project-name] chooses the best reviewers by looking at the Pull
-        | Request that you have just received. #[strong Do not worry] about
-        | bothering the wrong people.
+        | Request (PR) that you have just received. #[strong Do not worry about bothering the wrong people].
+      p.text-justify
+        | #[+project-name] looks back into the project's history to find the best reviewers,
+        | #[em i.e.] the #[strong people who contributed] to similar parts of the patch proposed
+        | within the PR.
+
+  hr
+  .row.big-picture
+    .col-sm-4.col-sm-offset-1
+      h4.text-center 1. Enable a project
+      img(src='/images/enable-a-project.png', class='img-responsive')
+
+    .col-sm-4.col-sm-offset-1
+      h4.text-center 2. Get reviewers assigned automatically
+      br
+      br
+      img(src='/images/pr-review-request.png', class='img-responsive')
 
   hr
   .row

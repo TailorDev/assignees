@@ -46,20 +46,6 @@ div(
       | and code reviews became our silver bullet to involve them. People become more
       | engaged and efficient when you trust them, you should try!
 
-  +faq-entry('how', 'How does that work?')
-    p.text-justify
-      | #[+project-name] registers a #[a(href='https://developer.github.com/webhooks/') webhook]
-      | on each project you decide to enable in your personal interface. This hook allows
-      | #[+project-name] to be notified when a new Pull Request is opened. Then,
-      | #[+project-name] selects and assigns the reviewers for this Pull Request,
-      | among a list of potential reviewers. You can configure the upper limit of
-      | reviewers to assign, and #[+project-name] will do her best to assign them.
-    p.text-justify
-      | This selection looks at the changes in the Pull Request and look back into
-      | the history to find the best reviewers, #[em i.e.] the people who contributed
-      | to similar parts of the patch proposed within the Pull Request.
-      | This algorithm is constantly evolving to provide you the best experience.
-
   +faq-entry('scopes', 'Why do you ask for GitHub permissions when I sign in?')
     p.text-justify
       | When you sign in to #[+project-name], we ask for permissions to access
