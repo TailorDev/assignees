@@ -179,13 +179,9 @@ exports.configure = config => async (repositoryId, number, author, logger) => {
     .then(take(repository.max_reviewers))
     // create review request
     .then((selected) => {
-      if (selected.length === 0) {
-        throw createHttpError(422, 'aborted', 'no reviewers found');
-      }
-
       logSelectReviewers(logger, repository, number, selected);
 
-      if (config.createReviewRequest === false) {
+      if (selected.length === 0 || config.createReviewRequest === false) {
         return Promise.resolve();
       }
 

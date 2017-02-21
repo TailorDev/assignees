@@ -46,7 +46,7 @@ describe('tasks/findReviewers', () => {
       expect(reviewers).to.deep.equal({});
     });
 
-    it('should does not return any reviewer when no collaborators', () => {
+    it('should not return any reviewer when no collaborators', () => {
       const reviewers = getPotentialReviewers({ boo: 23, baz: 1 }, {});
 
       expect(reviewers).to.deep.equal({});
