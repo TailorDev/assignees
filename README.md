@@ -3,9 +3,11 @@ Assignees
 
 [![CircleCI](https://circleci.com/gh/TailorDev/assignees.svg?style=svg&circle-token=75bf93c8fc2ccb61e3cb3f07f1444a133bf87eab)](https://circleci.com/gh/TailorDev/assignees)
 
-Assignees does automatically code review requests on GitHub (currently). This
-project is based on the
-[hackathon-starter](https://github.com/sahat/hackathon-starter).
+Assignees does automatically code review requests on GitHub (currently).
+This project is based on the
+[hackathon-starter](https://github.com/sahat/hackathon-starter) :heart:
+and it is a side project developed in a couple days for our needs (and
+also for fun).
 
 ## Usage
 
@@ -105,6 +107,16 @@ APM. These extra environment variables could be useful (at least on Heroku):
 * `NEW_RELIC_LOG` (automatically set by Heroku when enabling the add-on);
 * `NEW_RELIC_NO_CONFIG_FILE` should be set to `true`;
 * `NEW_RELIC_SKIP_NATIVE_METRICS` should be set to `true`.
+
+**Note:** [this commit](https://github.com/TailorDev/assignees/commit/f1d0e6657a2676ddf79c93c2da170363f926b71f)
+has disabled New Relic on this project. You can re-enable it by yourself by
+requiring the `newrelic` package in both the `package.json` file and the code.
+
+#### Other settings
+
+You may want to change the name of the project, the contact email address, or
+the Piwik tracking code by editing the [`views/global-mixins.pug`
+template](https://github.com/TailorDev/assignees/blob/master/views/global-mixins.pug).
 
 ### Requirements
 
