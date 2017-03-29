@@ -1,7 +1,5 @@
 /* eslint global-require: 0, comma-dangle: 0, no-param-reassign: 0 */
 /* eslint prefer-arrow-callback: ["error", { "allowNamedFunctions": true }] */
-process.env.NODE_ENV === 'production' && require('newrelic'); // eslint-disable-line
-
 const express = require('express');
 const compression = require('compression');
 const session = require('express-session');
