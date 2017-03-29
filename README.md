@@ -9,6 +9,10 @@ This project is based on the
 and it is a side project developed in a couple days for our needs (and
 also for fun).
 
+<p align="center">
+<img src="public/images/assignees-projects.png">
+</p>
+
 ## Usage
 
 ### Web application
