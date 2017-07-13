@@ -33,7 +33,7 @@ Docker container:
 
     $ docker-compose run --rm app yarn run assignees
     yarn run v0.19.1
-    $ node --harmony-async-await bin/assignees
+    $ node bin/assignees
 
     Usage: assignees [options] [command]
 

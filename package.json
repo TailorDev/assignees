@@ -5,9 +5,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "node --harmony-async-await app.js",
+    "start": "node app.js",
     "test": "NODE_ENV=test mocha --harmony --reporter spec --recursive",
-    "assignees": "node --harmony-async-await bin/assignees"
+    "assignees": "node bin/assignees"
   },
   "dependencies": {
     "async": "^2.1.2",
