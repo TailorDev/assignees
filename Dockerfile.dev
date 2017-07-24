@@ -1,4 +1,4 @@
-FROM node:8.1
+FROM node:7.4-alpine
 
 ENV APP_DIR=/usr/src/app
 
@@ -13,7 +13,5 @@ RUN yarn install
 ENV NODE_PATH=/usr/src/node_modules
 ENV PATH="$PATH:/usr/src/node_modules/.bin"
 WORKDIR $APP_DIR
-
-COPY . $APP_DIR
 
 CMD [ "nodemon", "--exec", "yarn", "run", "start" ]
