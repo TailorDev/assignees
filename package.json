@@ -78,7 +78,7 @@
     }
   },
   "engines": {
-    "node": "9.x",
+    "node": "8.x || 9.x",
     "yarn": "1.x"
   }
 }

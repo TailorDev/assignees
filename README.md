@@ -122,14 +122,6 @@ You may want to change the name of the project, the contact email address, or
 the Piwik tracking code by editing the [`views/global-mixins.pug`
 template](https://github.com/TailorDev/assignees/blob/master/views/global-mixins.pug).
 
-### Requirements
-
-This project runs on [Node](https://nodejs.org/en/) **7.4** and uses
-[Yarn](https://yarnpkg.com/) as package manager. Version **0.16.1** is used on
-Heroku because of an
-[incompatibility](https://github.com/heroku/heroku-buildpack-nodejs/issues/359).
-In development, Yarn 0.19.1 has been used without any problem.
-
 ## Running the Tests
 
     $ [docker-compose run --rm app] yarn run test
