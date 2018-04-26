@@ -12,6 +12,7 @@ const mongoose = require('../config/mongoose')(logger);
 const findReviewersTask = require('../tasks/findReviewers');
 const listUserFeaturesTask = require('../tasks/listUserFeatures');
 const updateUserFeatureTask = require('../tasks/updateUserFeature');
+const disableProjectTask = require('../tasks/disableProject');
 
 const updateUserFeatureAction = operation => async (username, feature) => {
   const updateUserFeature = updateUserFeatureTask.configure({ logger });
@@ -81,6 +82,23 @@ program
       if (!dryrun) {
         logger.info('reviewer(s) assigned');
       }
+    } catch(e) {
+      logger.error(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program
+  .command('project:disable [owner] [repo]')
+  .description('disable a project completely')
+  .action(async (owner, repo) => {
+    const disableProject = disableProjectTask.configure({ logger });
+
+    try {
+      await disableProject(owner, repo);
     } catch(e) {
       logger.error(chalk.red(e.stack));
       process.exitCode = 1;
