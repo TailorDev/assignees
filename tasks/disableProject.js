@@ -7,15 +7,17 @@ const User = require('../models/User');
  *   logger: { info: Function, error: Function },
  * }
  */
-exports.configure = config => async (owner, repo) => {
-  const repository = await Repository.findOne({
-    name: repo,
-    owner,
-  })
+exports.configure = config => async ({ owner, repo, repository }) => {
+  if (!repository) {
+    repository = await Repository.findOne({
+      name: repo,
+      owner,
+    })
     .catch(() => null);
+  }
 
   if (!repository) {
-    config.logger.error(`No project found for owner = "${owner}" and repo = "${repo}".`);
+    config.logger.error(`No project found for owner = "${repository.owner}" and repo = "${repository.name}".`);
     return;
   }
 
@@ -38,8 +40,8 @@ exports.configure = config => async (owner, repo) => {
     }
 
     await gh.auth(user).repos.deleteHook({
-      owner,
-      repo,
+      owner: repository.owner,
+      repo: repository.name,
       id: repository.github_hook_id,
     });
 
@@ -52,5 +54,5 @@ exports.configure = config => async (owner, repo) => {
     return;
   }
 
-  config.logger.info(`${owner}/${repo} successfully disabled.`);
+  config.logger.info(`${repository.owner}/${repository.name} successfully disabled.`);
 };

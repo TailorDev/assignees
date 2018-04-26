@@ -13,6 +13,7 @@ const findReviewersTask = require('../tasks/findReviewers');
 const listUserFeaturesTask = require('../tasks/listUserFeatures');
 const updateUserFeatureTask = require('../tasks/updateUserFeature');
 const disableProjectTask = require('../tasks/disableProject');
+const disableProjectsTask = require('../tasks/disableProjects');
 
 const updateUserFeatureAction = operation => async (username, feature) => {
   const updateUserFeature = updateUserFeatureTask.configure({ logger });
@@ -98,7 +99,24 @@ program
     const disableProject = disableProjectTask.configure({ logger });
 
     try {
-      await disableProject(owner, repo);
+      await disableProject({ owner, repo });
+    } catch(e) {
+      logger.error(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program
+  .command('project:disable-all [owner]')
+  .description('disable all projects of a user or organization completely')
+  .action(async (owner, repo) => {
+    const disableProjects = disableProjectsTask.configure({ logger });
+
+    try {
+      await disableProjects(owner);
     } catch(e) {
       logger.error(chalk.red(e.stack));
       process.exitCode = 1;
