@@ -17,7 +17,9 @@ also for fun).
 
 ### Web application
 
-The application is available at: https://app.assignees.io/.
+~The application is available at: https://app.assignees.io/.~
+<br>:warning: As of April 2018, our public instance is not available anymore,
+sorry.
 
 See the next section if you want to host it yourself.
 
