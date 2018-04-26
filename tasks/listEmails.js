@@ -11,7 +11,7 @@ exports.configure = config => async (asList) => {
   const emails = [...new Set(users.map((r) => r.email).filter((email) => /@/.test(email)))];
 
   if (asList) {
-    console.log(emails.join('\n'))
+    console.log(emails.join(' '))
   } else {
     config.logger.info(inspect(emails));
   }

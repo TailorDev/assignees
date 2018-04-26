@@ -11,7 +11,7 @@ exports.configure = config => async (asList) => {
   const owners = [...new Set(repositories.map((r) => r.owner))];
 
   if (asList) {
-    console.log(owners.join('\n'))
+    console.log(owners.join(' '))
   } else {
     config.logger.info(inspect(owners));
   }

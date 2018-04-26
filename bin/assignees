@@ -97,11 +97,12 @@ program
 program
   .command('project:disable [owner] [repo]')
   .description('disable a project completely')
-  .action(async (owner, repo) => {
+  .option('--force', 'mark a project as disabled')
+  .action(async (owner, repo, { force }) => {
     const disableProject = disableProjectTask.configure({ logger });
 
     try {
-      await disableProject({ owner, repo });
+      await disableProject({ owner, repo, force });
     } catch(e) {
       logger.error(chalk.red(e.stack));
       process.exitCode = 1;
@@ -131,7 +132,7 @@ program
 program
   .command('project:list-owners')
   .description('list all the owners in database')
-  .option('--as-list', 'output as list separated by newlines')
+  .option('--as-list', 'output as list separated by spaces')
   .action(async (options) => {
     const listOwners = listOwnersTask.configure({ logger });
 
@@ -149,7 +150,7 @@ program
 program
   .command('project:list-emails')
   .description('list all the emails in database')
-  .option('--as-list', 'output as list separated by newlines')
+  .option('--as-list', 'output as list separated by spaces')
   .action(async (options) => {
     const listEmails = listEmailsTask.configure({ logger });
 
