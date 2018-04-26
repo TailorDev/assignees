@@ -7,7 +7,7 @@ machine:
     GITHUB_ID: 123
     GITHUB_SECRET: 123
     SESSION_SECRET: s3cr3t
-    GITHUB_WEBHOOK_URL: http://assignees.dev:3000/events
+    GITHUB_WEBHOOK_URL: http://assignees.localdev:3000/events
     GITHUB_WEBHOOK_SECRET: s3cr3t
 
 dependencies:

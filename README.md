@@ -57,10 +57,10 @@ configuration to quickly build and start it. Clone the project, then run:
 
     $ docker-compose up -d app
 
-The application will shortly be accessible at: http://assignees.dev:3000/.
+The application will shortly be accessible at: http://assignees.localdev:3000/.
 
 **Important:** you must configure your local DNS to be able to use
-`assignees.dev` in the URL. You can edit your `/etc/hosts` file, but it is
+`assignees.localdev` in the URL. You can edit your `/etc/hosts` file, but it is
 recommended to install and configure
 [Dnsmasq](https://en.wikipedia.org/wiki/Dnsmasq). [This link is a good
 tutorial](https://passingcuriosity.com/2013/dnsmasq-dev-osx/).

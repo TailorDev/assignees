@@ -10,18 +10,18 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
-      APP_DOMAIN: assignees.dev
+      APP_DOMAIN: assignees.localdev
       MONGODB_URI: mongodb://db:27017/assignees
       GITHUB_ID: 19383c627ba67c57fcb9
       GITHUB_SECRET: 2ecf59c031dc6f9a0dad2ac739fcf0e136f20ef7
       SESSION_SECRET: s3cr3t
-      GITHUB_WEBHOOK_URL: http://assignees.dev:3000/events
+      GITHUB_WEBHOOK_URL: http://assignees.localdev:3000/events
       GITHUB_WEBHOOK_SECRET: Th4tIsS3cr3t
       ADMIN_IDS: 217628
       GITHUB_APP_ID: 19383c627ba67c57fcb9
     networks:
       public:
-        aliases: ['assignees.dev']
+        aliases: ['assignees.localdev']
       private: ~
     depends_on:
       - db
