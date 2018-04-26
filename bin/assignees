@@ -15,6 +15,7 @@ const updateUserFeatureTask = require('../tasks/updateUserFeature');
 const disableProjectTask = require('../tasks/disableProject');
 const disableProjectsTask = require('../tasks/disableProjects');
 const listOwnersTask = require('../tasks/listOwners');
+const listEmailsTask = require('../tasks/listEmails');
 
 const updateUserFeatureAction = operation => async (username, feature) => {
   const updateUserFeature = updateUserFeatureTask.configure({ logger });
@@ -130,11 +131,30 @@ program
 program
   .command('project:list-owners')
   .description('list all the owners in database')
-  .action(async () => {
+  .option('--as-list', 'output as list separated by newlines')
+  .action(async (options) => {
     const listOwners = listOwnersTask.configure({ logger });
 
     try {
-      await listOwners();
+      await listOwners(options.asList);
+    } catch(e) {
+      logger.error(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program
+  .command('project:list-emails')
+  .description('list all the emails in database')
+  .option('--as-list', 'output as list separated by newlines')
+  .action(async (options) => {
+    const listEmails = listEmailsTask.configure({ logger });
+
+    try {
+      await listEmails(options.asList);
     } catch(e) {
       logger.error(chalk.red(e.stack));
       process.exitCode = 1;

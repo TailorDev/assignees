@@ -6,9 +6,13 @@ const inspect = require('../helpers/inspect');
  *   logger: { info: Function, error: Function },
  * }
  */
-exports.configure = config => async (username) => {
+exports.configure = config => async (asList) => {
   const repositories = await Repository.find().catch([]);
   const owners = [...new Set(repositories.map((r) => r.owner))];
 
-  config.logger.info(inspect(owners));
+  if (asList) {
+    console.log(owners.join('\n'))
+  } else {
+    config.logger.info(inspect(owners));
+  }
 };
