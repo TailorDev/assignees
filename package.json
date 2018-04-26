@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "start": "node app.js",
+    "start": "node --harmony app.js",
     "test": "NODE_ENV=test mocha --harmony --reporter spec --recursive",
     "assignees": "node bin/assignees"
   },
@@ -33,7 +33,7 @@
     "lob": "^3.9.0",
     "lodash": "^4.16.6",
     "lusca": "^1.4.1",
-    "moment": "~2.17.1",
+    "moment": "^2.22.1",
     "mongoose": "^4.6.6",
     "multer": "^1.2.0",
     "node-sass": "^4.5.3",
@@ -78,7 +78,7 @@
     }
   },
   "engines": {
-    "node": "8.1",
-    "yarn": "0.24.6"
+    "node": "9.x",
+    "yarn": "1.x"
   }
 }
