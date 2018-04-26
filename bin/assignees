@@ -14,6 +14,7 @@ const listUserFeaturesTask = require('../tasks/listUserFeatures');
 const updateUserFeatureTask = require('../tasks/updateUserFeature');
 const disableProjectTask = require('../tasks/disableProject');
 const disableProjectsTask = require('../tasks/disableProjects');
+const listOwnersTask = require('../tasks/listOwners');
 
 const updateUserFeatureAction = operation => async (username, feature) => {
   const updateUserFeature = updateUserFeatureTask.configure({ logger });
@@ -117,6 +118,23 @@ program
 
     try {
       await disableProjects(owner);
+    } catch(e) {
+      logger.error(chalk.red(e.stack));
+      process.exitCode = 1;
+    } finally {
+      mongoose.connection.close();
+    }
+  })
+;
+
+program
+  .command('project:list-owners')
+  .description('list all the owners in database')
+  .action(async () => {
+    const listOwners = listOwnersTask.configure({ logger });
+
+    try {
+      await listOwners();
     } catch(e) {
       logger.error(chalk.red(e.stack));
       process.exitCode = 1;
