@@ -19,9 +19,3 @@ dependencies:
 test:
   override:
     - yarn test
-
-deployment:
-  production:
-    branch: master
-    heroku:
-      appname: assignees
